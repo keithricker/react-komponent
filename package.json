@@ -1,0 +1,77 @@
+{
+  "_from": "react-komponent",
+  "_id": "react-komponent@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha512-xXVuE7UAM2Ica9cY+duV8t0Iz5cc8pYSW5r9Go8uxAmQJXRzIog2lpFdLKtJS5yXOrFMQuL1ySu5ZrPtUkPcJA==",
+  "_location": "/react-komponent",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "react-komponent",
+    "name": "react-komponent",
+    "escapedName": "react-komponent",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-komponent/-/react-komponent-1.0.0.tgz",
+  "_shasum": "4d114bcb030ea111daf54a8e665297680f492d55",
+  "_spec": "react-komponent",
+  "_where": "/Users/TravelComputer/Desktop/node_sandbox/reactapp",
+  "author": "",
+  "private": false,
+  "babel": {
+    "presets": [
+      "@babel/preset-react",
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      [
+        "@babel/plugin-transform-react-jsx"
+      ]
+    ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "bin": {
+    "komponent-scripts": "bin/komponent.js"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/plugin-transform-react-jsx": "^7.12.5",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.5",
+    "express": "^4.17.1",
+    "jsdom": "^16.4.0",
+    "jsdom-global": "^3.0.2",
+    "redux": "^4.0.5",
+    "redux-persist": "^6.0.0",
+    "redux-saga": "^1.1.3",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0"
+  },
+  "deprecated": false,
+  "description": "",
+  "externals": {
+    "react": "react"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "react-komponent",
+  "preferGlobal": true,
+  "scripts": {
+    "compile": "node scripts/compile.js",
+    "babel-compile": "babel src/components/componentFunction.js -d dist --copy-files && mv dist/componentFunction.js src/components/componentFunctionCompiled.js && babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js",
+    "postinstall": "npm link --ignore-scripts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}
