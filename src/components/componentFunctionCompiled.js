@@ -1,14 +1,6 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.Component = Component;
-exports.RootComponent = exports.store = void 0;
-
 var _react = _interopRequireDefault(require("react"));
-
-var _index = require("../reducers/index");
 
 var _redux = require("redux");
 
@@ -20,21 +12,9 @@ var _fetchingOverlayCompiled = _interopRequireDefault(require("./fetchingOverlay
 
 require("../index.css");
 
-var _reduxSaga = _interopRequireDefault(require("redux-saga"));
-
 var _effects = require("redux-saga/effects");
 
-var _reducers = _interopRequireDefault(require("../reducers"));
-
-var _reactRouterDom = require("react-router-dom");
-
-var _reduxPersist = require("redux-persist");
-
-var _storage = _interopRequireDefault(require("redux-persist/lib/storage"));
-
-var _react2 = require("redux-persist/es/integration/react");
-
-var _reduxThunk = _interopRequireDefault(require("redux-thunk"));
+var _RootComponentCompiled = _interopRequireDefault(require("./RootComponentCompiled"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -64,16 +44,15 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var persistConfig = {
-  key: 'primary',
-  storage: _storage.default
+var allRed = _RootComponentCompiled.default.reducers;
+
+var allReducers = function allReducers() {
+  return allRed || _RootComponentCompiled.default.reducers;
 };
-var configuredReducers = (0, _reduxPersist.persistReducer)(persistConfig, _reducers.default);
-var sagaMiddleware = (0, _reduxSaga.default)();
-var store = (0, _redux.createStore)(configuredReducers, (0, _redux.applyMiddleware)(_reduxThunk.default, sagaMiddleware));
-exports.store = store;
-var persistor = (0, _reduxPersist.persistStore)(store);
-var combined = _index.combined;
+
+var store = function store() {
+  return _RootComponentCompiled.default.store;
+};
 
 function lowerFirst(word) {
   console.log('word!', word);
@@ -190,7 +169,7 @@ function Component(props) {
   }
 
   console.log("in the constructor!!!!!!!!!!!!!!", thiss.constructor.name);
-  var reducers = combined;
+  var reducers = allReducers();
   var componentName = component ? component.constructor.name : thiss.constructor.name;
   thiss.componentName = thiss.componentName || lowerFirst(componentName);
 
@@ -201,7 +180,7 @@ function Component(props) {
   var stateFromStorage = Component.stateFromStorage;
 
   var getState = function getState() {
-    return props.selectors || props.mapState || store.getState();
+    return props.selectors || props.mapState || store().getState();
   };
 
   thiss.actions = thiss.actions || {
@@ -297,7 +276,7 @@ function Component(props) {
     Component.statefulComponents[thiss.componentName] = thiss;
 
     if (thiss.sagas) {
-      sagaMiddleware.run(Component.rootSaga);
+      _RootComponentCompiled.default.sagaMiddleware.run(Component.rootSaga);
     }
   }
 
@@ -328,9 +307,9 @@ function Component(props) {
 
   if (Object.keys(untracked).length > 1) {
     console.log('untracked!', untracked);
-    combined = _objectSpread(_objectSpread({}, combined), untracked);
-    store.replaceReducer((0, _redux.combineReducers)(_objectSpread(_objectSpread({}, combined), Component.reducers)));
-    console.log('store from untracked:', store.getState());
+    allRed = _objectSpread(_objectSpread({}, allReducers()), untracked);
+    store().replaceReducer((0, _redux.combineReducers)(_objectSpread(_objectSpread({}, allRed), Component.reducers)));
+    console.log('store from untracked:', store().getState());
   }
 
   Object.keys(replenish).forEach(function (key) {
@@ -395,6 +374,7 @@ function Component(props) {
   thiss.render = function () {
     var Rendered = thiss.originalRender.bind(thiss);
     return /*#__PURE__*/_react.default.createElement(_fetchingOverlayCompiled.default, {
+      overlay: props.overlay,
       component: Rendered,
       fetching: thiss.state && thiss.state.fetching ? true : false
     });
@@ -405,7 +385,7 @@ function Component(props) {
 
 Component.prototype.getState = function () {
   var thiss = this;
-  return thiss.props.selectors || thiss.props.mapState || store.getState();
+  return thiss.props.selectors || thiss.props.mapState || store().getState();
 };
 
 Component.prototype.useState = function (initial) {
@@ -433,7 +413,7 @@ Component.prototype.useState = function (initial) {
 
 Component.prototype.useSelector = function () {
   var thiss = this;
-  var theState = thiss.props.selectors || thiss.props.mapState || store.getState();
+  var theState = thiss.props.selectors || thiss.props.mapState || store().getState();
 
   for (var _len2 = arguments.length, cb = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
     cb[_key2] = arguments[_key2];
@@ -452,8 +432,8 @@ Component.prototype.useSelector = function () {
   if (us.subscriptions.has(select)) return theSelected;
   if (theState === theSelected || theSelected === theState[this.componentName]) return theSelected; // return theState
 
-  var unsub = store.subscribe(function (state) {
-    var newStore = thiss.props.mapState || store.getState();
+  var unsub = store().subscribe(function (state) {
+    var newStore = thiss.props.mapState || store().getState();
     var newSelected = select(newStore); // console.log('NEWSTORE FROM SUBSCRIBE',newStore)
 
     var oldState = newSelected;
@@ -504,7 +484,7 @@ Component.prototype.useDispatch = function () {
   console.log('THIS', thiss);
 
   try {
-    console.log('STORE', store.getState());
+    console.log('STORE', store().getState());
   } catch (_unused2) {}
 
   if (inLoop || inPrevious) {
@@ -536,7 +516,7 @@ Component.prototype.useDispatch = function () {
     return;
   }
 
-  var dispatch = thiss.props.dispatch || store.dispatch;
+  var dispatch = thiss.props.dispatch || store().dispatch;
   console.log(args[0]);
 
   try {
@@ -777,13 +757,13 @@ Object.defineProperty(Component, 'rootSaga', {
 });
 
 Component.addReducers = function (red) {
-  var comb = _objectSpread(_objectSpread({}, combined), red);
+  var comb = _objectSpread(_objectSpread({}, allReducers()), red);
 
-  store.replaceReducer((0, _redux.combineReducers)(_objectSpread({}, comb)));
+  store().replaceReducer((0, _redux.combineReducers)(_objectSpread({}, comb)));
 };
 
 Component.refreshReducers = function () {
-  store.replaceReducer((0, _redux.combineReducers)(_objectSpread(_objectSpread({}, combined), Component.reducers)));
+  store().replaceReducer((0, _redux.combineReducers)(_objectSpread(_objectSpread({}, allReducers()), Component.reducers)));
 };
 
 Component.registerReducers = function (red) {
@@ -796,7 +776,7 @@ Component.registerReducers = function (red) {
 
   try {
     Object.keys(Component.reducers).some(function (redu) {
-      if (!store.getState()[redu]) Component.refreshReducers();
+      if (!store().getState()[redu]) Component.refreshReducers();
     });
   } catch (_unused5) {}
 };
@@ -847,12 +827,4 @@ function Komponent(Com) {
   return Connected;
 }
 
-var RootComponent = function RootComponent(props) {
-  return /*#__PURE__*/_react.default.createElement(_react.default.StrictMode, null, /*#__PURE__*/_react.default.createElement(_reactRouterDom.BrowserRouter, null, /*#__PURE__*/_react.default.createElement(_reactRedux.Provider, {
-    store: store
-  }, /*#__PURE__*/_react.default.createElement(_react2.PersistGate, {
-    persistor: persistor
-  }, props.children))));
-};
-
-exports.RootComponent = RootComponent;
+module.exports = Component;

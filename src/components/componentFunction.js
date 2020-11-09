@@ -1,35 +1,17 @@
 import React from 'react'
-import { combined as combinedReducers } from '../reducers/index'
 import { combineReducers } from 'redux'
 import { createSelector } from 'reselect'
 import { connect } from 'react-redux'
 import FetchingPage from './fetchingOverlayCompiled'
 
 import '../index.css';
-import { createStore } from 'redux'
-import createSagaMiddleware from 'redux-saga'
 import { all, call, put, takeEvery, takeLatest, takeLeading } from 'redux-saga/effects';
 
-import allReducers from '../reducers'
-import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import { PersistGate } from 'redux-persist/es/integration/react';
-import { applyMiddleware } from 'redux'
-import thunkMiddleware from 'redux-thunk'
+import RootComponent from './RootComponentCompiled'
 
-const persistConfig = {
-   key: 'primary',
-   storage
-};
-
-const configuredReducers = persistReducer(persistConfig, allReducers);
-const sagaMiddleware = createSagaMiddleware()
-export const store = createStore(configuredReducers,applyMiddleware(thunkMiddleware,sagaMiddleware))
-const persistor = persistStore(store)
-
-let combined = combinedReducers
+let allRed = RootComponent.reducers
+let allReducers = () => allRed || RootComponent.reducers
+let store = () => RootComponent.store
 
 function lowerFirst(word) {
    console.log('word!',word)
@@ -142,7 +124,7 @@ function Component(props) {
    }
    
    console.log("in the constructor!!!!!!!!!!!!!!",thiss.constructor.name)
-   let reducers = combined
+   let reducers = allReducers()
    const componentName = component ? component.constructor.name : thiss.constructor.name
    thiss.componentName = thiss.componentName || lowerFirst(componentName)
 
@@ -151,7 +133,7 @@ function Component(props) {
    thiss.originalComponentDidMount = thiss.componentDidMount 
 
    const stateFromStorage = Component.stateFromStorage
-   const getState = () => props.selectors || props.mapState || store.getState() 
+   const getState = () => props.selectors || props.mapState || store().getState() 
 
    thiss.actions = thiss.actions || { 
       setState: (payload,comp=thiss.componentName) => {
@@ -199,7 +181,7 @@ function Component(props) {
    if (!Component.statefulComponents[thiss.componentName]) {
       Component.statefulComponents[thiss.componentName] = thiss
       if (thiss.sagas) {
-         sagaMiddleware.run(Component.rootSaga)
+         RootComponent.sagaMiddleware.run(Component.rootSaga)
       }
    }  
 
@@ -223,9 +205,9 @@ function Component(props) {
    
    if (Object.keys(untracked).length > 1) {
       console.log('untracked!', untracked)
-      combined = { ...combined, ...untracked }
-      store.replaceReducer(combineReducers({ ...combined, ...Component.reducers }))
-      console.log('store from untracked:',store.getState())
+      allRed = { ...allReducers(), ...untracked }
+      store().replaceReducer(combineReducers({ ...allRed, ...Component.reducers }))
+      console.log('store from untracked:',store().getState())
    }
 
    Object.keys(replenish).forEach(key => {
@@ -278,12 +260,8 @@ function Component(props) {
    thiss.render = function() {
 
 
-      
-
       let Rendered = thiss.originalRender.bind(thiss)
-      return <FetchingPage component={Rendered} fetching={(thiss.state && thiss.state.fetching) ? true : false}></FetchingPage>
-
-
+      return <FetchingPage overlay={props.overlay} component={Rendered} fetching={(thiss.state && thiss.state.fetching) ? true : false}></FetchingPage>
 
       
    }
@@ -294,7 +272,7 @@ function Component(props) {
 }
 Component.prototype.getState = function() { 
    const thiss = this
-   return thiss.props.selectors || thiss.props.mapState || store.getState()
+   return thiss.props.selectors || thiss.props.mapState || store().getState()
 }
 Component.prototype.useState = function(initial) {
    let nextKey = 0
@@ -317,7 +295,7 @@ Component.prototype.useState = function(initial) {
 }
 Component.prototype.useSelector = function(...cb) { 
    const thiss = this
-   const theState = thiss.props.selectors || thiss.props.mapState || store.getState() 
+   const theState = thiss.props.selectors || thiss.props.mapState || store().getState() 
    const select = cb[0]
 
    let selector = createSelector(...cb,(things) => things)
@@ -337,9 +315,9 @@ Component.prototype.useSelector = function(...cb) {
 
    // return theState
 
-   const unsub = store.subscribe(state => {
+   const unsub = store().subscribe(state => {
 
-      let newStore = thiss.props.mapState || store.getState()
+      let newStore = thiss.props.mapState || store().getState()
       let newSelected = select(newStore)
 
       // console.log('NEWSTORE FROM SUBSCRIBE',newStore)
@@ -395,7 +373,7 @@ Component.prototype.useDispatch = function(...args) {
    const inPrevious = previous.some(prev => (prev.arg === args[0].toString()) && (prev.instance === instance) && (prevInstance === prev.prevInstance) && (reactMethod === prev.reactMethod))
    console.log('STATE',thiss.props)
    console.log('THIS',thiss)
-   try { console.log('STORE',store.getState()) } catch {}
+   try { console.log('STORE',store().getState()) } catch {}
    if (inLoop || inPrevious) {
       console.log('stuck in a loop - getting out ...')
       throw new Error
@@ -421,7 +399,7 @@ Component.prototype.useDispatch = function(...args) {
       return
    }
 
-   let dispatch = thiss.props.dispatch || store.dispatch
+   let dispatch = thiss.props.dispatch || store().dispatch
    
    console.log(args[0])
    try { dispatch(args[0]) } catch(err) { 
@@ -624,11 +602,11 @@ Object.defineProperty(Component,'rootSaga',{
    }
 })
 Component.addReducers = function(red) {
-   let comb = { ...combined, ...red }
-   store.replaceReducer(combineReducers({ ...comb }))
+   let comb = { ...allReducers(), ...red }
+   store().replaceReducer(combineReducers({ ...comb }))
 }
 Component.refreshReducers = function() {
-   store.replaceReducer(combineReducers({ ...combined, ...Component.reducers }))
+   store().replaceReducer(combineReducers({ ...allReducers(), ...Component.reducers }))
 }
 Component.registerReducers = function(red) {
    if (red) {
@@ -639,7 +617,7 @@ Component.registerReducers = function(red) {
    }
    try {
       Object.keys(Component.reducers).some(redu => {
-         if (!store.getState()[redu])
+         if (!store().getState()[redu])
             Component.refreshReducers()
       })
    } catch {}
@@ -679,18 +657,4 @@ function Komponent(Com,bypassInherit=false) {
 
 }
 
-const RootComponent = (props) => {
-   return (
-      <React.StrictMode>
-         <BrowserRouter>
-            <Provider store={store}>
-            <PersistGate persistor={persistor}>
-               {props.children}
-            </PersistGate>
-            </Provider>
-         </BrowserRouter>
-      </React.StrictMode>
-   );
- }
-
- export { Component, RootComponent }
+module.exports = Component

@@ -3,7 +3,7 @@ import isLoggedReducer from './isLogged'
 import userReducer from './user'
 import collectionsReducer from './collections'
 import {combineReducers} from 'redux'
-export const combined = {
+export const allReducers = {
     counter:counterReducer,
     collections: collectionsReducer,
     isLogged: isLoggedReducer,

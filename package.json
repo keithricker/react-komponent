@@ -69,7 +69,7 @@
   "preferGlobal": true,
   "scripts": {
     "compile": "node scripts/compile.js",
-    "babel-compile": "babel src/components/componentFunction.js -d dist --copy-files && mv dist/componentFunction.js src/components/componentFunctionCompiled.js && babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js",
+    "babel-compile": "babel src/components/componentFunction.js -d dist --copy-files && mv dist/componentFunction.js src/components/componentFunctionCompiled.js && babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js && babel src/components/RootComponent.js -d dist --copy-files && mv dist/RootComponent.js src/components/RootComponentCompiled.js && cd ../../ && npm run server2",
     "postinstall": "npm link --ignore-scripts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

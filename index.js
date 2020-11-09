@@ -1,3 +1,2 @@
-const { Component, RootComponent } = require('./src/components/componentFunctionCompiled.js')
-exports.komponent = Component
-exports.RootComponent = RootComponent
+exports.komponent = require('./src/components/componentFunctionCompiled.js')
+exports.RootComponent = require('./src/components/RootComponentCompiled.js')
