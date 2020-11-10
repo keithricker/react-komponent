@@ -6,7 +6,7 @@ var _redux = require("redux");
 
 var _reactRedux = require("react-redux");
 
-var _reduxSaga = _interopRequireDefault(require("redux-saga"));
+var _reduxSaga = _interopRequireWildcard(require("redux-saga"));
 
 var _reactRouterDom = require("react-router-dom");
 
@@ -18,7 +18,13 @@ var _react2 = require("redux-persist/es/integration/react");
 
 var _reduxThunk = _interopRequireDefault(require("redux-thunk"));
 
+var _effects = require("redux-saga/effects");
+
 var _componentFunctionCompiled = _interopRequireDefault(require("./componentFunctionCompiled"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -62,44 +68,53 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+console.log('component!', _componentFunctionCompiled.default);
+throw new Error();
 var persistConfig = {
   key: 'primary',
   storage: _storage.default
 };
+var originalCreateStore = _redux.createStore;
+var originalApplyMiddleware = _redux.applyMiddleware;
+var originalCreateSagaMiddleware = _reduxSaga.default;
 
-var RootComponent = /*#__PURE__*/function (_React$Component) {
-  _inherits(RootComponent, _React$Component);
+var RootClass = /*#__PURE__*/function (_React$Component) {
+  _inherits(RootClass, _React$Component);
 
-  var _super = _createSuper(RootComponent);
+  var _super = _createSuper(RootClass);
 
-  function RootComponent(props) {
+  function RootClass(props) {
     var _this;
 
-    _classCallCheck(this, RootComponent);
+    _classCallCheck(this, RootClass);
 
     _this = _super.call(this, props);
 
-    var thiss = _assertThisInitialized(_this);
+    if (_this.constructor.hasOwnProperty('extension')) {
+      throw new Error("The " + _this.constructor.name + " class is intended to be a root-level component." + " it is therefore not intended to have more than one instance. Try extending the " + _this.constructor.name + " class (not guaranteed to be stable), or create a new RootComponent if you wish to have multiple instances.");
+    }
 
+    RootClass.extension = _this.constructor;
+
+    var thiss = _this.constructor.instance = _assertThisInitialized(_this);
+
+    var proto = Object.getPrototypeOf(_assertThisInitialized(_this));
     Object.keys(props).forEach(function (key) {
-      if (key !== 'reducers') thiss[key] = props[key];
+      if (!proto[key]) thiss[key] = props[key];
     });
-    _this.sagaMiddleware = _this.sagaMiddleware || (0, _reduxSaga.default)();
-    _this.store = _this.store || _this.createStore(_this.reducers, _this.persistConfig || persistConfig);
     var combinedProps = [].concat(_toConsumableArray(Reflect.ownKeys(Object.getPrototypeOf(_assertThisInitialized(_this)))), _toConsumableArray(Object.keys(_assertThisInitialized(_this))));
     combinedProps.forEach(function (key) {
-      if (!RootComponent[key]) {
-        Object.defineProperty(RootComponent, key, {
-          get: function get() {
-            return Reflect.get(thiss, key, thiss);
-          }
-        });
+      if (!_this.constructor[key]) {
+        _this.constructor[key] = Reflect.get(thiss, key, thiss);
       }
     });
+    _this.store = _this.store || _this.constructor.createStore(_this.constructor.reducers, _this.persistConfig || persistConfig);
+    _this.constructor.store = _this.store;
+    if (_this.sagas) _this.constructor.runSaga();
     return _this;
   }
 
-  _createClass(RootComponent, [{
+  _createClass(RootClass, [{
     key: "render",
     value: function render() {
       var persistor = this.persistor || (0, _reduxPersist.persistStore)(this.store);
@@ -109,18 +124,11 @@ var RootComponent = /*#__PURE__*/function (_React$Component) {
         persistor: persistor
       }, this.props.children))));
     }
-  }, {
+  }], [{
     key: "createStore",
     value: function createStore(reducers, pc) {
-      this.props = _objectSpread(_objectSpread({}, this.props), {}, {
-        reducers: reducers || this.props.reducers
-      });
+      reducers = reducers || this.reducers;
       pc = pc || this.persistConfig || persistConfig;
-      this.configuredReducers = (0, _reduxPersist.persistReducer)(pc, this.combinedReducers);
-      console.log('configuredReducers', this.configuredReducers);
-      console.log('args thunkMiddleware', _reduxThunk.default);
-      console.log('args sagaMiddleware', this.sagaMiddleware);
-      console.log('applyMiddlewear', (0, _redux.applyMiddleware)(_reduxThunk.default, this.sagaMiddleware));
       this.store = (0, _redux.createStore)(this.configuredReducers, (0, _redux.applyMiddleware)(_reduxThunk.default, this.sagaMiddleware));
       return this.store;
     }
@@ -130,20 +138,88 @@ var RootComponent = /*#__PURE__*/function (_React$Component) {
       return _reactRedux.connect.apply(void 0, arguments);
     }
   }, {
+    key: "createStore",
+    value: function createStore(red, pc) {
+      red = red || this.reducers;
+      pc = pc || this.persistConfig || persistConfig;
+      var smw = this.sagaMiddleware || (0, _reduxSaga.default)();
+      var configuredReducers = (0, _reduxPersist.persistReducer)(pc, red);
+      return this.store = originalCreateStore(configuredReducers, (0, _redux.applyMiddleware)(_reduxThunk.default, smw));
+    }
+  }, {
+    key: "createSagaMiddleware",
+    value: function createSagaMiddleware() {
+      return originalCreateSagaMiddleware.apply(void 0, arguments);
+    }
+  }, {
+    key: "runSaga",
+    value: function runSaga(sagas) {
+      sagas = sagas || this.sagas || [];
+      this.sagas = _componentFunctionCompiled.default.sagas.concat(sagas.map(function (sag) {
+        return (0, _effects.call)(sag);
+      }));
+      sagaMiddleware.run( /*#__PURE__*/regeneratorRuntime.mark(function rootSaga() {
+        return regeneratorRuntime.wrap(function rootSaga$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return all(sagas);
+
+              case 2:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, rootSaga);
+      }));
+    }
+  }, {
+    key: "applyMiddleware",
+    value: function applyMiddleware() {
+      return originalApplyMiddleware.apply(void 0, arguments);
+    }
+  }, {
     key: "combinedReducers",
     get: function get() {
       return (0, _redux.combineReducers)(this.reducers);
     }
   }, {
+    key: "configuredReducers",
+    get: function get() {
+      return (0, _reduxPersist.persistReducer)(this.persistConfig || persistConfig, this.combinedReducers);
+    }
+  }, {
     key: "reducers",
     get: function get() {
-      var pr = this.props && this.props.reducers ? this.props.reducers : {};
+      var pr = this.instance && this.instance.reducers ? this.instance.reducers : {};
       var cr = _componentFunctionCompiled.default.reducers || {};
       return _objectSpread(_objectSpread({}, pr), cr);
     }
   }]);
 
-  return RootComponent;
+  return RootClass;
 }(_react.default.Component);
 
-module.exports = RootComponent;
+function RootComponent(props) {
+  var Root = /*#__PURE__*/function (_RootClass) {
+    _inherits(Root, _RootClass);
+
+    var _super2 = _createSuper(Root);
+
+    function Root(props) {
+      _classCallCheck(this, Root);
+
+      return _super2.call(this, props);
+    }
+
+    return Root;
+  }(RootClass);
+
+  return /*#__PURE__*/_react.default.createElement(Root, props, props.children);
+}
+
+module.exports = {
+  RootComponent: RootComponent,
+  RootClass: RootClass
+};
