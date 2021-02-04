@@ -211,11 +211,13 @@ class RootClass extends React.Component {
          get(ob,prop) { 
             if (prop === 'events') return { ...domEvents } 
             return theHtml[prop] || ReactDom[prop]
+         },
+         set(ob,prop,val) { 
+            theHtml[prop] = val; return true
          }
       } 
       let theDOM = vars(this).DOM 
       if (!theDOM) vars(this).DOM = new Proxy(function DOM() {
-         return 'hello'
          let comp = args[0]
          if (vars(comp).domNode) return vars(comp).domNode 
          vars(comp).domNode = ReactDOM.findDOMNode(comp)

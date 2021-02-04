@@ -1,17 +1,71 @@
 
-
-
-
-
-
-
-
-
 import React from "react";
 import path from 'path'
 const proto = { get: Object.getPrototypeOf, set: Object.setPrototypeOf };
 const reflectKeys = Reflect.ownKeys(Reflect).concat(["enumerate"]);
 
+
+export const is = (function () {
+  return new Proxy(require("util").types || require("util"), {
+    get(ob, prop) {
+      let props = {
+        get promise() {
+          return ob.isPromise || isPromise;
+        },
+        get json() {
+          return ob.isJSON || isJSON;
+        },
+        get url() {
+          return ob.isURL || isURL;
+        },
+        defined(arg) {
+           return ob.isDefined ? ob.isDefined(arg) : typeof arg !== "undefined";
+        },
+        empty(ob) { return (typeof ob === 'undefined') ? undefined : (!Reflect.ownKeys(ob).length) ? true : false },
+        class(func) {
+           return func.toString().split(" ")[0] === "class";
+        },
+        object(ob) { 
+           let deflt = ob.isObject ? ob.isObject(ob) : typeof ob === 'object'
+           return deflt && !Array.isArray(ob)
+        },
+        instanceOf(ob,...arg) {
+           if (arg.length > 1) {
+              let op = (['all','some','and','or'].includes(arg[arg.length-1])) ? arg[arg.length-1] : 'all'
+              let res = arg.filter(ar => ob instanceof ar)
+              if (['all','and'].includes(op)) 
+                 return !!(res.length === arg.length)
+              if (['some','or'].includes(op))
+                 return !!(res.length)
+           }
+           return ob instanceof arg[0]
+        },
+        descriptor(obj) {
+           if (!obj) return false
+           if (!obj.hasOwnProperty('get') && !obj.hasOwnProperty('value')) return false
+           if (Reflect.ownKeys(obj).length === 1) return true
+           const descProperties = Reflect.ownKeys(Object.getOwnPropertyDescriptor(Object.defineProperty({},'property',{get:()=>{},set:()=>{}}),'property')).concat('value')
+           return Reflect.ownKeys(obj).every(key => descProperties.includes(key))  
+        }
+      };
+      let types = ['undefined','object','boolean','number','bingint','string','symbol','function','object']
+      let deflt = (...args) => { let item = (args.length > 1) ? arguments: args[0]; return (typeof ob[prop] === 'function') ? ob[prop](...args) : types.includes(prop) && typeof item === prop }
+      if (props.hasOwnProperty(prop)) return props[prop]
+      let modProp = "is" + capitalize(prop);
+      return typeof ob[modProp] === "function" ? ob[modProp] : deflt
+    }
+  });
+})();
+export function swap(cond,mp) {
+   let res = cond()
+   let deflt = {}
+   let ret = deflt
+   mp.forEach((val,key) => {
+      if (ret !== deflt) return
+      if (key === res) { ret = val(res) }
+   })
+   return ret === deflt ? undefined : ret
+}
 export function mapFunc(map,func) {
    let returnFunc = function mapFunc(ob,val) {
       if (func) return func(ob,val,map,[...arguments])
@@ -31,12 +85,13 @@ export function mapFunc(map,func) {
 export class PrivateVariables {
    constructor(newVars) {
       if (!newVars) newVars = new WeakMap()
-      return mapFunc(newVars,(key,val,map,args) => {
+      const newMapFunc = mapFunc(newVars,(key,val,map,args) => {
          if (args.length === 4) {
             let ret = map.get(key)
             if (!ret) { map.set(key,val); ret = val }
-            if (!ret.hasOwnProperty(args[2])) 
-               ret[args[2]] = args[3]
+            if (ret instanceof Map || ret instanceof WeakMap)
+               ret.set(args[2],args[3])
+            else ret[args[2]] = args[3]
             return ret[args[3]]
          }
          let def = {}
@@ -44,6 +99,13 @@ export class PrivateVariables {
          if (!retrieved || arguments[1]) map.set(key,val || def)
          return val || retrieved || def
       })
+      newMapFunc.default = function(key,val={},defKey,defValue) {
+         key = newVars.get(key) || newVars.set(key,val)
+         if (!is.defined(arguments[2]) || val.hasOwnProperty(defKey)) return val
+         if (is.instanceOf(val,Map,WeakMap,'or')) val.set(defKey,defValue); else val[defKey] = defValue
+         return defValue
+      }
+      return newMapFunc
    }
 }
 const vars = new PrivateVariables()
@@ -177,34 +239,35 @@ export function sequence(...funcs) {
 }
 
 export const dynamicImport = (function() {
-   return function(...arg) {
-      let cb = arg[2]
-      return cb ? dynImport(...arg) : new Promise(res => {
-         arg[2] = (ret) => res(ret) 
-         dynImport(...arg)
-      })
-   }
-   function dynImport(script,id,callback) {
-      let imports = dynImport.imports || {}
-      let script = document.createElement("script")
-      script.setAttribute("id",id)
-      script.setAttribute("src", script);
-      script.setAttribute("async", "false")
-  
-      let head = document.head;
-      head.insertBefore(script,head.firstElementChild)
+  return function(...arg) {
+     let cb = arg[2]
+     return cb ? dynImport(...arg) : new Promise(res => {
+        arg[2] = (ret) => res(ret) 
+        dynImport(...arg)
+     })
+  }
+  function dynImport(script,id,callback) {
+     let imports = dynImport.imports || {}
+     let scriptTag = document.createElement("script")
+     scriptTag.setAttribute("id",id)
+     scriptTag.setAttribute("src", script);
+     scriptTag.setAttribute("async", "false")
+ 
+     let head = document.head;
+     head.insertBefore(scriptTag,head.firstElementChild)
 
-      let before = Reflect.ownKeys(window)
-      script.addEventListener("load", loaded, false)
-      function loaded() {
-         let newProps = mapFunc(new Map())
-         let difference = Reflect.ownKeys(window).filter(key => !before.includes(key))
-         difference.forEach(props(key,window[key]))
-         dynImport.imports[id] = newProps
-         return callback ? callback(newProps) : newProps
-      }
-   }
+     let before = Reflect.ownKeys(window)
+     scriptTag.addEventListener("load", loaded, false)
+     function loaded() {
+        let newProps = mapFunc(new Map())
+        let difference = Reflect.ownKeys(window).filter(key => !before.includes(key))
+        difference.forEach(key => newProps(key,window[key]))
+        imports[id] = newProps
+        return callback ? callback(newProps) : newProps
+     }
+  }
 })()
+
 export const mixin = (obj, mix) => {
   let mixProx = new Proxy(proto.get(obj), {
     get(ob, prop) {
@@ -300,7 +363,7 @@ export const Obj = (function () {
   const mixins = new WeakMap();
   let newObj = function Obj(obj) {
     if (mixins.has(obj)) return mixins.get(obj);
-    let mix = mixins.get(obj, {
+    let mix = {
       has(prop) {
         return this.hasOwnProperty(prop);
       },
@@ -335,8 +398,8 @@ export const Obj = (function () {
       set proto(val) {
         return Object.setPrototypeOf(this, val);
       }
-    });
-    mixins.set(obj, mix);
+    }
+    mixins.set(obj,mix);
     return mix;
   };
   return newObj;
@@ -426,7 +489,6 @@ export function ObjectMap(obMap={}) {
   let types = mapFunc(new WeakMap());
   let type = obMap instanceof Map ? "map" : "object";
   let asObject = type === "object" ? obMap : Object.fromEntries(obMap);
-  console.log('hellooo')
   let asMap = type === "object" ? new Map(Object.entries(obMap)) : obMap;
 
   asObject.asMap = function () {
@@ -1106,11 +1168,13 @@ const swapProxy = function(reference,handler={}) {
    merge(handler,{ get target() { return reference() } })
    handlerSetup(handler)
    let newProxy = new Proxy(reference,handler)
-   return { proxy: newProxy, swap: function(newTarget) {
+   return { proxy: newProxy, swap: function(newTarget,newHandler) {
       reference = newTarget
+      Obj(handler).clear(); merge(handler,newHandler)
    }}
    function handlerSetup(handler,trg,src=Reflect) {
       let target = () => trg || handler.target
+      console.log('src',src); console.log('objc',Obj(src))
       Obj(src).forEach((key,val) => {
          handler[key] = function(...arg) { arg[0] = target(); return val(...arg) }
       })
@@ -1120,7 +1184,8 @@ const swapProxy = function(reference,handler={}) {
 export const Module = (function() {
   class Module {
     constructor(mod,mode='common') {
-       const priv = vars(this)
+     
+       const ModPriv = vars.default(Module,{imports: new ObjMap(new Map())})
        const ext = Obj(this)
        priv.module = mod
        if (!mod.exports) mod.exports = priv.exports = {}
@@ -1129,6 +1194,7 @@ export const Module = (function() {
        let self = this
 
        this.imports = mapFunc(new Map())
+
        this.requirements = mapFunc(new Map())
 
        let exportsHandler = {
@@ -1191,7 +1257,7 @@ export const Module = (function() {
 
     }
     import(mod) {
-       let fromCache = this.imports(require.resolve(mod))
+       let fromCache = this.imports(typeof mod === 'string' ? require.resolve(mod) : mod)
        if (fromCache)
           return fromCache.returned
        let returnVal; let compiled
@@ -1199,14 +1265,19 @@ export const Module = (function() {
        if (!obj) {
           try { 
              obj = require(mod) 
-          } catch {  
+          } catch {
+             if (this.requirements)
              compiled = obj = this.compile.babel(require.resolve(mod))
           }
        }
        returnVal = obj.default || obj
        if (typeof mod === 'string') mod = require.resolve(mod)
-       this.imports.set(mod,{ returned:returnVal,compiled }); 
+       this.imports.set(mod,{ returned:returnVal,compiled })
+
        return returnVal
+    }
+    get imports() {  
+       let imports = vars(Module,{},'imports',importsMap)
     }
     require(mod) {
        let required = this.requirements.get(mod) || require(mod)
@@ -1230,7 +1301,7 @@ export const Module = (function() {
        let comp = function compile() {}
        let self = this
        comp.babel = function(src,pth) {
-          const path = require('path')
+          
           src = path.resolve(process.cwd(),src || self.id)
           let processed
 

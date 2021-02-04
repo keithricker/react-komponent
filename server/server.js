@@ -1,16 +1,13 @@
 const path = require('path')
 const fs = require('fs')
+const { webpack } = require('./compiler.js')
 const fetchData = require('./fetchData.js')
 const theDirectory = __dirname
 const appRoot = process.cwd()
 const modulePath = path.resolve(theDirectory,'../')
 const express = require('express');
 const nodeEnv = process.env.NODE_ENV
-Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
 const { commandLine,is } = require(modulePath+'/src/components/helpers/utilsCompiled.js')
-const webpack = require(process.cwd()+'/node_modules/webpack')
-const ReactServerHTMLPlugin = require(modulePath+'/config/react-server-html')
-const MiniCssExtractPlugin = require(process.cwd()+'/node_modules/mini-css-extract-plugin')
 const { merge, isClass } = require('../src/components/helpers/utilsCompiled')
 
 const makeFunction = (func,props,pro) => { 
@@ -24,7 +21,6 @@ const makeFunction = (func,props,pro) => {
 function reactServer(custom = {}) {
    
    custom.webpack = custom.webpack
-   custom.webpack.SSR = {}
    let config = custom.webpack.config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
    let port = custom.port || process.env.Port || process.env.PORT || 3000
    const app = express()
@@ -94,16 +90,16 @@ function reactServer(custom = {}) {
 
    modules.SSR.hooks.window((wind) => { wind.reactSSR = modules.SSR })
 
-   const htmlPluginOptions = custom.webpack.SSR = { 
+   custom.webpack = custom.webpack || {}
+   const htmlPluginOptions = custom.webpack.SSR = custom.webpack.SSR || { 
       enabled:true,
-      protocol, host, port, modules,
+      server, protocol, host, port, modules,
       prepend: `<script>window.serverURL = '${serverUrl()}'</script>;`,
       windowPrerender: (wind) => {
          wind.reactServer = modules
       }
    }
    if (custom.url) htmlPluginOptions.url = custom.url
-
 
    let socket
 
@@ -180,34 +176,14 @@ function reactServer(custom = {}) {
             function listenCallback(err) {
                cb(err)
                // commandLine(`rm -r ./dist/*`)
-               let address = server.address()
-               port = address.port
-               host = custom.url ? getHost(custom.url) : (address.address === '::') ? 'localhost' : address.address
-               let overrides = custom.webpack.overrides || {}
                config.module = config.module || {}
                if (parsedData) HtmlPluginOptions.data = parsedData
-               config.plugins.push(new ReactServerHTMLPlugin(htmlPluginOptions))
-               config.plugins = config.plugins.concat(overrides.plugins || [])
-               config.output.path = overrides.outputPath || custom.SSR && path.resolve(custom.webpack.SSR.appRoot) || path.resolve('./dist')
-               config.mode = overrides.mode || 'development'
-               config.optimization.minimize = overrides.minimize || false
-               config.module.rules = overrides.moduleRules || config.module.rules
-               config.module.rules.forEach((rule,ind) => {
-                  if (rule.oneOf) {
-                     config.module.rules[ind].oneOf.unshift({
-                        test: /\.css$/i,
-                        use: [MiniCssExtractPlugin.loader, 'css-loader'],
-                     })
-                  }
-               })
-               const build = webpack(config).run((err, stats) => {
+               const build = webpack(config,(err, stats) => {
                   if (err) {
                      console.error(err)
                   }
-                  Object.defineProperty(process.env,'NODE_ENV',{value: nodeEnv || 'development',writable:true})
                })
             }
-            
             if (arg.length) 
                delete defaults.listen
             else defaults.listen[0][1] = listenCallback

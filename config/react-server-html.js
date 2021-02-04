@@ -3,7 +3,7 @@ var fs = require('fs')
 require('jsdom-global')()
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom
-const { contract, asyncForEach, isPromise } = require('../src/components/helpers/utilsCompiled');
+const { contract, asyncForEach } = require('../src/components/helpers/utilsCompiled');
 const { sequence,mixin } = require('react-komponent/src/components/helpers/utilsCompiled');
 const socketClient = path.resolve('../')+'/node_modules/socket.io-client/dist/socket.io.min.js'
 
@@ -98,7 +98,7 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
       let constructorCallbacks = getCallbacks('constructor')
       
 
-      if (windowCallbacks.length > 0) {
+      if (windowCallbacks.length) {
          jsdOptions.beforeParse = (win) => {
             let prerens = windowCallbacks.map(wp => {
                return () => { return wp(win) } 
@@ -136,7 +136,7 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
          // make initial dom
          return sequence(
             () => {
-               if (constructorCallbacks && constructorCallbacks.length > 0) {
+               if (constructorCallbacks && constructorCallbacks.length) {
                   return addHooks('constructor',new mySDOM(html))
                }
             },
@@ -153,7 +153,7 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
       // if we have prerenderCallbacks then just start from scratch and redefine dom and doc.
       function makeDom(HTML=modifiedHTML) {
 
-         if (!(renderCallbacks && renderCallbacks.length > 0))
+         if (!(renderCallbacks && renderCallbacks.length))
             return complete()
 
          let newDom = new mySDOM(HTML)
