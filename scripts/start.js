@@ -1,22 +1,72 @@
+/*
 const path = require('path')
-const express = require('express')
-process.env.NODE_ENV = 'development'
-console.log(process.cwd())
-console.log(__dirname)
+const express = require('express');
+const fs = require("fs");
+const nodeEnv = process.env.NODE_ENV
+Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
+const modulePath = process.cwd()+'/node_modules/react-komponent'
 const config = require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
 const webpack = require(process.cwd()+'/node_modules/webpack');
-const ReactServerHTMLPlugin = require(process.cwd()+'/node_modules/react-komponent/config/react-server-html')
+const ReactServerHTMLPlugin = require(modulePath+'/config/react-server-html')
 const MiniCssExtractPlugin = require(process.cwd()+'/node_modules/mini-css-extract-plugin')
 
 const app = express()
 app.use(express.static('dist'))
+const appEnv = app.get('env')
 app.set('env','development');
-const port = 3000
+const port = process.env.Port || process.env.PORT || 3000
+*/
 
-const cssRegex = /\.css$/
-const cssModuleRegex = /\.module\.css$/
-const sassRegex = /\.(scss|sass)$/
-const sassModuleRegex = /\.module\.(scss|sass)$/
+/*
+execSync(`cd ${modulePath} && npm run-script server-setup`, (error, stdout, stderr) => {
+   if (error) {
+       console.log(`error: ${error.message}`);
+       return;
+   }
+   if (stderr) {
+       console.log(`stderr: ${stderr}`);
+       return;
+   }
+   console.log(`stdout: ${stdout}`);
+});
+*/
+const modulePath = process.cwd()+'/node_modules/react-komponent'
+const commandLine = require(`${modulePath}/src/components/helpers/utilsCompiled.js`).commandLine
+commandLine(`cd ${modulePath} && npm run-script babel-compile`);
+// commandLine(`npm run-script build`);
+
+let server = require(process.cwd()+'/server/server.js')
+
+/*
+server = server()
+server.start()
+*/
+/*
+execSync(`npm run-script build`, (error, stdout, stderr) => {
+   if (error) {
+       console.log(`error: ${error.message}`);
+       return;
+   }
+   if (stderr) {
+       console.log(`stderr: ${stderr}`);
+       return;
+   }
+   console.log(`stdout: ${stdout}`);
+});
+*/
+
+/*
+execSync(`cd ${modulePath} && npm run-script babel-compile`, (error, stdout, stderr) => {
+   if (error) {
+       console.log(`error: ${error.message}`);
+       return;
+   }
+   if (stderr) {
+       console.log(`stderr: ${stderr}`);
+       return;
+   }
+   console.log(`stdout: ${stdout}`);
+});
 
 config.plugins.push(new ReactServerHTMLPlugin(),new MiniCssExtractPlugin())
 config.output.path = path.resolve('./dist')
@@ -35,11 +85,13 @@ const build = webpack(config).run((err, stats) => {
    if (err) console.error(err)
 })
 
+Object.defineProperty(process.env,'NODE_ENV',{value: nodeEnv || 'development',writable:true})
+app.set('env',appEnv || 'development');
+
 app.get('/',(req,res) => {
    const indexFile = path.resolve('./build/index.html');
    res.sendFile(indexFile)
 });
-// app.use(handleRender)
 
 //Serve static files
 app.use(express.static("./build"));
@@ -47,3 +99,4 @@ app.use(express.static("./build"));
 app.listen(port, () => {
    console.log(`Server is listening on port ${port}`);
 });
+*/

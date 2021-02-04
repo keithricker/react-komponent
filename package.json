@@ -45,17 +45,26 @@
   "bundleDependencies": false,
   "dependencies": {
     "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.13",
     "@babel/plugin-transform-react-jsx": "^7.12.5",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.5",
+    "child_process": "^1.0.2",
     "express": "^4.17.1",
+    "ip": "^1.1.5",
     "jsdom": "^16.4.0",
     "jsdom-global": "^3.0.2",
+    "mini-css-extract-plugin": "^1.3.5",
+    "node-fetch": "^2.6.1",
+    "npm-add-script": "^1.1.0",
     "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
     "redux-saga": "^1.1.3",
     "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0"
+    "require-from-string": "^2.0.2",
+    "reselect": "^4.0.0",
+    "socket.io": "^3.1.0",
+    "socket.io-client": "^3.1.0"
   },
   "deprecated": false,
   "description": "",
@@ -69,9 +78,10 @@
   "preferGlobal": true,
   "scripts": {
     "compile": "node scripts/compile.js",
-    "babel-compile": "babel src/components/componentFunction.js -d dist --copy-files && mv dist/componentFunction.js src/components/componentFunctionCompiled.js && babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js && babel src/components/RootComponent.js -d dist --copy-files && mv dist/RootComponent.js src/components/RootComponentCompiled.js && cd ../../ && npm run server2",
-    "postinstall": "npm link --ignore-scripts",
+    "babel-compile": "babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js && babel src/components/Komponent/higherOrder.js -d dist --copy-files && mv dist/higherOrder.js src/components/Komponent/higherOrderCompiled.js && babel src/components/RootComponent.js -d dist --copy-files && mv dist/RootComponent.js src/components/RootComponentCompiled.js && babel src/components/helpers/utils.js -d dist --copy-files && mv dist/utils.js src/components/helpers/utilsCompiled.js",
+    "server-setup": "cd ../../ && mkdir -p server && cp node_modules/react-komponent/server/server.js server/server.js && npmAddScript -k server -v 'komponent-scripts start'",
+    "postinstall": "npm link --ignore-scripts && npm run-script server-setup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

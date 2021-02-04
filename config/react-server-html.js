@@ -1,119 +1,257 @@
 var path = require('path');
 var fs = require('fs')
-var HtmlWebpackPlugin = require(process.cwd()+'/node_modules/html-webpack-plugin');
-const miniCSS = require(process.cwd()+'/node_modules/mini-css-extract-plugin')
 require('jsdom-global')()
 const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-const express = require('express')
-const app = express()
-app.use(express.static('dist'))
-app.use('/json', express.static('json'))
+const { JSDOM } = jsdom
+const { contract, asyncForEach, isPromise } = require('../src/components/helpers/utilsCompiled');
+const { sequence,mixin } = require('react-komponent/src/components/helpers/utilsCompiled');
+const socketClient = path.resolve('../')+'/node_modules/socket.io-client/dist/socket.io.min.js'
 
-const root = path.resolve('./');
+class mySDOM extends JSDOM {
+   constructor(...arg) {
+      super(...arg)
+   }
+   elements() { return  }
+   tags(name) { return this.window.document.getElementsByTagName(name) }
+   tag(name) { return this.tags(name)[0] }
+   html() { return this.tag('html').outerHTML }
+   newTag(type,inner,appendTo) { let newEl = this.window.document.createElement(type); newEl.innerHTML = inner; appendTo.appendChild(newEl)  }
+   setHtml(HTML) { let newJdom = typeof HTML === 'object' ? HTML : new mySDOM(HTML); this.tag('html').innerHTML = newJdom(HTML).tag('html').innerHTML; return true }
+   setTag(name,val) { return this.tag(name).innerHTML = val }
+   query(search) { return this.window.document.querySelector(search) }
+   queryAll(search) { return this.window.document.querySelectorAll(search) }
+}
+delete mySDOM.prototype.constructor
 
-
-function ReactServerHTMLPlugin(options) {
+function ReactServerHTMLPlugin(options={}) {
+   let self = this
 	this.options = Object.assign({
         appRoot: "./dist",
         template: "./index.html",
         dataPath: "./json/data.json",
-        url:"http://localhost",
-        port: "3006"
-	},options);
+        url: "http://localhost",
+        port: "3006",
+        append: '',
+        prepend: '',
+        htmlPrerender: (html) => html,
+        htmlModify: (html) => html,
+        socketio: false,
+        // windowPrerender: (wind) => wind,
+        // webpackConfig
+        // domPrerender: (dom) => dom,
+        // domModify: (dom) => dom
+        // modules: {}
+    },options);
+    // this.options.modules = this.options.modules || {}
 }
 
 ReactServerHTMLPlugin.prototype.apply = function(compiler) {
-   
-    var self = this;
 
-    var { appRoot, template, dataPath, url, port  } = self.options
-    var fullURL = url+':'+port+'/'
-    var fullPath = path.resolve(appRoot)
+    const self = this;
+
+    let { appRoot, modules, template, append, prepend, htmlPrerender, host, protocol,port  } = self.options
+    if (self.options.server && self.options.server.address) {
+       address = server.address().address
+       port = server.address().port
+    }
+    let fullURL = `${protocol}://${host}:${port}/`
+    console.log('url:',fullURL)
     self.options.url = fullURL
-	compiler.plugin("emit", function(compilation, callback) {
+    
+    compiler.hooks.emit.tapAsync('ReactServerHTMLPlugin', function(compilation, callback) {
+	 // compiler.plugin("emit", function(compilation, callback) {
+      const templ = compilation.assets[path.basename(template)]
+      if (!templ) return callback()
+    		
+      let html = templ.source();
+      // dataPath = path.resolve(appRoot,dataPath);
+      // let rawdata = fs.readFileSync(dataPath);
+      // let json = JSON.parse(rawdata);
 
-        var templ = compilation.assets[path.basename(template)]
-		if (templ) {
+      // var script = `<script>window.__PRELOADED_STATE__ = ${JSON.stringify(json).replace(/</g, '\\u003c')}</script>`
+      // Add additional assets from configuration options
 
-			var server = app.listen(port, async function () {
-                var html = templ.source();
+      const virtualConsole = new jsdom.VirtualConsole();
+      virtualConsole.on("error", (err) => { console.error("ERror",err) });
+      virtualConsole.sendTo(console);
 
-                const modifiedHTML = html.replace(/<script src="\//gi,'<script src="file://'+root+'/dist/')
-                .replace(/link href="\//gi, 'link href="file://'+root+'/dist/')
-                .replace(/(<link[^>]+rel=[^>]+href=\"\/)/gi,"$1file://"+root+"/public/")
-                let assets = compilation.assets
-                Object.keys(assets).forEach(key => {
-                    let data = assets[key].source()
-                    if (path.extname(key) === '.js') {
-                        fs.writeFileSync(appRoot+'/'+key, data)
-                        delete compilation.assets[key]
-                    }
-                    if (path.extname(key) === '.css') {
-                        fs.writeFileSync(appRoot+'/'+key,data)
-                        delete compilation.assets[key]
-                    }
-                })
+      let jsdOptions = {
+            url: fullURL,
+            runScripts: "dangerously",
+            resources: "usable"
+      }
 
-                var virtualConsole = new jsdom.VirtualConsole();
-                virtualConsole.on("error", (err) => { console.error("ERror",err) });
-                virtualConsole.sendTo(console);
+      let ssrHooks = modules && modules.SSR && modules.SSR.hooks
+      
+      let callbacks = Object.keys(ssrHooks).reduce((obj,key) => {
+         obj[key] = ssrHooks[key].callbacks
+         let mix = mixin(obj,{ fresh: () => ssrHooks[key].callbacks })
+         return Object.setPrototypeOf(obj,mix)
+      },{})
+      const getCallbacks = (name) => callbacks[name].temp.concat(callbacks[name].perm)
 
-                console.log('html!', modifiedHTML)
+      let windowCallbacks = getCallbacks('window')
+      // let windowAlters = ssrHooks && ssrHooks.windowAlter && ssrHooks.windowAlter.callbacks
+      let getRenderCallbacks = () => getCallbacks('render')
+      let renderCallbacks = getRenderCallbacks()
+      let componentDidMountCallbacks = getCallbacks('componentDidMount')
+      let constructorCallbacks = getCallbacks('constructor')
+      
 
-                var options = {
-                    url: fullURL,
-                    runScripts: "dangerously",
-                    resources: "usable"
-                };
-                var dom = new JSDOM(modifiedHTML,options)
-                console.log('heyRoot',dom.window.document.querySelector("#root").innerHTML)
+      if (windowCallbacks.length > 0) {
+         jsdOptions.beforeParse = (win) => {
+            let prerens = windowCallbacks.map(wp => {
+               return () => { return wp(win) } 
+            })
+            return sequence(...prerens)
+         }
+      }
 
-                dataPath = path.resolve(appRoot,dataPath);
-                
-                console.log('--------------------------------------------')
-                console.log('cwd',process.cwd())
-                console.log('things',Reflect.ownKeys(dom.window.document));
+      let assets = compilation.assets
+      
+      Object.keys(assets).forEach(key => {
+         if (path.extname(key) === '.js' || path.extname(key) === '.css') {
+            let data = assets[key].source()
+            const filePath = appRoot+'/'+key
+            const dirname = path.dirname(filePath)
+            fs.mkdirSync(dirname, { recursive: true })
+            fs.writeFileSync(appRoot+'/'+key, data)
+            delete compilation.assets[key]
+         }
+      })
 
-                console.log('heyDom',dom.window.document.querySelector("body").innerHTML)
-                // throw new Error
-                
-                dom.window.document.addEventListener('DOMContentLoaded', (ev) => {
+      let dom; let doc; let modifiedHTML = html
+      
+      function HTMLPrerender() {
+         html = htmlPrerender(html)
+         ssrHooks.constructor((vdom) => {
+            vdom.setHtml(
+               vdom.html().replace(/<script src="\//gi,`<script src="${fullURL}`)
+               .replace(/link href="\//gi, `link href="${fullURL}`)
+               .replace(/(<link[^>]+rel=[^>]+href=\"\/)/gi,`$1${fullURL}`)
+               .replace('<head>',`<head>${prepend}`)
+               .replace('</head>',`${append}</head>`)
+            )
+         })
+         // make initial dom
+         return sequence(
+            () => {
+               if (constructorCallbacks && constructorCallbacks.length > 0) {
+                  return addHooks('constructor',new mySDOM(html))
+               }
+            },
+            (jsd) => { if (jsd) html = jsd.html(); return html },
+            (res) => makeDom(res),
+            (res) => {
+               modifiedHTML = res.html()
+               doc.addEventListener('DOMContentLoaded',listener, false)
+               return modifiedHTML
+            }
+         )
+      }
 
-                    console.log('weeeee'); 
+      // if we have prerenderCallbacks then just start from scratch and redefine dom and doc.
+      function makeDom(HTML=modifiedHTML) {
 
-                    try {
+         if (!(renderCallbacks && renderCallbacks.length > 0))
+            return complete()
 
-                        let rawdata = fs.readFileSync(dataPath);
-                        let json = { posts: JSON.parse(rawdata) };
-                        html = html.replace('<div id="root"></div>','<div id="root">'+dom.window.document.getElementById("root").innerHTML+'</div>')
-                        var script = `<script>window.__PRELOADED_STATE__ = ${JSON.stringify(json).replace(/</g, '\\u003c')}</script>`
-                        html = html.replace('</head>',`
-                        ${script}</head>`)
+         let newDom = new mySDOM(HTML)
+         return contract(addHooks('render',newDom),(res) => { 
+            HTML = res.html()
+            return complete() 
+         })
 
-                        compilation.assets[path.basename(template)] = {
-                            source: function () {
-                                return html;
-                            },
-                            size: function () {
-                                return html.length;
-                            }
-                        };
-                        callback()
+         function complete() {
+            dom = new mySDOM(HTML,jsdOptions)
+            doc = dom.window.document
+            return dom
+         }
+      }
+      /*
+      beforeParse(window) {
+         window.document.childNodes.length === 0;
+         window.someCoolAPI = () => { };
+      }
+      */
+      /*
+      return contract(preRen(newDom.window,HTML),(result) => {
+      HTML = (typeof result === 'string') ? result : getHtml(newDom)
+      if (ind === renderCallbacks.length-1)
+         return complete()
+      })
+      */
 
-                    } catch(error) {
-                        console.error("Got an error: ", error)
-                        throw new Error
-                    }
-                    server.close();
+      function addHooks(type,jsd) {
+         console.log('type',type)
+         let hooks = getCallbacks(type)
+         if (!hooks || hooks.length === 0)
+            return jsd
+         const loopMods = () => {
+            let HTML = jsd.html(); let modHTML = HTML
+            return contract(asyncForEach((hooks,(hook,ind) => {
+               return contract(
+                  hook(jsd.window,modHTML),
+                  (hooked) => {
+                     if (typeof hooked === 'string')
+                        modHTML = hooked
+                     else if (hooked.constructor && hooked.constructor === JSDOM) jsd = hooked
+                     if (ind === hooks.length-1 && modHTML !== HTML)
+                        jsd.setHtml(modHTML)
+                     return hooked
+                  }
+               )
+            })),() => jsd)
+         }
+         if (type === 'componentDidMount') {
+            jsd.addEventListener('DOMContentLoaded',() => {
+               return loopMods()
+            },false)
+            return jsd       
+         } else return loopMods()   
+      }
 
-                }, false);
+      function listener(ev) {
+         let before = renderCallbacks || []
+         let after = getRenderCallbacks() || []
+         if (before.length < after.length) {
+            renderCallbacks = preRens
+            return contract(makeDom(modifiedHTML),(res) => {
+               dom.setHtml(res)
+            })
+         }
+         // if prerenderCallbacks are there, it means they were added post-render, so we need to start over
+         return contract(addHooks('componentDidMount',dom),finishUp)
+      }
 
-			})
-		}
-		else {
-			callback();
-		}
+      function finishUp(jdom=dom) {
+         let htmlJsd = new mySDOM(html)
+
+         htmlJsd.query('#root').innerHTML = jdom.query('#root').innerHTML
+      
+         return contract(
+            addHooks('componentDidMount',htmlJsd),
+            (ret) => { 
+               html = ret.html()
+               compilation.assets[path.basename(template)] = {
+                  source: function () {
+                     return html;
+                  },
+                  size: function () {
+                     return html.length;
+                  }
+               }
+            }
+         )
+      }
+      
+      sequence(
+         HTMLPrerender,
+         makeDom,
+         finishUp,
+         callback
+      )
+      return
 
 	});
 }

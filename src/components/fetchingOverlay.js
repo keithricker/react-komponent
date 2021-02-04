@@ -12,6 +12,7 @@ export default function Overlay(props) {
    return (
       <Fragment>
          <Overlay></Overlay>
+         {console.log('rendering the component')}
          <Component></Component>
       </Fragment>
    )
