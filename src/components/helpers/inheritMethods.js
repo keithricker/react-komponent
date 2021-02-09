@@ -1,5 +1,5 @@
 import React from 'react'
-import { Sub,getLevel,tie,ReflecTie,getProp,WeakerMap,getDefinition,contract } from '../helpers/utils'
+import { Standin,getLevel,tie,ReflecTie,getProp,WeakerMap,getDescriptor,contract } from '../helpers/utils'
 import privates from '../Komponent/privateVariables'
 import {combineReducers} from 'redux'
 
@@ -20,7 +20,7 @@ const safe = (ob,prop,binder) => {
 
 export function callIt(obj,func,Bind,...arg) {
    if (typeof func === 'string') {
-      let def = getDefinition(obj,func)
+      let def = getDescriptor(obj,func)
       if (!def) return
       func = def.get || def.value
       if (typeof func !== 'function') return
@@ -81,20 +81,20 @@ export const onSets = {
 }
 
 export function gB(obj,thiss) {
-   return new Sub(thiss,{
+   return new Standin(thiss,{
 
       get: function(ob,prop) {
          if (prop === 'original') {
             let level = proto.get(obj)
-            return new Sub(level,{
+            return new Standin(level,{
                get: function(o,p) {
                   let levl = getLevel(level,lvl => lvl.hasOwnProperty(p)) || level
-                  let bindThiss = new Sub(thiss,{
+                  let bindThiss = new Standin(thiss,{
                      get: function(src,key) {
                         if (key === 'original') {
-                           return new Sub(proto.get(levl),{
+                           return new Standin(proto.get(levl),{
                               get: function(thing,name) {
-                                 let newBnd = new Sub(thiss,{
+                                 let newBnd = new Standin(thiss,{
                                     get: function(ob,prop) {
                                        if (prop === 'original') return bindThiss.original 
                                        let retVal = Reflect.get(thiss,prop,newBnd)
@@ -122,7 +122,7 @@ export function gB(obj,thiss) {
 }
 
 export const getBind = (start,thiz) => {
-   let newProx = new Sub(thiz,{
+   let newProx = new Standin(thiz,{
       get: function(o,p) {
          return thiz[p]
       }

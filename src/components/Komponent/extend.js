@@ -1,18 +1,18 @@
 import React from 'react'
 import KomponentClass from './class'
 import privateVars from './privateVariables'
-import { clone,merge,isClass,lowerFirst,Sub, getLevel, cloneFunc } from '../helpers/utils'
+import { clone,merge,isClass,lowerFirst,Standin, getLevel, cloneFunc } from '../helpers/utils'
 
 const proto = { set: Object.setPrototypeOf, get: Object.getPrototypeOf }
 const rand = privateVars.randomString
 
-const rxProxy = new Sub(React.Component,{ 
+const rxProxy = new Standin(React.Component,{ 
    get: function(ob,prop) { 
       if (prop === 'variant') return 'rxProxy'
       return (prop === 'prototype') ? React.Component.prototype : KomponentClass[prop] 
    },
 })
-const exProxy = (ex) => new Sub(ex,{ 
+const exProxy = (ex) => new Standin(ex,{ 
    get: function(ob,prop) { 
       if (prop === 'variant') return 'exProxy'
       return (prop === 'prototype') ? ex.prototype : (prop in ex) ? ex[prop] : KomponentClass[prop] 

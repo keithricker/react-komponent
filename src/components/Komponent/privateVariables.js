@@ -1,7 +1,7 @@
 Object.defineProperty(exports, "__esModule", {
    value: true
 });
-const { WeakerMap,Sub,randomString} = require('../helpers/utils')
+const { WeakerMap,Standin,randomString} = require('../helpers/utils')
 
 const privateMap = new WeakerMap()
 const privateObj = {
@@ -14,7 +14,7 @@ let defaultVars = () => Object.setPrototypeOf({},{
    }
 })
 
-exports.default = new Sub(privateMap,{
+exports.default = new Standin(privateMap,{
     get: function(ob,prop) { 
        return ob[prop] || privateObj[prop];  
     },

@@ -160,7 +160,7 @@ const Komponent = function (comp) {
 
     const safe = (ob, prop, binder) => {
       const useTarget = !(ob instanceof _utils.Prox && cPHandler.get.hasOwnProperty(prop));
-      let theProp = !useTarget ? ob[prop] : (0, _utils.getDefinition)(ob, prop);
+      let theProp = !useTarget ? ob[prop] : (0, _utils.getDescriptor)(ob, prop);
       if (!theProp) return;
       let def = useTarget ? theProp : undefined;
       if (def) theProp = def.get || def.value;

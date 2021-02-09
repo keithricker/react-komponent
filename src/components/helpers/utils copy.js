@@ -1,12 +1,12 @@
 import React from "react";
 import path from 'path'
-import Obj from './Obj'
 const proto = { get: Object.getPrototypeOf, set: Object.setPrototypeOf };
 const reflectKeys = Reflect.ownKeys(Reflect).concat(["enumerate"]);
-const utilTypes = () => require("util").types || require("util")
-iife = (...arg) => (function() { return arg.shift()(...arg) })(...arg)
-let glbl = suppress(() => window,global)
 
+
+export function isClass(func) {
+  return is.class(func)
+}
 
 function undef(varble) {
   return typeof varble === "undefined";
@@ -14,8 +14,8 @@ function undef(varble) {
 
 export function isURL(url) {
   if (typeof url !== "string") return false;
-  if (!isURL.pattern) isURL.pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-  return isURL.pattern.test(url) ? true : false;
+  var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+  return pattern.test(url) ? true : false;
 }
 
 export function isJSON(data) {
@@ -29,270 +29,110 @@ export function isPromise(res) {
   return typeof res === "object" && res instanceof Promise;
 }
 
-class Problem extends Error() {
-   constructor(...arg) {
-      super(...arg)
-   }
-   get log() {
-      let stackTrace;
-      let stack = new Error().stack;
-      let modified = {}
-      stackTrace = stack.split("\n");
-      if (stackTrace[0].includes("log")) stackTrace.shift();
-
-
-      let re = /(\w+)@|at (\w+) \(/g
-      stackTrace.forEach((st,ind) => {
-         if (!st.trim()) return
-         let find = re.exec(st)
-         if (find) find = find[1] || find[2]
-         if (typeof find !== 'string')
-            return
-          modified[find] = st
-         let url = st.match(isURL.pattern)
-         modified[find] = url ? url[0] : st
-      });
-      return modified
-      /*
-      var callerName;
-      try {
-        throw new Error();
-      } catch (e) {
-        var re = /(\w+)@|at (\w+) \(/g,
-          st = e.stack;
-          var m;
-        re.exec(st); m = re.exec(st)
-        callerName = m[1] || m[2];
-      }
-      console.log(callerName);
-      */
-   }
-}
-
 export const is = (function () {
-   const isHandler = {
-      get props() {
-         return {
-            get promise() {
-               return utilTypes().isPromise || isPromise
-            },
-            get json() {
-               return utilTypes().isJSON || isJSON
-            },
-            get url() {
-               return utilTypes().isURL || isURL
-            },
-            defined(arg) {
-               return utilTypes().isDefined ? utilTypes().isDefined(arg) : typeof arg !== "undefined";
-            },
-            empty(ob) { return (typeof ob === 'undefined') ? undefined : (!utilTypes().length) ? true : false },
-            class(func) {
-               let classText = (str) => str.split(" ")[0] === "class"
-               let funcString = func.toString().toLowerCase()
-               if (classText(funcString)) return true
-               let call = tryCatch(() => func())
-               return (call.message && classText(call.message.toLowerCase())) ? true : false
-            },
-            object(ob) { 
-               let deflt = ob.isObject ? ob.isObject(ob) : typeof ob === 'object'
-               return deflt && !Array.isArray(ob)
-            },
-            instanceOf(ob,...arg) {
-               if (arg.length > 1) {
-                  let op = (['all','some','and','or'].includes(last(arg))) ? last(arg) : 'all'
-                  let res = arg.filter(ar => ob instanceof ar)
-                  if (['all','and'].includes(op)) 
-                     return !!(res.length === arg.length)
-                  if (['some','or'].includes(op))
-                     return !!(res.length)
-               }
-               return ob instanceof arg[0]
-            },
-            equivalent(ob1,ob2,strict=true) {
+  return new Proxy(require("util").types || require("util"), {
+    get(ob, prop) {
+      let props = {
+        get promise() {
+          return ob.isPromise || isPromise;
+        },
+        get json() {
+          return ob.isJSON || isJSON;
+        },
+        get url() {
+          return ob.isURL || isURL;
+        },
+        defined(arg) {
+           return ob.isDefined ? ob.isDefined(arg) : typeof arg !== "undefined";
+        },
+        empty(ob) { return (typeof ob === 'undefined') ? undefined : (!Reflect.ownKeys(ob).length) ? true : false },
+        class(func) {
+           return func.toString().split(" ")[0] === "class";
+        },
+        object(ob) { 
+           let deflt = ob.isObject ? ob.isObject(ob) : typeof ob === 'object'
+           return deflt && !Array.isArray(ob)
+        },
+        instanceOf(ob,...arg) {
+           if (arg.length > 1) {
+              let op = (['all','some','and','or'].includes(arg[arg.length-1])) ? arg[arg.length-1] : 'all'
+              let res = arg.filter(ar => ob instanceof ar)
+              if (['all','and'].includes(op)) 
+                 return !!(res.length === arg.length)
+              if (['some','or'].includes(op))
+                 return !!(res.length)
+           }
+           return ob instanceof arg[0]
+        },
+        equivalent(ob1,ob2) {
+           if (ob1 === ob2) return true
+           if (typeof ob1 !== typeof ob2) return valse
+           let desc = Object.getOwnPropertyDescriptors
+           let toStr = (ob) => JSON.stringify(ob)+JSON.stringify(desc(ob))
+           if (toStr(ob1) !== toStr(ob2)) return false
 
-               if (ob1 == ob2 && typeof ob1 === typeof ob2) return true
-               if (typeof ob1 !== typeof ob2) return false
-               ob1 = Object(ob1); ob2 = Object(ob2)
-               if (Reflect.ownKeys(ob1).length !== Reflect.ownKeys(ob2).length) 
-                  return false
-               if (suppress(() => {  
-                  return ob1.toString() !== ob2.toString() 
-               },true))
-               return false
+           let lvls1 = getLevels(ob1)
+           let lvls2 = getLevels(ob2)
+ 
+           let mismatch = lvls1.some((lvl,ind) => (lvl[ind] === lvls2[ind]) ? false : toStr(lvl) !== toStrlvls2[ind])
+           return (mismatch) ? false : true
+        },
+        descriptor(obj) {
+           if (!obj) return false
+           if (!obj.hasOwnProperty('get') && !obj.hasOwnProperty('value')) return false
+           if (Reflect.ownKeys(obj).length === 1) return true
+           const descProperties = Reflect.ownKeys(Object.getOwnPropertyDescriptor(Object.defineProperty({},'property',{get:()=>{},set:()=>{}}),'property')).concat('value')
+           return Reflect.ownKeys(obj).every(key => descProperties.includes(key))  
+        },
+        numeric(num) { return !isNaN(num) }
+      };
+      let types = ['undefined','object','boolean','number','bingint','string','symbol','function','object']
+      let deflt = (...args) => { let item = (args.length > 1) ? arguments: args[0]; return (typeof ob[prop] === 'function') ? ob[prop](...args) : types.includes(prop) && typeof item === prop }
+      
+      let lcProp = prop.toLowerCase()
+      if (props.hasOwnProperty(lcProp)) return props[lcProp]
 
-               let toStr = (ob) => {
-                  let jsonString = ''                  
-                  Reflect.ownKeys(ob).forEach(key => {
-                     jsonString += key+' '+typeof ob[key]+"\n"
-                  })
-                  if (!strict) return jsonString 
-                  jsonString += JSON.stringify(ob)+JSON.stringify(Object.getOwnPropertyDescriptors(ob))
-                  return jsonString
-               }
-               let stringMatch = toStr(ob1) === toStr(ob2)
-               if (!stringMatch) return false
-
-               let protoMatch = proto.get(ob1) === proto.get(ob2)
-               if (protoMatch) return true
-
-               let lvls1 = getLevels(ob1)
-               let lvls2 = getLevels(ob2)
-               if (lvls1.length !== lvls2.length && strict) return false
-               let names1 = lvls1.strings()
-               let names2 = lvls2.strings()
-               if (JSON.stringify(names1) === JSON.stringify(names2) && !strict) return true
-   
-               let mismatch = lvls1.some((lvl,ind) => toStr(lvl) !== toStr(lvls2[ind]))
-               return (mismatch) ? false : true
-            },
-            descriptor(obj) {
-               if (!obj) return false
-               if (!obj.hasOwnProperty('get') && !obj.hasOwnProperty('value')) return false
-               if (Reflect.ownKeys(obj).length === 1) return true
-               const descProperties = Reflect.ownKeys(Object.getOwnPropertyDescriptor(Object.defineProperty({},'property',{get:()=>{},set:()=>{}}),'property')).concat('value')
-               return Reflect.ownKeys(obj).every(key => descProperties.includes(key))  
-            },
-            descriptors(ob) {
-               return Reflect.ownKeys(ob).every(key => this.descriptor(ob[key]))
-            },
-            numeric(num) { return !isNaN(num) }
-         }
-      },
-      get(ob, prop) {
-        if (prop === '{{handler}}') return isHandler
-
-        let types = ['undefined','object','boolean','number','bingint','string','symbol','function','object']
-        let deflt = (...args) => { let item = (args.length > 1) ? arguments: args[0]; return (typeof ob[prop] === 'function') ? ob[prop](...args) : types.includes(prop) && typeof item === prop }
-        
-        let lcProp = prop.toLowerCase()
-        if (this.props.hasOwnProperty(lcProp)) return this.props[lcProp]
-  
-        let lcProps = {};
-        let mod = (str) => { 
-           str = str.toLowerCase(); let spl = str.split('is'); if (spl[1] && (spl[0] === "")) return str[1] 
-        }
-        Reflect.ownKeys(ob).forEach(key => lcProps[mod(key)] = ob[key])
-        let mprop = mod(prop)
-        return typeof lcProps[mprop] === "function" ? lcProps[mprop] : deflt
+      let lcProps = {};
+      let mod = (str) => { 
+         str = str.toLowerCase(); let spl = str.split('is'); if (spl[1] && (spl[0] === "")) return str[1] 
       }
-   }
-   return mixin(utilTypes(),isHandler)   
+      Reflect.ownKeys(ob).forEach(key => lcProps[mod(key)] = ob[key])
+      let mprop = mod(prop)
+      return typeof lcProps[mprop] === "function" ? lcProps[mprop] : deflt
+    }
+  });
 })();
 
-export function isClass(func) {
-  return is.class(func)
-}
-                    
-let last = (arr) => [...arr].pop()
-
+let and = (...arg) => arg.every(cond => cond)
+let or = (...arg) => arg.some(cond => cond)
 let tryCatch = (exp,cb) => { 
    let res; let err; 
    try { res = exp() } catch(error) { err = error } return cb ? cb(res,err) : err || res
 }
 let suppress = (exp,deflt) => { let res = tryCatch(exp); return res instanceof Error ? deflt : res }
+let last = (arr) => {
+   let obj = tryCatch(() => Object.fromEntries())
+   if (arr.length) return Object.keys()
+}
 
 class Funktion extends Function {
-   constructor(params,func,props={}) {
-
-      let funk = this
-
-      props = arguments[2] || (typeof func === 'object') && func
-      func = (typeof params === 'function') ? params : (typeof func === 'function') ? func : props && props.function
-      if (props) delete props.function
-      params = Array.isArray(params) && params
-      let argsObj = {}
-      let name = props.name || func.name || this.name || 'funktion'
-      delete props.name
-      let newProps
-
-      let newTarget
-      let self
-
-      ['properties','static'].forEach(pr => { 
-         if (pr in props)
-            newProps = newProps ? merge(newProps,props[pr]) : props[pr]
-      })
-      function funktionCaller(fun,...ar) {
-         let proxTrg = newTarget ? self : {}
-         argumentsProx = new Proxy(proxTrg,{ 
-            get(ob,prop) {
-               if (prop in ob) return ob[prop]
-               if (argsObj && argsObj.hasOwnProperty(prop)) return argsObj[prop]
-               if (prop === 'arguments') return [...ar]
-            }
-         })
-         return !newTarget ? fun.call(argumentsProx,...ar) : new fun(argumentsProx,...ar)
+   constructor(func,props) {
+      let funktion
+     
+      let args = [...arguments]
+      let mode = (typeof last(args) === 'string') ? 'Function' : 'Funktion'
+      if (mode === 'Funktion') {
+         props = (args.length === typeof props === 'object')
+         
       }
-      function getArgs(args) {
-
-         params.forEach((par,ind) => {
-            if (typeof par === 'string') {
-               argsObj[par] = args[ind]
-               return
-            }
-            let key = Object.keys(par)[0]
-            argsObj[key] = args.hasOwnProperty(ind) ? args[ind] : argsObj[key]
-         })
-
-         merge(glbl,argsObj,(key,desc) => {
-          let original = glbl[key]
-          var reactKomponentVars = (typeof reactKomponentVars === 'undefined') ? {} : reactKomonentVars || {}
-          if (!reactKomponentVars.stacks) reactKomponentVars.stacks = {}
-  
-          if (!vars(glbl)) vars(glbl,new WeakMap())
-          let windowVars = vars(glbl).set(Funktion,{})
-  
-          let getLog = () => new Problem().log
-          let log = functionCaller(getLog)
-          let stack = log.funktionCaller
-  
-          windowVars[key] = { 
-            [key]: { 
-               funktion: argsObj[key],
-               window: original,
-               stack
-             }
-          }
-          Object.defineProperty(glbl,key,{
-             get() {
-                return function() {
-                   let stack = new Problem().log.functionCaller
-                   return stack ? windowVars[key].funktion : windowVars[key].window
-                }
-             },
-             set(val) { windowVars[key].window = val }
-           })
-         })
-         return argsObj
-      }
+      let superArgs = mode === 'Funktion' ? args : ['func','thiss',`return function ${props.name || this.name}() { 
+         return Array.apply.bind(func)(thiss,Array.from(arguments))
+      }`]
+      funktion = mode === 'Funktion' ? this(func,this) : this
+      merge(funktion,props)
       
-      let funktion = (!is.class(func)) ? {
-         [name]: function(...ar) {
-            self = this
-            let argus = arguments
-            newTarget = new.target
-            if (!params)
-               return funktionCaller(func,...ar)
-            return (!argsObj) ? funktionCaller(func,...argus) : funktionCaller(func,argsObj)     
-         }
-      }[name]
-      : {
-         [name]: class {
-            constructor() {
-               let args
-               if (params)
-                  args = getArgs([...arguments])
-               return Function.apply.bind(func)(funk,args ? [args] : [...arguments])
-            }
-         }[name]
-      }[name]
-      Object.defineProperty(funktion,'name',{writable: false, enumerable: false, configurable: true})
 
-      super()
-      merge(funktion,this,['name'])
-      if (props) merge(funktion,props,['name'])
-      proto.set(funktion,this.constructor.prototype)
-      return funktion
+
    }
 }
 
@@ -341,26 +181,22 @@ export class PrivateVariables extends MapFunc {
          if (!retrieved || arguments[1]) map.set(key,val || def)
          return val || retrieved || def
       })
+      this.default = function(key,val={}) {
+         if (!val instanceof PrivateVars) mixin(val,PrivateVars.prototype)
+         if (!arguments[1] || !newVars.has(key)) {
+            newVars.set(key,val)
+            return val
+         }
+         let retrieved = newVars.get(key)
+         if (retreived === val || is.equivalent(retreived,val)) return retreived
+         if (typeof val === 'object' && typeof retrieved === 'object' && is.array(val) === is.array(retrieved)) {
+            if (is.array(val)) {
+               merge(retrieved,val)
+            } else merge(retrieved,val,(key) => !(key in retrieved))
+         }
+         return retrieved || val
+      }
       return this
-   }
-   default(key,val={}) {
-
-      if (!(val instanceof PrivateVars)) mixin(val,clone(PrivateVars.prototype,false))
-
-      if (!arguments[1] || !this.has(key)) {
-         this.set(key,val)
-         return val
-      }
-      let retrieved = newVars.get(key)
-      
-      if (is.equivalent(retreived,val)) return retreived
-
-      if ((Obj(val).Type === Obj(retreived).type && (Obj(val).Type === 'Array' || Obj(val).type === 'Object'))) {
-         if (is.array(val)) {
-            merge(retrieved,val)
-         } else merge(retrieved,val,(key) => !(key in retrieved))
-      }
-      return retrieved || val
    }
 }
 
@@ -438,169 +274,48 @@ export const dynamicImport = (function() {
   }
 })()
 
-export function mirrorObject(src,trg,bind) {
-   bind = bind || src
-   trg = trg || new Obj(src).Type.class()
-   return merge(trg,src,(key,desc) => {
-      delete desc.value
-      desc.get = function() {
-         return ReflectBind(key,src[key],bind)
+export const boundMixin = (obj,mix,type='proxy',bound,primary,secondary,tertiary) => {
+   bound = bound || obj
+   primary = primary || obj
+   secondary = secondary || proto.get(primary)
+   tertiary = tertiary || mix
+   if (type === 'proxy') {
+      let mixProx = new Proxy(secondary, {
+         get(sec,prop) {
+            let deflt = {}
+            let result = deflt
+            let getResult = (object) => (object === primary ? object.hasOwnProperty(prop) : (prop in object)) ? tie(Reflect.get(object,prop,bound)) : deflt
+            [primary,sec,secondary].some(object => { result = getResult(object); if (result !== deflt) return true })
+            return result === deflt ? undefined : result
+         }
+      });
+      return mixProx
+   }
+   let prox = boundMixin(primary,secondary,tertiary,'object',bound)
+   return merge({},secondary,(prop,desc) => {
+      desc.get = function() { 
+         return prox[prop]
       }
+      desc.set = function(val) { return this[prop] = val }
+      delete desc.value
       return desc
    })
 }
 
-export function mixProx(obj,mix,bound,precedence) {
-   let prec = precedence
-
-   let handler = {
-      get(ob,prop) {
-         let trg =  (prop in prec) && prec || (prop in obj) && obj || (prop in mix) && mix
-         let bnd = bound
-         if (trg === bound) bnd = undefined
-         return bnd ? tie(Reflect.get(trg[prop],bnd),bnd) : trg[prop]
-      }
-   }
-   return new Proxy(obj,handler)
-}
-
-export function reverseInherit(obj,mix) {
-   let newMix = clone(mix,false,(key,desc) => {
-      return {
-         get() {
-         
-            target = (key in obj) ? precedence : (key in mix) ? mix : obj
-            desc.get = function() {
-               return target[key]
-            }
-            if (target === precedence) desc.set = function() {
-               
-            }
-          
-
-            let obs = [precedence,prototype === precedence ? mix : prototype]
-            let owner = obs.find(ob => ob.hasOwnProperty(key))
-            let inheriter = obs.filter(ob => ob !== owner).find(ob => (key in ob))
-            let target = owner || inheriter
-            let bnd = bound
-            let returnThis = (...args) => {
-               if (bound === target) bnd = null
-               if (target !== obj) bnd = bound
-               return args[0] ? tie(Reflect.get(...args),bnd) : undefined
-            }
-            return returnThis(...[target,key,bnd].filter(arg => !!arg))
-         },
-         configurable:true
-      }
-   })
-   return proto.set(obj,proto.set(newMix,proto.get(obj)))
-
-   
-export function mixin(obj,mix,bound,precedence,prox=false) {
-   
-   precedence = precedence || obj
-   let mixType = Obj(mix).Type.class()
-   let objType = Obj(obj).Type.class()
+export function mixin(obj,mix,bound,precedence) {
    let prototype = proto.get(obj)
-
-   if (!precedence) {
-      if ((mix.constructor === Object || obj.constructor === Object) || obj instanceof mixType) {
-         let cloned = clone(mix,false)
-         let last = getLevel(mix,lvl => {
-            target,src,exclude,binder
-            cloned = proto.set(cloned,clone(lvl,false,[],bound))
-            if (proto.get(lvl).constructor === mixType) return true
-         })
-         return proto.set(obj,proto.set(last,proto.get(obj)))
-      }
-   }
-
-   bound = bound || obj
-
-   let clonedProto = mirrorObject(prototype,{},bound)
-      proto.set(clonedProto,new Proxy(proto.get(clonedProto,{
-         get(ob,prop) { return ReflectBind(ob,prop,bound) }
-      })))
-
-
-   let newMix = clone(mix,false,(key,desc) => {
-      delete desc.value
-      desc.get = function() {
-         let trg
-         let isTrg = (tr) => tr === clonedProto ? obj === trg : tr === trg
-         [clonedProto,mix].forEach((target,ind) => {
-            let other = ind === 0 ? clonedProto : mix
-            if ((key in target && (target === precedence || !key in other)))
-               trg = target
-            else trg = other
-         })
-         return ReflectBind(trg,key,!isTrg(bound) && bound)
-      }
-   })
-
-
-
-   if (precedence && precedence !== )
-   mix = mirrorObject()
-
-
-
-
-   if (obj.constructor === mixType || obj.constructor === Object)
-      return proto.set(obj,mix)
-   if (proto.get(mix).constructor && proto.get(mix).constructor.name === Obj(mix).Type
-   && obj instanceof proto.get(mix).constructor && (!bound || bound === obj) && (!precedence || precedence === obj))
-     return proto.set(obj,proto.set(clone(mix),proto.get(obj)))
-   
-     let prototype = proto.get(obj)
-
-   let handler = function(object,property) {
-      let handlr = {
-         get(ob=object,prop=property) { 
-
-
-   if (prox === false) {
-      let mixClone = clone(mix,false,(key,desc,trg) => {
-         delete desc.value
-         desc.get = function() {
-            return handler(obj,key)
-         }
-      })
-      proto.set(obj,proto.set(mixClone,proto.get(obj)))
-   }
-
-   let rand = randomString()
-   let handler = {
-      [rand]:true
-   }; 
-   let mixinProxy = new Proxy(obj,handler)
-
-
-
-   let newMix = clone(mix,false,(key,desc) => {
+   precedence = precedence || mix
+   let newMix = clone(mix,false,[],(key,desc) => {
       return {
          get() {
-            let target
-            if (!bound) {
-               target = (key in precedence) ? precedence : (key in mix) ? mix : obj
-               desc.get = function() {
-                  return target[key]
-               }
-               if (target === precedence) desc.set = function() {
-
-               }
-            }
             let obs = [precedence,prototype === precedence ? mix : prototype]
             let owner = obs.find(ob => ob.hasOwnProperty(key))
             let inheriter = obs.filter(ob => ob !== owner).find(ob => (key in ob))
             let target = owner || inheriter
-            let bnd = bound
             let returnThis = (...args) => {
-               if (bound === target) bnd = null
-               if (target !== obj) bnd = bound
-               return args[0] ? tie(Reflect.get(...args),bnd) : undefined
+               return args[0] ? tie(Reflect.get(...args),bound) : undefined
             }
-            return returnThis(...[target,key,bnd].filter(arg => !!arg))
+            return returnThis(...[target,key,bound].filter(arg => !!arg))
          },
          configurable:true
       }
@@ -688,6 +403,68 @@ export class WeakerMap extends WeakMap {
   }
 }
 
+export const Obj = (function () {
+  const mixins = new WeakMap();
+  let newObj = function Obj(obj) {
+    if (mixins.has(obj)) return mixins.get(obj);
+    let mix = {
+      has(prop) {
+        return this.hasOwnProperty(prop);
+      },
+      get keys() { return Reflect.ownKeys(this) },
+      get type() {
+        return Array.isArray(obj) ? "array" : typeof this;
+      },
+      get size() {
+        return Reflect.ownKeys(this).length;
+      },
+      clear() {
+         this.keys.forEach(key => {
+            try { delete this[key] } catch(err) { console.error(err) }
+         })
+      },
+      forEach(cb) {
+         this.keys.forEach((key,ind) => cb(key,this[key],ind,this))
+      },
+      filter(cb) {
+         let filtered = {}
+         this.keys.forEach((key,ind) => {
+            let res = cb(key,this[key],ind,filtered)
+            if (res === true) filtered[key] = res
+         })
+         return filtered
+      },
+      define(key,val,type) {
+        let isDef = false;
+        if (arguments.length === 2 && is.object(val))
+          isDef = is.descriptor(val)
+        return Object.defineProperty(
+          this,
+          key,
+          isDef ? val : { [type]: val, configurable: true }
+        );
+      },
+      mixin(mix) { return mixin(this,mix) },
+      get is() {
+         function is(obj) {
+            return Object.prototype.is.call(this,obj)
+         }
+      },
+      equivalent(obj) {
+         return is.equivalent(this,obj)
+      },
+      get proto() {
+        return Object.getPrototypeOf(this);
+      },
+      set proto(val) {
+        return Object.setPrototypeOf(this, val);
+      }
+    }
+    mixins.set(obj,mix);
+    return mix;
+  };
+  return newObj;
+})();
 
 export class Handler {
   constructor(original) {
@@ -930,20 +707,21 @@ export function ObjectMap(obMap={}) {
   if (!vars.has(obMap)) 
      initializeVars(obMap)
   
-  // if it's an object, then we set the object's prototype to the map itself
   if (vars(obMap).type === 'object') {
      proto.set(obMap,vars(obMap).map)
      return obMap
-  }
+   }
 
   let map = (ths) => vars(ths).map
   let obj = (ths) => vars(ths).obj
 
+  let mp = Map.prototype
+  
   let mpro = (ths) => {
      if (vars(ths).mpro) return vars(ths).mpro
-     vars(ths).mpro = new Proxy(map(ths),{
+     vars(ths).mpro = new Proxy(mp,{
         get(ob,prop) { 
-           return map(ths)[prop]
+           return Reflect.get(ob,prop,map(ths)).bind(ths)
         }
      })
      return vars(ths).mpro
@@ -952,43 +730,43 @@ export function ObjectMap(obMap={}) {
   const omProto = {
     get(key) { 
       if (!(typeof key === 'string' || typeof key === 'symbol'))
-         key = this.symbolFromKey(this,key)
+          key = this.symbolFromKey(this,key)
       return obj(this)[key]
     },
     set(key,val,alt) {
-       mpro(this).set(key)
-       let obkey = (typeof key === 'string' || typeof key === 'symbol') ? key : new mapKey(obj(this),key,alt)
-       obj(this)[obkey] = val
+      mpro(this).set(key)
+      let obkey = (typeof key === 'string' || typeof key === 'symbol') ? key : new mapKey(obj(this),key,alt)
+      obj(this)[obkey] = val
     },
     delete(key) {
-       mpro(this).delete(key)
-       return delete obj(this)[key]
+      mpro(this).delete(key)
+      return delete obj(this)[key]
     },
     has(key) { 
-       if (!(typeof key === 'string' || typeof key === 'symbol'))
+      if (!(typeof key === 'string' || typeof key === 'symbol'))
           key = this.symbolFromKey(key)
-       return !!obj(this)[key]
+      return !!obj(this)[key]
     },
     clear() {
-       mpro(this).clear()
-       return Obj(obj(this)).clear()
+      mpro(this).clear()
+      return Obj(obj(this)).clear()
     },
     refresh() {
-       mpro(this).forEach((val,key) => { 
+      mpro(this).forEach((val,key) => { 
           if (!obj(this).hasOwnProperty(key)) mpro(this).delete(key)
           mpro(this).set(key,ob(this)[key]) 
-       })
-       let objEnt = Object.entries(obj(this)).filter(([key,val] = ent) => !mpro(this).has(key))
-       objEnt.forEach(([key,val] = ent) => mpro(this).set(key,val))
-     },
-     symbolFromKey(ob,key) {
-        return Reflect.ownKeys(vars(ob).obj).find(key => keys.get(key) === key)
-     },
-     keyFromSymbol(ob,sym) {
-       return keys.get(sym).key
-     }
+      })
+      let objEnt = Object.entries(obj(this)).filter(([key,val] = ent) => !mpro(this).has(key))
+      objEnt.forEach(([key,val] = ent) => mpro(this).set(key,val))
+    },
+    symbolFromKey(ob,key) {
+      return Reflect.ownKeys(vars(ob).obj).find(key => keys.get(key) === key)
+    },
+    keyFromSymbol(ob,sym) {
+      return keys.get(sym).key
+    }
   }
-  // if it's not a map then we have to get creative
+
   if (!(vars(obMap).type === 'map' && vars(obMap).obj !== obMap)) {
     let mixed = mixin(obMap,omProto)
     delete mixed.constructor
@@ -1003,7 +781,7 @@ export function ObjectMap(obMap={}) {
 
 
 const proxInstances = new WeakMap();
-export const Standin = (function () {
+export const Sub = (function () {
   let defaultHandler = (handler) =>
     proto.set(
       {
@@ -1047,12 +825,7 @@ export const Standin = (function () {
         }
       },
       handler
-  );
-  let ownProp
-  const hasProp = (src,prop) => {
-     if (src.hasOwnProperty(prop)) ownProp = true
-     return ownProp || (proto.get(src).hasOwnProperty(prop) && proto.get(src).constructor !== Object)
-  }
+    );
   return new Proxy(Proxy, {
     construct(target, hand = {}, binder) {
       let handler = defaultHandler(hand);
@@ -1184,17 +957,7 @@ export const Standin = (function () {
       proxInstances.set(newProxy, target);
       return newProxy;
     },
-    static: {
-       merge(trg,src,bind) {
-          return new Proxy(trg,{
-             get(ob,prop) {
-                if (hasProp(src) && (ownProp || (!hasProp(trg)))) return ReflectBind(src,prop,trg)
-                if (hasProp(trg) && (ownProp || (!hasProp(src)))) return ReflectBind(trg,prop)
-                return (prop in src) ? ReflectBind(src,prop,trg) : ReflectBind(trg,prop)
-             }
-          }) 
-       } 
-    },
+
     get(obj, prop) {
       if (prop === Symbol.hasInstance) {
         return (instance) => {
@@ -1203,8 +966,7 @@ export const Standin = (function () {
       }
       return Reflect.get(...arguments);
     }
-  }
-  );
+  });
 })();
 
 export const reverseExtend = (comp, pro) => {
@@ -1312,15 +1074,15 @@ export function cloneFunc(func, cb, binder) {
   cloned.prototype = func.prototype;
   const clonedProto = proto.set({}, func);
   ["call", "bind", "apply"].forEach((method) => {
-    let original = tie(Function.prototype[method],cloned);
+    let original = tie(Function.prototype[method], cloned);
     clonedProto[method] = function (...arg) {
-      let bin = binder || this
+      let bin = binder || this;
       binder = arg[0];
       if (method === "bind") {
         let newClone = cloneFunc(func, cb, arg[0]);
-        let newOriginal = tie(Function.prototype.bind,newClone);
+        let newOriginal = tie(Function.prototype.bind, newClone);
         binder = bin;
-        return newOriginal(...arg)
+        return newOriginal(...arg);
       }
       try {
         return original(...arg);
@@ -1334,52 +1096,47 @@ export function cloneFunc(func, cb, binder) {
   return cloned;
 }
 
-export function ReflectBind(ob,prop,binder,bindMethod=tie) {
-   let args = [...arguments]
-   let desc = Object.getOwnPropertyDescriptor(ob,prop)
-   if (!(desc.get || typeof desc.value === 'function'))
-      return ob[prop]
-   if (!binder) args = args.slice(0,2)
-   if (bindMethod !== tie) {
-      if (bindMethod.arguments.length < 2) {
-         bindMethod = bindMethod.call
-      }
-   }
-   return bindMethod(Reflect.get(...args),binder)
+export function ReflectBind(ob, prop, binder) {
+  binder = binder || ob;
+  return bind(Reflect.get(ob, prop, binder), binder);
 }
 
-export function bindProxy(func,binder) {
-   let handler = {
-      apply(a, b, args) {
-        return func.call(binder, ...args);
-      },
-      get(ob,prop) {
-        if (prop === "bind")
-          return function bind(bnd) {
-             return bindProxy(func,bnd)
-          };
-        return ob[prop];
-      }
-   }
-   return new Proxy(func,handler);
+export function ReflecTie(ob, prop, binder) {
+  let returnVal = tie(Reflect.get(ob, prop, binder), binder);
+  if (typeof returnVal !== "function")
+    return function () {
+      return returnVal;
+    };
+  return returnVal;
 }
 
-export function ReflectBindProx(ob,prop,binder) {
-  let returnVal = Reflect.get(ob,prop,binder);
-  if (typeof returnVal !== "function" || is.class(returnVal)) return returnVal;
-  return tieProx(returnVal,binder);
+export function tieProx(func, binder) {
+  return new Proxy(func, {
+    apply(a, b, args) {
+      return func.call(binder, ...args);
+    },
+    get(ob, prop) {
+      if (prop === "bind")
+        return function bind(bnd) {
+          return new tieProx(func, bnd);
+        };
+      return ob[prop];
+    }
+  });
 }
 
-export function defineBind(trg,prop,src,key,binder) {
-   if (is.class(src[key])) return trg
-   let desc = (is.descriptor(src)) && src
-   if (!desc) {
-      src = getLevel(src, (lvl) => lvl.hasOwnProperty(key))
-      desc = Object.getOwnPropertyDescriptor(src, key)
-   }
-   const type = desc.get ? "get" : "value"
-   desc[type] = tie(desc[type],binder);
-   return Object.defineProperty(trg,prop,def);
+export function ReflecTieProx(ob, prop, binder) {
+  let returnVal = Reflect.get(ob, prop, binder);
+  if (typeof returnVal !== "function") return returnVal;
+  return tieProx(returnVal, binder);
+}
+
+export function defineTie(trg, prop, src, key, binder) {
+  src = getLevel(src, (lvl) => lvl.hasOwnProperty(key));
+  const def = Object.getOwnPropertyDescriptor(src, key);
+  const type = def.hasOwnProperty("get") ? "get" : "value";
+  def[type] = tie(def[type], binder);
+  return Object.defineProperty(trg, prop, def);
 }
 
 export function cleanup(comp) {
@@ -1419,7 +1176,7 @@ export function merge(target,src,exclude,binder) {
       try {
          let cbResult
          if (callback) {
-            cbResult = callback(key,desc,target)
+            cbResult = callback(key,desc)
             desc = (cbResult === true) ? desc : cbResult
             if (cbResult instanceof Error || typeof cbResult === 'string') {
                throwThis = cbResult
@@ -1440,36 +1197,34 @@ export function clone(obj, withProto = false, exclude = [], binder) {
   return cloned;
 }
 
-export function getLevel(obj,cb) {
+export function getLevel(obj, cb) {
   let level = obj;
   let success = false;
   if (typeof level === "undefined") return;
   const loop = () => {
-     level = proto.set({}, level);
-     while ((level = proto.get(level))) {
-       if (typeof level === "undefined") return;
-       let result = cb(level)
-       if (result) {
-          success = true;
-          return level
-       }
+    level = proto.set({}, level);
+    while ((level = proto.get(level))) {
+      if (typeof level === "undefined") return;
+      if (cb(level)) {
+        success = true;
+        return level;
+      }
     }
   };
   loop();
   return success ? level : undefined;
 }
 
-function getLevels(ob) {
+export function getLevels(ob) {
    let levels = new Set()
    getLevel(ob,lvl => {
       if (!lvl) return true
       levels.add(lvl.constructor)
    })
-   let lvls = Array.from(levels)
-   lvls.strings = () => lvls.map(lvl => lvl.constructor.name)
+   return Array.from(levels)
 }
 
-export function getDescriptor(obj, prop) {
+export function getDefinition(obj, prop) {
   let level = getLevel(obj, (lvl) => lvl && lvl.hasOwnProperty(prop));
   return level ? Object.getOwnPropertyDescriptor(level, prop) : undefined;
 }
@@ -1479,12 +1234,19 @@ export function descriptorValue(obj, prop) {
   let desc;
   if (arguments.length === 1 && ("get" in obj || "value" in obj)) desc = obj;
   desc = desc || Object.getOwnPropertyDescriptor(obj, prop);
-  return desc.hasOwnProperty("get") ? desc.get : desc.value
+  if (!desc) return;
+  return desc.hasOwnProperty("get") ? desc.get : desc.value;
 }
+
+export const getProp = (obj, prop) => {
+  let desc = getDefinition(obj, prop);
+  if (!desc) return;
+  return desc.hasOwnProperty("get") ? desc.get : desc.value;
+};
 
 export function getNextLevel(lvl, prop) {
   if (!lvl || !prop) return;
-  let current = descriptorValue(getDescriptor(lvl, prop));
+  let current = descriptorValue(getDefinition(lvl, prop));
   if (!current) return;
 
   return getLevel(lvl, (lvl2) => {
@@ -1494,7 +1256,7 @@ export function getNextLevel(lvl, prop) {
 }
 
 export function cloneProxy(obj, handler = {}, binder) {
-  let cloneProx = new Standin(obj, handler, binder);
+  let cloneProx = new Sub(obj, handler, binder);
   const bindIt = (o, pr, bndr = binder) => {
     if (bndr === "cloneProxy") bndr = cloneProx;
     if (!bndr || bndr === o || pr === "constructor") return Reflect.get(o, pr);
@@ -1524,7 +1286,21 @@ export function cloneProxy(obj, handler = {}, binder) {
 }
 
 export function getStackTrace() {
-   return new Propblem().log
+  let stackTrace;
+  let stack;
+  stack = new Error().stack;
+  stackTrace = stack.split("\n");
+  stackTrace.forEach((st, ind) => {
+    let returnVal = st.split("@")[0];
+    if (returnVal.includes(" (")) returnVal = returnVal.split(" (")[0];
+    if (returnVal.includes("    at "))
+      returnVal = returnVal.split("    at ")[1];
+    stackTrace[ind] = returnVal;
+  });
+  stackTrace.shift();
+  stackTrace.pop();
+  if (stackTrace[0].includes("getStackTrace")) stackTrace.shift();
+  return stackTrace.filter((ti) => ti !== "");
 }
 /*
 export function commandLine(command) {
@@ -1543,14 +1319,14 @@ export function commandLine(command) {
 */
 export function safe(ob, type = "get") {
   let props = [];
-  let safeProx = Standin(ob, {
+  let safeProx = Sub(ob, {
     get: function (ob,prop) {
       if (prop !== "done" && prop !== "setVal") props.push(prop);
       ob = ob["{{target}}"] || ob;
       if (prop === "done" || prop === "setVal") {
         return function(val) {
           if (val) {
-             prop = last(props)
+             prop = props[props.length - 1];
              ob[prop] = arguments[0];
           }
           return prop === "done" ? ob : safe(ob[prop]);
@@ -1790,16 +1566,3 @@ export const Module = (function() {
 
   return Module
 })()
-let modExp = module.exports
-
-module.exports = clone(modExp,true,(key,desc,trg) => {
-   let get = desc.get
-   let type = desc.get ? 'get' : 'value'
-   if (type === 'value') delete desc.value
-   desc.get = function() {
-      return modExp[key] || this[key]
-   }
-   desc.set = function(val) {
-      return modExp[key] = val
-   }
-})

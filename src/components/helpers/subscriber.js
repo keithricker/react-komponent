@@ -1,4 +1,4 @@
-    import { toHash } from './utils'
+
     export const oddEven = (num) => num % 2 == 0 ? 'even' : 'odd'
 
     export function subscribeToStore(store,func,selector,trace) {
@@ -16,10 +16,10 @@
         console.error('subscribing to store')
         const unsub = store.subscribe(function() {
 
-            let newSelected = toHash(selector.call(thiss,store.getState()) || {})
+            let newSelected = selector.call(thiss,store.getState()) || {}
             // console.log('NEWSTORE FROM SUBSCRIBE',newStore)
 
-            let oldSelected = subscriptions.get(func) || toHash({})
+            let oldSelected = subscriptions.get(func) || {}
 
             // console.log("NEW STATE from Subscribe",newSelected); console.log("OLD STATE from Subscribe",oldState)
             if (newSelected !== oldSelected) {

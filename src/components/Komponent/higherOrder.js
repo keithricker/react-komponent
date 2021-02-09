@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from "react-dom"
 import KomponentClass from './class'
-import { getLevel,WeakerMap,isClass,cloneProxy,cloneFunc,clone,ReflecTie,lowerFirst,getStackTrace,Sub,getDefinition,Obj,safe } from '../helpers/utils'
+import { getLevel,WeakerMap,isClass,cloneProxy,cloneFunc,clone,ReflecTie,lowerFirst,getStackTrace,Standin,getDescriptor,Obj,safe } from '../helpers/utils'
 import { callIt } from '../helpers/inheritMethods'
 import Connector from './Connector'
 import extend from './extend'
@@ -103,7 +103,7 @@ const Komponent = function(comp) {
       const safe = (ob,prop,binder) => {
 
          const useTarget = !(ob instanceof Prox && cPHandler.get.hasOwnProperty(prop))
-         let theProp = !useTarget ? ob[prop] : getDefinition(ob,prop)
+         let theProp = !useTarget ? ob[prop] : getDescriptor(ob,prop)
          if (!theProp) return
 
          let def = useTarget ? theProp : undefined
@@ -476,7 +476,7 @@ const Komponent = function(comp) {
          },
    
          original(thiss) {
-            return new Sub(thiss,{
+            return new Standin(thiss,{
                get: function(ob,prop) {
                   let privs = privateVars.get(ob)
                   let caller = privs.caller
@@ -526,7 +526,6 @@ const Komponent = function(comp) {
                if (typeof original === 'function' && key !== 'constructor' && !original.defined) {
                   def[type] = cloneFunc(original,function() {
                      let arg = [...arguments]
-                     console.error('calling ',key)
                      let prop = original.bind(cP)
                      let propCall = callIt(obj,prop,cP,...arg) 
                      if ((key === 'mapStateToProps' || key === 'mapDisPatchToProps') && typeof propCall === 'function') {
