@@ -1,14 +1,15 @@
-const is = require('./utilsCompiled').is
-const PrivateVariables = require('./utilsCompiled').PrivateVariables
-const vars = require('./utilsCompiled').vars
-
 const Obj = (function () {
+
+   const mixin = (...arg) => require('./utils').mixin(...arg)
+   const PrivateVariables = (...arg) => new require('./utils').PrivateVariables(...arg)
+   const vars = (...arg) => require('./utils').vars(...arg)
+   const ReflectBind = (...arg) => require('./utils').ReflectBind(...arg)
   
     vars.default(Obj,{ mixins:new PrivateVariables() })
     let iz = is
 
     let newObj = function Obj(obj) {
-
+      obj = Object(obj)
       let mixins = mixins.default(this)
       if (mixins(this)) return mixins(this);
       
@@ -54,16 +55,18 @@ const Obj = (function () {
                }
             },
             size(enumerable=false,symb=false) {
+               let self = this
                if (('size' in this) && !isNaN(this.size)) return this.size
                if (typeof this === 'string') return this.length
-               if (suppress( () => { this = [...this]; return this } ),false) return this.length
-               this = Object(this)
-               this = suppress(() => { 
-                  let res = Object.fromEntries(this)
-                  return res || this
-               },this)
-               return (enumeralbe && symb) ? Reflect.ownKeys(this).length : enumerable ? Object.getOwnPropertyNames(this).length : Object.keys(this).length 
+               if (suppress( () => { self = [...this]; return self } ),false) return this.length
+               self = Object(self)
+               self = suppress(() => { 
+                  let res = Object.fromEntries(self)
+                  return res || self
+               },self)
+               return (enumeralbe && symb) ? Reflect.ownKeys(self).length : enumerable ? Object.getOwnPropertyNames(self).length : Object.keys(self).length 
             },
+  
             clear() {
                Reflect.ownKeys(this).forEach(key => {
                   try { delete this[key] } catch(err) { console.error(err) }
@@ -74,16 +77,18 @@ const Obj = (function () {
             },
             filter(cb) {
                let filtered = {}
-               Reflect.ownKeys(this).forEach((key,ind) => {
+               Reflect.ownKeys(this).forEach(function(key,ind) {
                   let res = cb(key,this[key],ind,filtered)
                   if (res === true) filtered[key] = res
-               })
+               }.bind(this))
                return filtered
             },
-            map(cb) {
+            map(mapped,cb) {
+               cb = cb || mapped
+               mapped = arguments[1] ? mapped : undefined;
                let self = this
                if (proto.get(this).hasOwnProperty('map')) return proto.get(this).map.bind(this)
-               let mapped = new Objthis.Type.class()
+               mapped = new Obj(this).Type.class()
                Reflect.ownKeys(this).forEach((key,ind) => {
                   let res = cb(key,self[key],ind,mapped)
                   let desc = is.descriptor(res) ? res :
@@ -114,10 +119,29 @@ const Obj = (function () {
                })
                return key
             },
-            mixin(mix) { return mixin(this,mix) },
+            mixin(...arg) { 
+               return mixin(this,...arg) 
+            },
+            bind(target) {
+               return new Proxy(this,{
+                  get(ob,prop) { return ReflectBind(ob,prop,target) }
+               })
+            },
+            mirror(trg,bnd) {
+               
+               let bind = (target=trg) => bnd || (target !== bnd) && trg
+               trg = trg || new Obj(src).Type.class()
+               return merge(trg,src,(key,desc) => {
+                  delete desc.value
+                  desc.get = function() {
+                     return ReflectBind(key,src[key],bind)
+                  }
+                  return desc
+               })
+            },
             get is() {
-               function is(this) {
-                  return Object.prototype.is.call(this,this)
+               function is(obj) {
+                  return Object.prototype.is.call(obj,this)
                }
                [iz['{{handler}}'],utilTypes()].forEach(ob => {
                   Obj(ob).forEach((key,val) => {
@@ -127,8 +151,8 @@ const Obj = (function () {
                })
                return is
             },
-            equivalent(this) {
-               return iz.equivalent(this,this)
+            equivalent(obj) {
+               return iz.equivalent(obj,this)
             },
             get proto() {
                return Object.getPrototypeOf(this);
@@ -137,6 +161,7 @@ const Obj = (function () {
                return Object.setPrototypeOf(this, val);
             }
          }
+         return mix
 
       }.bind(obj)()
       mixins.set(obj,mix)
@@ -145,7 +170,4 @@ const Obj = (function () {
     return newObj
 })()
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports,'default',{get:function() { return is }})
+Object.defineProperty(module,'exports',{get:function() { return Obj }})

@@ -1,27 +1,9 @@
 var path = require('path');
 var fs = require('fs')
-require('jsdom-global')()
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom
 const { contract, asyncForEach } = require('../src/components/helpers/utilsCompiled');
 const { sequence,mixin } = require('react-komponent/src/components/helpers/utilsCompiled');
 const socketClient = path.resolve('../')+'/node_modules/socket.io-client/dist/socket.io.min.js'
-
-class mySDOM extends JSDOM {
-   constructor(...arg) {
-      super(...arg)
-   }
-   elements() { return  }
-   tags(name) { return this.window.document.getElementsByTagName(name) }
-   tag(name) { return this.tags(name)[0] }
-   html() { return this.tag('html').outerHTML }
-   newTag(type,inner,appendTo) { let newEl = this.window.document.createElement(type); newEl.innerHTML = inner; appendTo.appendChild(newEl)  }
-   setHtml(HTML) { let newJdom = typeof HTML === 'object' ? HTML : new mySDOM(HTML); this.tag('html').innerHTML = newJdom(HTML).tag('html').innerHTML; return true }
-   setTag(name,val) { return this.tag(name).innerHTML = val }
-   query(search) { return this.window.document.querySelector(search) }
-   queryAll(search) { return this.window.document.querySelectorAll(search) }
-}
-delete mySDOM.prototype.constructor
+const DOM = require('../src/components/helpers/DOM')
 
 function ReactServerHTMLPlugin(options={}) {
    let self = this
@@ -137,7 +119,7 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
          return sequence(
             () => {
                if (constructorCallbacks && constructorCallbacks.length) {
-                  return addHooks('constructor',new mySDOM(html))
+                  return addHooks('constructor',new DOM(html))
                }
             },
             (jsd) => { if (jsd) html = jsd.html(); return html },
@@ -156,14 +138,14 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
          if (!(renderCallbacks && renderCallbacks.length))
             return complete()
 
-         let newDom = new mySDOM(HTML)
+         let newDom = new DOM(HTML)
          return contract(addHooks('render',newDom),(res) => { 
             HTML = res.html()
             return complete() 
          })
 
          function complete() {
-            dom = new mySDOM(HTML,jsdOptions)
+            dom = new DOM(HTML,jsdOptions)
             doc = dom.window.document
             return dom
          }
@@ -225,7 +207,7 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
       }
 
       function finishUp(jdom=dom) {
-         let htmlJsd = new mySDOM(html)
+         let htmlJsd = new DOM(html)
 
          htmlJsd.query('#root').innerHTML = jdom.query('#root').innerHTML
       

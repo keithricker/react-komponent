@@ -1,26 +1,34 @@
 const path = require('path')
-const fs = require(fs)
-const fallback = (path) => fs.existSync(path) ? path :  
-const webpack = require(process.cwd()+'/node_modules/webpack')
+const fs = require(fs) 
+let webpack = require(process.cwd()+'/node_modules/webpack') || require("webpack")
 const ReactServerHTMLPlugin = require("react-komponent/config/react-server-html")
 const MiniCssExtractPlugin = require(process.cwd()+'/node_modules/mini-css-extract-plugin')
-const { is } = require("react-komponent/src/components/helpers/utils")
 
 
 exports.webpack = function webpackCompiler(custom,cb) {
 
    // commandLine(`rm -r ./dist/*`)
+   let config
+   if (!custom.config && !custom.overrides && config.entry) {
+      config = custom; custom = undefined
+   }
+   else config = custom.config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
+
    Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
-   let config = custom.config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
-   if (is)
    let SSR = custom.SSR
-   let server = SSR.server
+   let server = SSR && SSR.server
    let overrides = custom.overrides || {}
+   let If = (exp,more) => { 
+      if (!(more) && typeof exp === 'function') {
+         let cb = (res) => res || undefined
+         try { return exp(cb) } catch { return undefined }
+      }
+      return exp ? more(exp) : undefined 
+   }
 
-   if (SSR.enabled) {
-
-      overrides.output.path = overrides.output.path || path.resolve('./dist')
-      const getHost = (url) => url.split('://')[1].split(':')[0]
+   if (SSR && SSR.enabled) {
+      overrides.output.path = path.resolve(process.cwd(),overrides.output.path || './dist')
+      const getHost = (url) => If(/:\/\/([^ ^:]*)/.exec(url),(res) => res[1])
       
       let address = server && server.address()
       if (address) {
@@ -34,7 +42,7 @@ exports.webpack = function webpackCompiler(custom,cb) {
    }
    config.module = config.module || {}
    config.plugins = config.plugins.concat(overrides.plugins || [])
-   config.output.path = overrides.outputPath || SSR && path.resolve(SSR.appRoot) || path.resolve('./build')
+   config.output.path = overrides.outputPath || SSR && path.resolve(SSR.appRoot) 
    config.mode = overrides.mode || 'development'
    config.optimization.minimize = overrides.minimize || false
    config.module.rules = overrides.moduleRules || config.module.rules

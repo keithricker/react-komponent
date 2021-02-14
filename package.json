@@ -49,6 +49,7 @@
     "@babel/plugin-transform-react-jsx": "^7.12.5",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.5",
+    "browser-es-module-loader": "^0.4.1",
     "child_process": "^1.0.2",
     "express": "^4.17.1",
     "ip": "^1.1.5",
