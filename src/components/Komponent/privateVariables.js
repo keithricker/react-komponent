@@ -1,31 +1,35 @@
 Object.defineProperty(exports, "__esModule", {
    value: true
 });
-const { WeakerMap,Standin,randomString} = require('../helpers/utils')
+const { randomString } = require('../helpers/utils')
 
-const privateMap = new WeakerMap()
-const privateObj = {
-    randomString: randomString()
-}
-let defaultVars = () => Object.setPrototypeOf({},{
-   getSet(key,value) {  
-       if (!this.hasOwnProperty(key)) this[key] = value
-       return this[key]
-   }
-})
+const privs = new WeakMap();
+const random = randomString()
+const privateMap = function(obj,properties) {
+   if (!privs.has(obj)) return privateMap.get(...arguments)
+   if (!arguments.hasOwnProperty(1)) return privs.get(obj)
+   return privs.set(...arguments)
+ }
+ Reflect.ownKeys(WeakMap.prototype).forEach(key => {
+   privateMap[key] = typeof WeakMap.prototype[key] === 'function' ? WeakMap.prototype[key].bind(privs) : WeakMap.prototype[key]
+ })
+ privateMap.get = function(obj,properties) {
+   let def = {}
+   let props = () => arguments.hasOwnProperty(1) 
+   if (!props() && privs.has(obj)) return privs.get(obj)
+   if (!privs.has(obj)) privateMap.set(obj, props() ? properties : def)
+   return props() ? properties : def
+ }
+ privateMap.set = function(obj,props) {
+   if (!privs.has(obj)) privs.set(obj,new Proxy({},{
+     get(ob,prop) { 
+        return prop === 'randomString' ? random : (prop in props) ? props[prop] : undefined 
+     },
+     set(ob,prop,val) { 
+        return props[prop] = val
+     }
+   }))
+   else privs.set(obj,props)
+ }
 
-exports.default = new Standin(privateMap,{
-    get: function(ob,prop) { 
-       return ob[prop] || privateObj[prop];  
-    },
-    set: function(ob,prop,val) {
-       if ((prop in privateMap)) throw new Error('Property name '+prop+' is reserved. Try a different name for your variable.')
-       privateObj[prop] = val; return true 
-    },
-    apply: function(a,b,props) {
-       let obj = props[0]; let val = props[1]; let def = defaultVars();
-       if (!privateMap.has(obj)) privateMap.set(obj,def) 
-       if (props.hasOwnProperty(1)) privateMap.set(obj,val)
-       return privateMap.get(obj)
-    }
-})
+ exports.default = privateMap

@@ -1,7 +1,7 @@
 export default function DOM(...arg) {
     const Global = suppress(() => window,global)
     require('jsdom-global')()
-    const jsdom = require("jsdom");
+    const jsdom = require("jsdom")
     const { JSDOM } = jsdom
     class DOM extends JSDOM {
        constructor(...arg) {

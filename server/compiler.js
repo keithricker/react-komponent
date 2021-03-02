@@ -8,11 +8,11 @@ const MiniCssExtractPlugin = require(process.cwd()+'/node_modules/mini-css-extra
 exports.webpack = function webpackCompiler(custom,cb) {
 
    // commandLine(`rm -r ./dist/*`)
-   let config
-   if (!custom.config && !custom.overrides && config.entry) {
+   let config = custom && custom.config
+   if (!custom.config && !custom.overrides && custom.entry) {
       config = custom; custom = undefined
    }
-   else config = custom.config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
+   config = config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
 
    Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
    let SSR = custom.SSR
@@ -40,9 +40,12 @@ exports.webpack = function webpackCompiler(custom,cb) {
       SSR.host = SSR.host || custom.url ? getHost(custom.url) : 'localhost'
       config.plugins.push(new ReactServerHTMLPlugin(SSR))
    }
+   if (typeof config.entry === 'string') config.entry = path.resolve(process.pwd(),config.entry)
+   else if (Array.isArray(config.entry)) config.entry = config.entry.map(ent => path.resolve(process.pwd(),ent))
+   else if (typeof entry === 'object') Object.keys(entry).forEach(key => config.entry[key] = path.resolve(process.pwd(),config.entry[key]))
    config.module = config.module || {}
    config.plugins = config.plugins.concat(overrides.plugins || [])
-   config.output.path = overrides.outputPath || SSR && path.resolve(SSR.appRoot) 
+   config.output.path = path.resolve(process.pwd(),overrides.outputPath) || SSR && path.resolve(SSR.appRoot) 
    config.mode = overrides.mode || 'development'
    config.optimization.minimize = overrides.minimize || false
    config.module.rules = overrides.moduleRules || config.module.rules
