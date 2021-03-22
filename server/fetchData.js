@@ -1,10 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-const theDirectory = path.resolve(__dirname)
-const modulePath = path.resolve(theDirectory,'../')
-const { is } = require('../src/components/helpers/utilsCompiled.js')
+const { isURL,isJSON } = require('../src/components/helpers/utilsCompiled.js')
 const https = require('https')
-const requireFromString = require('require-from-string')
 const appRoot = process.cwd()
 
 function fetchRemote(remote,cb) {
@@ -37,7 +34,7 @@ module.exports = fetchData
 
 async function fetchData(customData,as="object") {
    let parsedData
-   if (typeof customData === 'string' && is.url(customData)) {
+   if (typeof customData === 'string' && isURL(customData)) {
       customData = await fetchRemote(customData)
       customData = await fetchData(customData,as)
    }
@@ -55,12 +52,14 @@ async function fetchData(customData,as="object") {
 
       return customData
    }
-   if (is.json(customData))
+   if (isJSON(customData))
       return (as === 'object') ? JSON.parse(customData) : customData
 
    let format = customData.split('.').pop()
    // module as a js file must include a default export
    if (format === 'js') {
+      if (isURL(arguments[0]))
+         return customData
       let dataPath = path.resolve(appRoot,customData)
       let data = require(dataPath)
       let fetched = await fetchData(data,as)

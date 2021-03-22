@@ -1,9 +1,6 @@
 import {boundProperties} from './Obj'
-
 let or = (thing,...conditions) => conditions.some(cond => thing === cond)
-let _typeof = (ob) => window[({}).toString.call(ob).split('[object ')[1].split("]")[0]]
 
- 
  function entries(obj) {
    return Reflect.ownKeys(obj).map(key => {
       let ent = [key,'']; Object.defineProperty(ent,1,Object.getOwnPropertyDescriptor(obj,key))
@@ -21,7 +18,7 @@ let _typeof = (ob) => window[({}).toString.call(ob).split('[object ')[1].split("
  _typeof.class = (ob) => _global[_typeof(ob)]
 
  
- const _Map = (function() {
+ let _Map = (function() {
    let keyz = vars(_Map).keys = new WeakMap()
    function keys(ob) {
       if (!keyz.has(ob)) {
@@ -150,7 +147,6 @@ let _typeof = (ob) => window[({}).toString.call(ob).split('[object ')[1].split("
        asObject(prototype = Object.prototype) {
           if (!priv(this).newTarget) return priv(this).object
           let constructor = prototype.constructor
-          if (constructor !== Object) 
           let obj = constructor === Object ? {} : undefined
           if (!obj) {
             let pro = Object.create(constructor.prototype); let curr = pro
@@ -203,7 +199,7 @@ let _typeof = (ob) => window[({}).toString.call(ob).split('[object ')[1].split("
        }  
     }
     let map = _Map
-    let _Map = function(...arg) {
+    _Map = function(...arg) {
         let newMap = new map(...arg)
         priv(newMap).newTarget = new.target
     };

@@ -1,38 +1,55 @@
-export default function DOM(...arg) {
-    const Global = suppress(() => window,global)
-    require('jsdom-global')()
+let _global
+try { _global = global } catch { global = window }
+
+const DOM = module.exports = function DOM(...arg) {
+    // require('jsdom-global')()
     const jsdom = require("jsdom")
     const { JSDOM } = jsdom
     class DOM extends JSDOM {
        constructor(...arg) {
+          if (!arg[1]) arg[1] = { runScripts: "dangerously" }
+          if (!arg[0]) arg[0] = `<!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <title></title>
+          </head>
+          <body>
+          </body>
+          </html>`
           super(...arg)
           let self = this
-          if (!arg.length) {
-            const docHandler = {
-               get(ob,prop,prox) {
-                  if (prop === '{{target}}') return ob
-                  let match = (/^{{(.*)}}$/.exec(prop))
-                  if (match && match[1]) {
-                     prop = match[1]
-                     ob = self
-                  }
-                  if (prop === 'window') return new Proxy(window,{
-                     get(ob,prop) { 
-                        if (prop === 'document') return prox
-                        return ob[prop] 
-                     }
-                  })
-                  if (prop in self) {
-                     if (this.hasOwnProperty(prop))
-                        return self[prop]
-                     return typeof self[prop] === 'function' ? self[prop].bind(ob) : self[prop]
-                  }
-                  return ob[prop]
+          let env = (_global.document && _global.document.constructor.name === 'HTMLDocument') ? 'web' : 'node'
+          let _window = (arguments.length || env === 'node') ? self.window : window
+          let _document = _window.document
+         
+          const docHandler = {
+            get(ob,prop,prox) {
+               if (prop === '{{target}}') return ob
+               let match = (/^{{(.*)}}$/.exec(prop))
+               if (match && match[1]) {
+                  prop = match[1]
+                  ob = self
                }
+               if (prop === 'window') return new Proxy(_window,{
+                  get(obj,key) { 
+                     if (key === 'document') return prox
+                     if (key in obj) return obj[key]
+                     if (key in self) return prox[key] 
+                  }
+               })
+               if (ob.hasOwnProperty(prop))
+                  return ob[prop]
+               if (prop in DOM.prototype)
+                  return typeof self[prop] === 'function' ? self[prop].bind(self) : self[prop]
+               if (prop in self) return self[prop]
+               let elem = ob.getElementsByTagName(prop) 
+               if (elem && elem.length === 1) elem = elem[0]
+               if (typeof elem !== 'undefined') return elem
             }
-            let docProx = new Proxy(window.document,docHandler)
-            return docProx
-          }
+         }
+         let docProx = new Proxy(_document,docHandler)
+         return docProx
        }
        elements(key,val) {
           if (key === 'class') return this.getElementsByClassName(key)
@@ -70,21 +87,21 @@ export default function DOM(...arg) {
          let pattern2 = `([^ ]*)=(?:["|'])([^ ]*?)["|']`
          */
          
-         newEl = newEl || self.window.document.createElement(type)
+         newEl = newEl || this.window.document.createElement(type)
          if (attributes)
             Object.keys(attributes).forEach(key => newEl.setAttribute(key,attributes[key])) 
          if (appendTo) appendTo.appendChild(newEl)
          
-         simpleMixin(newEl,{ set(...arg) { this.setAttribute(...arg); return this } })
+         Object.setPrototypeOf(newEl,Object.setPrototypeOf({ set(...arg) { this.setAttribute(...arg); return this } },Object.getPrototypeOf(newEl)))
          return newEl  
        }
        tags(name) { return this.getElementsByTagName(name) }
        tag(name) {
-         return self.tags(name)[0]
+         return this.tags(name)[0]
        }
        html(html) { 
            if (!html) {
-             let prop = (this === window.document) ? 'outerHTML' : 'innerHTML'  
+             let prop = (_global.document && this === _global.document) ? 'outerHTML' : 'innerHTML'  
              this.getElementsByTagName('html')[prop] = html
              return this.tag('html').outerHTML
            }
@@ -100,3 +117,4 @@ export default function DOM(...arg) {
     }
     return new DOM(...arg)
 }
+DOM.default = DOM

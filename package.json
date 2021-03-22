@@ -49,8 +49,10 @@
     "@babel/plugin-transform-react-jsx": "^7.12.5",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.5",
+    "@babel/standalone": "^7.13.11",
     "browser-es-module-loader": "^0.4.1",
     "child_process": "^1.0.2",
+    "esprima": "^4.0.1",
     "express": "^4.17.1",
     "ip": "^1.1.5",
     "jsdom": "^16.4.0",
@@ -65,7 +67,9 @@
     "require-from-string": "^2.0.2",
     "reselect": "^4.0.0",
     "socket.io": "^3.1.0",
-    "socket.io-client": "^3.1.0"
+    "socket.io-client": "^3.1.0",
+    "webpack": "^5.27.0",
+    "webpack-node-externals": "^2.5.2"
   },
   "deprecated": false,
   "description": "",

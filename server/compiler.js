@@ -1,23 +1,30 @@
-const path = require('path')
-const fs = require(fs) 
-let webpack = require(process.cwd()+'/node_modules/webpack') || require("webpack")
+const nodeEnv = process.env.NODE_ENV || 'production'
+Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true,enumerable:true,configurable:true})
 const ReactServerHTMLPlugin = require("react-komponent/config/react-server-html")
 const MiniCssExtractPlugin = require(process.cwd()+'/node_modules/mini-css-extract-plugin')
 
 
 exports.webpack = function webpackCompiler(custom,cb) {
 
-   // commandLine(`rm -r ./dist/*`)
+   let path = require('path')
    let config = custom && custom.config
+   let isDefault = false
    if (!custom.config && !custom.overrides && custom.entry) {
-      config = custom; custom = undefined
+      config = custom; custom = {config}
    }
-   config = config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
+   let webpack = require("webpack")
+   if (!config) {
+      config = require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
+      isDefault = true
+   }
+   if (custom && !custom.config) custom.config = config
+   else if (!custom) custom = {config}
 
    Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
    let SSR = custom.SSR
    let server = SSR && SSR.server
    let overrides = custom.overrides || {}
+
    let If = (exp,more) => { 
       if (!(more) && typeof exp === 'function') {
          let cb = (res) => res || undefined
@@ -27,6 +34,7 @@ exports.webpack = function webpackCompiler(custom,cb) {
    }
 
    if (SSR && SSR.enabled) {
+      const path = require('path')
       overrides.output.path = path.resolve(process.cwd(),overrides.output.path || './dist')
       const getHost = (url) => If(/:\/\/([^ ^:]*)/.exec(url),(res) => res[1])
       
@@ -40,14 +48,19 @@ exports.webpack = function webpackCompiler(custom,cb) {
       SSR.host = SSR.host || custom.url ? getHost(custom.url) : 'localhost'
       config.plugins.push(new ReactServerHTMLPlugin(SSR))
    }
-   if (typeof config.entry === 'string') config.entry = path.resolve(process.pwd(),config.entry)
-   else if (Array.isArray(config.entry)) config.entry = config.entry.map(ent => path.resolve(process.pwd(),ent))
-   else if (typeof entry === 'object') Object.keys(entry).forEach(key => config.entry[key] = path.resolve(process.pwd(),config.entry[key]))
+   config.entry = overrides.entry || config.entry
+   if (typeof config.entry === 'string') config.entry = path.resolve(process.cwd(),config.entry)
+   else if (Array.isArray(config.entry)) config.entry = config.entry.map(ent => path.resolve(process.cwd(),ent))
+   else if (typeof entry === 'object') Object.keys(entry).forEach(key => config.entry[key] = path.resolve(process.cwd(),config.entry[key]))
    config.module = config.module || {}
+   overrides.optimization = overrides.optimization || {}
    config.plugins = config.plugins.concat(overrides.plugins || [])
-   config.output.path = path.resolve(process.pwd(),overrides.outputPath) || SSR && path.resolve(SSR.appRoot) 
+   config.output.path = SSR ? path.resolve(SSR.appRoot) : overrides.output.path || 'dist'  
+   if (overrides.output) config.output = Object.assign(config.output,overrides.output)
+   
    config.mode = overrides.mode || 'development'
-   config.optimization.minimize = overrides.minimize || false
+   config.optimization.minimize = false
+   config.optimization = Object.assign(config.optimization,overrides.optimization)
    config.module.rules = overrides.moduleRules || config.module.rules
    config.module.rules.forEach((rule,ind) => {
       if (rule.oneOf) {
@@ -57,11 +70,29 @@ exports.webpack = function webpackCompiler(custom,cb) {
          })
       }
    })
+   if (isDefault) config.node = { global: true, __filename: true, __dirname: true }
+   config.node = overrides.node || config.node
+   config.target = overrides.target || config.target || 'web'
+   if (!config.resolve && overrides.resolve) 
+     config.resolve = overrides.resolve 
+   else if (config.resolve && overrides.resolve) {
+      let resmods
+      if (config.resolve.modules && overrides.resolve.modules) 
+        resmods = [...config.resolve.modules,...overrides.resolve.modules]
+      config.resolve = {...config.resolve,...overrides.resolve,modules:resmods}
+   }
+   delete config.output.jsonpFunction
+   delete config.output.futureEmitAssets
+
+   console.log('config',config)
+   console.log('overrides',overrides)
+
+   Reflect.ownKeys(overrides).forEach(key => { if (typeof config[key] === 'undefined') config[key] = overrides[key] })
    let callback = function(...arg) { 
       if (!cb) cb = (err, stats) => { if (err) console.error(err) }
       let ran = cb(...arg)
       Object.defineProperty(process.env,'NODE_ENV',{value: nodeEnv || 'development',writable:true})
       return ran
    }
-   return webpack(config).run(callback(err,stats))
+   return webpack(config).run(callback)
 }

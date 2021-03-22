@@ -1,11 +1,84 @@
-import { merge, clone, bindIt, _typeof, merge,MapFunc } from "./newUtils";
+const priv = require("../Komponent/privateVariables");
 
-let priv = new MapFunc(new WeakMap())
+const clone = (...args) => require("./utils").clone(...args);
+const merge = (trg, src, ex = [], bind) => {
+  let descs = {};
+  if (!src) return trg;
+  Reflect.ownKeys(src)
+    .filter((key) => !ex.includes(key))
+    .forEach((key) => {
+      let desc = Object.getOwnPropertyDescriptor(src, key);
+      if (bind) {
+        let originalDesc = { ...desc };
+        if (typeof desc.value === "function")
+          desc.value = desc.value.bind(bind);
+        if (typeof desc.get === "function") {
+          desc.get = function () {
+            let res;
+            try {
+              res = originalDesc.call(bind);
+            } catch {
+              try {
+                res = originalDesc.get.call(this);
+              } catch {
+                res = originalDesc.get.call(src);
+              }
+            }
+            return typeof res === "function" ? res.bind(bind) : res;
+          };
+        }
+      }
+      descs[key] = desc;
+    });
+  Object.defineProperties(trg, descs);
+  return trg;
+};
+const bindIt = function (ob, prop, bind) {
+  let desc;
+  if (Object(ob) !== ob) return ob;
+  if (arguments.length < 3) {
+    if (arguments.length === 1) {
+      desc = { value: ob };
+      ob = undefined;
+    } else if (prop && typeof prop !== "string" && typeof prop !== "symbol") {
+      bind = prop;
+      desc = { value: ob };
+      ob = undefined;
+      prop === undefined;
+    }
+  }
+  if (prop && ob && !(prop in ob)) return ob[prop];
+  desc =
+    desc ||
+    (function () {
+      desc = Object.getOwnPropertyDescriptor(ob, prop);
+      if (desc) return desc;
+      let trg = Object.setPrototypeOf({}, ob);
+      while ((trg = Object.getPrototypeOf(trg))) {
+        if (trg.hasOwnProperty(prop))
+          desc = Object.getOwnPropertyDescriptor(trg, prop);
+      }
+      return desc;
+    })();
+  if (bind) {
+    let type = Array("value", "get").find(
+      (type) => typeof desc[type] === "function" && prop !== "constructor"
+    );
+    if (type) desc[type] = desc[type].bind(bind);
+  }
+  if (desc.value) return desc.value;
+  let result = ob ? desc.get.call(ob) : desc.get();
+  return bind && typeof result === "function" && prop !== "constructor"
+    ? result.bind(bind)
+    : result;
+};
 
-const _Proxy = (function() {
+const _Proxy = (function () {
   class _Proxy {
     constructor(...argus) {
-      let [target,handler] = argus
+      priv(this).newTarget = true;
+      let self = this;
+      let [target, handler = undefined] = argus;
       let options =
         arguments.length === 1
           ? target
@@ -15,8 +88,27 @@ const _Proxy = (function() {
             };
       if (!options.target) return;
       options.actions = options.actions || [];
-      handler = options.handler = options.handler || {};
-      
+      handler = options.handler || {};
+      if (!options.handler) {
+        Object.defineProperty(options, "handler", {
+          get() {
+            return handler;
+          },
+          set(hand) {
+            merge(handler, hand);
+            merge(self.properties, hander, Reflect.ownKeys(self.properties));
+            return !!Object.defineProperty(this, "handler", {
+              value: handler,
+              configurable: true,
+              enumerable: true,
+              writable: true
+            });
+          },
+          enumerable: true,
+          configurable: true
+        });
+      }
+
       let opt = options;
       let newProx = new Proxy(opt.target, this);
       if (opt.clone) {
@@ -24,87 +116,135 @@ const _Proxy = (function() {
         opt.virtualTarget = opt.clone;
         opt.bind = opt.clone;
       }
-      let handlerProps = opt.properties || {}
+      let handlerProps = opt.properties || {};
+      opt.newTarget = true;
       priv.set(this, opt);
       if (opt.bind === opt.target) delete opt.bind;
 
-      this.properties = {
+      let defaultDefaults = merge({}, Reflect);
+      let theProperties = {
         get(ob, prop, prox) {
           let original = ob;
-          ob = arguments[0] = opt.target;
-          prox = opt.bind || prox;
+          ob = ob !== opt.target ? ob : opt.virtualTarget || opt.target;
+          prox = prox !== newProx ? prox : opt.bind || opt.clone || prox;
+
           let args = [ob, prop, prox];
           let properties =
             typeof opt.properties === "function"
               ? opt.properties(...args)
               : opt.properties;
           let alternate = ob === opt.primary ? opt.alternate : ob;
-    
           let result,
             results = [];
-          let getResult = opt.handler.get
-            ? opt.handler.get(...args)
-            : Reflect.get(ob, prop, prox);
+          let getResult =
+            opt.handler && opt.handler.get
+              ? opt.handler.get(...args)
+              : Reflect.get(ob, prop, prox);
           if (properties && prop in properties)
             results.push([properties, prop, prox]);
           if (properties && properties.default)
             results.push([properties.default(...args)]);
           results.push([getResult]);
           if (alternate) results.push([alternate, prop, prox]);
-    
+
           results.some((res) => {
-            result = this.getProp(...res);
+            result = self.getProp(...res);
             if (typeof result !== "undefined") return true;
           });
-          return typeof result !== "undefined"
-            ? result
-            : prop in Object.getPrototypeOf(this)
-            ? this[prop]
-            : undefined;
+
+          result =
+            typeof result !== "undefined"
+              ? result
+              : prop in Object.getPrototypeOf(this)
+              ? this[prop]
+              : undefined;
+
+          return result;
         },
         get properties() {
-          return function(ob,prop,bind) {
-            if (typeof opt.properties === "function")
-              return opt.properties(...arguments);
-            let result = Reflect.get(opt.properties,prop,bind)
-            return ((typeof result === 'function') && bind !== newProx) ? result.bind(bind) : result
-          }      
+          let opt = priv.get(this);
+          let result;
+          if (
+            typeof opt.properties !== "object" &&
+            typeof opt.properties !== "function"
+          )
+            return {};
+          return function (ob, prop, bind) {
+            ob = ob !== opt.target ? ob : opt.clone || opt.virtualTarget || ob;
+            bind = bind !== newProx ? bind : opt.bind || opt.clone;
+
+            if (typeof opt.properties === "object")
+              return bindIt(Reflect.get(opt.properties, prop, ob), bind);
+            else return bindIt(opt.properties.call(opt, ob, prop, bind), bind);
+          };
         },
-        set(ob,prop,val) {
-          let desc = Object.getOwnPropertyDescriptor(this.properties,prop)
-          if (desc && desc.set === 'function') return this.properties[prop] === val
-          return ob[prop] = val
+        set(ob, prop, val) {
+          let opt = priv.get(self);
+          if (!Reflect.isExtensible(opt.target)) return true;
+          if (Reflect.hasOwnProperty(opt.target, prop)) {
+            let desc = Object.getOwnPropertyDescriptor(opt.target, prop);
+            if (desc.configurable === false && desc.writable === false)
+              return true;
+          }
+          if (opt.virtualTarget) ob = opt.virtualTarget;
+          let desc = Object.getOwnPropertyDescriptor(this.properties, prop);
+          if (desc && desc.set === "function")
+            return this.properties[prop] === val;
+          return opt.handler.set
+            ? !!opt.handler.set(ob, prop, val)
+            : !!(ob[prop] = val);
         },
         has(ob, prop) {
-          let opt = priv.get(this);
-          if (opt.clone) return prop in opt.clone;
+          let opt = priv.get(self);
           let vTarget = opt.virtualTarget;
-          if (!Reflect.isExtensible(ob)) return Reflect.has(ob);
+          if (!Reflect.isExtensible(opt.target)) return Reflect.has(opt.target);
           if (vTarget) ob = vTarget;
           else return Reflect.has(ob, prop);
           let desc = Object.getOwnPropertyDescriptor(ob, prop);
           if (desc && desc.configurable === false) return true;
           return Reflect.has(vTarget, prop);
         },
-        ownKeys = function(ob) {
-          let opt = priv.get(this);
-          if (opt.clone) return Reflect.ownKeys(opt.clone);
-          let keys = Reflect.ownKeys(ob);
+        getPrototypeOf(ob, ...arg) {
+          let opt = priv.get(self);
           let vTarget = opt.virtualTarget;
           if (vTarget) ob = vTarget;
-          else return keys;
-          let vKeys = new Set(Reflect.ownKeys(vTarget));
-          Object.entries(Object.getOwnPropertyDescriptors(ob)).forEach(
+          if (!Reflect.isExtensible(opt.target)) ob = opt.target;
+          return Reflect.getPrototypeOf(ob, ...arg);
+        },
+        setPrototypeOf(ob, ...arg) {
+          let opt = priv.get(self);
+          let vTarget = opt.virtualTarget;
+          if (vTarget) ob = vTarget;
+          if (!Reflect.isExtensible(opt.target)) ob = opt.target;
+          return Reflect.setPrototypeOf(ob, ...arg);
+        },
+        ownKeys(ob) {
+          let opt = priv.get(self);
+          if (!Reflect.isExtensible(opt.target))
+            return Reflect.ownKeys(opt.target);
+          let vTarget = opt.virtualTarget;
+
+          if (vTarget) ob = vTarget;
+          let keys = Reflect.ownKeys(ob);
+          if (!vTarget) return keys;
+          let vKeys = new Set(keys);
+
+          Object.entries(Object.getOwnPropertyDescriptors(opt.target)).forEach(
             ([key, ent]) => {
-              if (ent.confirgurable === false || !Reflect.isExtensible(ob))
+              if (
+                ent.configurable === false ||
+                !Reflect.isExtensible(opt.target)
+              )
                 vKeys.add(key);
             }
           );
-          return [...keys];
+          return [...vKeys];
         },
-        getOwnPropertyDescriptor = function(ob, prop) {
+        getOwnPropertyDescriptor(ob, prop) {
           let getDesc = Object.getOwnPropertyDescriptor;
-          let opt = priv.get(this);
+          let opt = priv.get(self);
+          if (!Reflect.isExtensible(opt.target))
+            return Object.getOwnPropertyDescriptor(opt.target, prop);
           let obDesc = getDesc(ob, prop);
           if (!opt || !opt.VirtualTarget) return obDesc;
           let vTarget = opt.virtualTarget;
@@ -117,12 +257,18 @@ const _Proxy = (function() {
           )
             return obDesc;
           vDesc.configurable = obDesc ? obDesc.configurable : true;
-          if (obDesc && obDesc.configurable === false && obDesc.writable === false)
+          if (
+            obDesc &&
+            obDesc.configurable === false &&
+            obDesc.writable === false
+          )
             return obDesc;
           return vDesc;
         },
-        defineProperty = function(ob, prop, desc) {
-          if (!(prop in ob) && !Reflect.isExtensible(ob)) return;
+        defineProperty(ob, prop, desc) {
+          let opt = priv.get(self);
+          if (!(prop in opt.target) && !Reflect.isExtensible(opt.target))
+            return;
           let obDesc = Object.getOwnPropertyDescriptor(ob, prop);
           desc.configurable =
             obDesc && "configurable" in obDesc ? obDesc.configurable : true;
@@ -138,46 +284,110 @@ const _Proxy = (function() {
             });
           return Object.defineProperty(ob, prop, desc) || undefined;
         },
-        get ["{{handler}}"]() {
-          return this;
-        },
-        get ["{{target}}"]() {
-          return priv.get(this).target;
-        },
-        get [Symbol.toStringTag]() {
-          return "Proxy";
+        deleteProperty(...args) {
+          let opt = priv.get(self);
+          let vTarget = opt.virtualTarget;
+          if (vTarget) ob = vTarget;
+          args[0] = ob;
+          return Reflect.deleteProperty(...args);
         }
-      }    
-      merge(this.properties,handler,Reflect.ownKeys(this.properties));
-      reflectTraps(this.properties)
+      };
+      if (!handler.defaults) {
+        Object.defineProperty(handler, "defaults", {
+          get() {
+            let opt = priv.get(self);
+            return new Proxy(defaultDefaults, {
+              get(ob, prop) {
+                if (prop === "get") return ob[prop];
 
-      console.log("this,this", this);
-      return newProx
+                let object = opt.virtualTarget || opt.clone;
+                let theTarget =
+                  typeof theProperties[prop] === "function"
+                    ? theProperties[prop]
+                    : ob[prop];
+
+                return function (obj, ...arg) {
+                  let result,
+                    bind = arg[1];
+                  obj = obj !== opt.target ? obj : opt.virtualTarget || obj;
+                  if (prop === "get" || prop === "set") {
+                    if (prop === "set") bind = obj;
+                    else bind = opt.bind || obj;
+                  }
+                  if (opt.actions) {
+                    opt.actions.push({
+                      prop,
+                      action: (object = obj) => theTarget(object, ...arg),
+                      arguments: [...arguments],
+                      method: prop,
+                      function: theTarget
+                    });
+                  }
+                  return theTarget(obj, ...arg);
+                };
+              }
+            });
+          },
+          set(def) {
+            merge(defaultDefaults, def);
+            return true;
+          },
+          enumerable: true,
+          configurable: true
+        });
+      }
+      let filtered = Reflect.ownKeys(theProperties).filter(
+        (key) =>
+          !(
+            typeof Reflect[key] === "function" &&
+            key !== "get" &&
+            typeof opt.handler[key] === "function"
+          )
+      );
+      merge(this.properties, theProperties);
+      merge(this, handler, filtered, this);
+      reflectTraps(this);
+      priv(this).newTarget = false;
+      return newProx;
     }
+
+    get ["{{handler}}"]() {
+      return this["{{handler}}"] || this;
+    }
+    get ["{{target}}"]() {
+      return priv.get(this).target["{{target}}"] || priv.get(this).target;
+    }
+
     get _get() {
-      if (!this.newTarget) return
-      return new Proxy(this,{
-        set(ob,prop,val) {
-          return ob.define.get(prop,val)
+      if (!priv(this).newTarget) return;
+      return new Proxy(this, {
+        set(ob, prop, val) {
+          return ob.define.get(prop, val);
         }
-      })
+      });
     }
     get properties() {
-      if (!this.newTarget) return
-      return new Proxy(this,{
-        set(ob,prop,val) {
-          return ob[prop] = val
-        }
-      })
+      if (!priv(this).newTarget) return;
+      return this;
     }
-    
-    define() { return Object.defineProperty.bind(null,this) }
-    defineProps() { return Object.defineProperties }
+    set properties(val) {
+      merge(this, val);
+      return true;
+    }
+
+    define() {
+      return Object.defineProperty.bind(null, this);
+    }
+    defineProps() {
+      return Object.defineProperties;
+    }
     getProp(...arg) {
       return bindIt(...arg);
     }
-    get keys() { return Reflect.ownKeys(this)  }
-    
+    get keys() {
+      return Reflect.ownKeys(this);
+    }
+
     static swappable(ob, hand, callback) {
       hand = hand || {};
       hand.actions = [];
@@ -248,7 +458,6 @@ const _Proxy = (function() {
           archive = priv.get(ob).archive;
           archive.push(backup);
         }
-        console.log("ob", ob);
         ob = replace;
         return callback ? callback(replace, options) : returnVal;
       }
@@ -281,31 +490,32 @@ const _Proxy = (function() {
       return returnVal;
     }
   }
-  reflectTraps()
   function reflectTraps(handler) {
-    Reflect.ownKeys(Reflect)
-      .filter((key) => key !== "getPrototypeOf")
-      .forEach((key) => {
-        let oldKey = handler[key];
-        Object.defineProperty(handler, key, {
-          value: function (ob, ...arg) {
-            let pr = priv.get(this);
-            let target = typeof oldKey === "function" ? oldKey : Reflect[key];
-            console.log("pr", pr, "key,", key);
-            if (pr.virtualTarget) ob = pr.virtualTarget;
-            if (pr.actions) {
-              pr.actions.push({
-                key,
-                action: (object = ob) => target(object, ...arg),
-                arguments: [...arguments],
-                method: "get",
-                function: target
-              });
-            }
-            return target(ob, ...arg);
+    Reflect.ownKeys(Reflect).forEach((key) => {
+      let oldKey = handler[key];
+      Object.defineProperty(handler, key, {
+        value: function (ob, ...arg) {
+          let pr = priv.get(this);
+          let theTarget = typeof oldKey === "function" ? oldKey : Reflect[key];
+          if (pr.clone) ob = clone;
+          if (pr.virtualTarget) ob = pr.virtualTarget;
+          if (key === "get" || key === "set") {
+            let bind = pr.bind || pr.clone;
+            arg[2] = bind;
           }
-        });
+          if (pr.actions) {
+            pr.actions.push({
+              key,
+              action: (object = ob) => theTarget(object, ...arg),
+              arguments: [...arguments],
+              method: key,
+              function: theTarget
+            });
+          }
+          return theTarget(ob, ...arg);
+        }
       });
+    });
     return handler;
   }
   (function () {
@@ -314,7 +524,7 @@ const _Proxy = (function() {
       if (item && item["{{target}}"]) {
         class Proxy {
           constructor(ob) {
-            merge(this, ob);
+            Object.defineProperties(this, Object.getOwnPropertyDescriptors(ob));
             Object.setPrototypeOf(this, Object.getPrototypeOf(ob));
             return this;
           }
@@ -324,7 +534,8 @@ const _Proxy = (function() {
       }
       _privateLog.apply(console, arguments);
     };
-  })()
-  return _Proxy
-})()
-export default _Proxy;
+  })();
+  return _Proxy;
+})();
+module.exports = _Proxy;
+_Proxy.default = _Proxy

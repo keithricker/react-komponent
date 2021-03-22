@@ -6,8 +6,7 @@ const theDirectory = __dirname
 const appRoot = process.cwd()
 const modulePath = path.resolve(theDirectory,'../')
 const express = require('express');
-const nodeEnv = process.env.NODE_ENV
-const { commandLine,is } = require(modulePath+'/src/components/helpers/utilsCompiled.js')
+const { commandLine,isJSON } = require(modulePath+'/src/components/helpers/utilsCompiled.js')
 const { merge, isClass } = require('../src/components/helpers/utilsCompiled')
 
 const makeFunction = (func,props,pro) => { 
@@ -20,8 +19,7 @@ const makeFunction = (func,props,pro) => {
 
 function reactServer(custom = {}) {
    
-   custom.webpack = custom.webpack
-   let config = custom.webpack.config || require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
+   let config = custom.webpack && custom.webpack.config ? custom.webpack.config : require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
    let port = custom.port || process.env.Port || process.env.PORT || 3000
    const app = express()
    let protocol = (port === 443 || (custom.https && custom.https.key && custom.https.cert)) ? 'https' : 'http'
@@ -35,7 +33,7 @@ function reactServer(custom = {}) {
    let serverUrl = () => custom.url || `${protocol}://${host}:${port}`
 
    let distPath = custom.dist ? custom.dist[custom.dist.length-1] === '/' ? custom.dist.slice(0,-1) : custom.dist : 'dist'
-   let customData = custom.data; let parsedData = is.json(customData) ? customData : undefined
+   let customData = custom.data; let parsedData = isJSON(customData) ? customData : undefined
    
    if (!custom.data) {
       let defaultPath = path.resolve(appRoot,distPath)+'/preloaded/data.json'
@@ -46,7 +44,7 @@ function reactServer(custom = {}) {
    }
 
    function getTheData(cb) {
-      if (is.json(customData)) return cb ? cb(customData) : customData
+      if (isJSON(customData)) return cb ? cb(customData) : customData
       let dataPromise = (async () => await fetchData(customData))()
       if (!cb) return dataPromise
       dataPromise
@@ -134,7 +132,7 @@ function reactServer(custom = {}) {
                socket = require('socket.io')(server)
                htmlPluginOptions.socket = true
                // copy the client version of socket to the web root
-               commandLine(`cp ${modulePath}/node_modules/socket.io-client/dist/socket.io.min.js dist/socket.io.min.js`)
+               fs.copyFileSync(`${modulePath}/node_modules/socket.io-client/dist/socket.io.min.js`, 'dist/socket.io.min.js')
                // commandLine(`mkdir -p ${indexPath}/react-komponent && cp ${modulePath}/node_modules/socket.io-client/dist/socket.io.min.js ${indexPath}/react-komponent/socket.io.min.js`)
                socket.on('connection', (sock) => {
                   sock.on('reducer', (reduced) => {
@@ -161,11 +159,47 @@ function reactServer(custom = {}) {
          }
 
          return function(...arg) {
+
+            const Mod = require('../src/components/helpers/Module')
+            let dir = '../src'
+            let entry = path.resolve(__dirname,dir,'./components/helpers/theObj/src/index.js')
+            
+
+
+            Mod.dynamicImport(entry,'objectify',(res) => { 
+               console.log('res',res); 
+               throw new Error 
+            })
+            
+            function compileDir(dir) {
+              let dirPath = path.resolve(__dirname,dir)
+              let files = fs.readdirSync(''+dirPath)
+              files.forEach(function (file, ind) {
+                let filePath = path.resolve(dirPath,file)
+                let stat = fs.statSync(filePath)
+                if (stat && stat.isDirectory()) {
+                   compileDir(filePath)
+                   return
+                }
+                let parsed = path.parse(file)
+                if (parsed.ext !== '.js' && parsed.ext !== '.jsx') return
+                let pSplit = parsed.name.split('Compiled')
+                if (pSplit.length === 2 && pSplit[1] === "") return
+                const src = filePath
+                const dest = path.resolve(dirPath,parsed.name+'Compiled'+parsed.ext)
+                Mod.compile.babel(src,dest)
+              })
+            }
+            
             const realProp = prop
             if (prop === 'start') prop = 'listen'
             calls.push(prop)
-            commandLine(`cd ${modulePath} && npm run-script babel-compile`)
+            compileDir(dir)
             let cb = () => {}; 
+
+
+
+
             // if first argument isn't a port number then add the port number
             if (isNaN(arg[0])) arg.unshift(defaults.listen[0][0])
             arg.forEach((ar,ind) => { 
@@ -173,16 +207,19 @@ function reactServer(custom = {}) {
                   cb = ar; arg[ind] = listenCallback 
             }})
 
+            console.log('listening ....')
+
+
             function listenCallback(err) {
                cb(err)
                // commandLine(`rm -r ./dist/*`)
                config.module = config.module || {}
                if (parsedData) HtmlPluginOptions.data = parsedData
-               const build = webpack(config,(err, stats) => {
+               /* const build = webpack(config,(err, stats) => {
                   if (err) {
                      console.error(err)
                   }
-               })
+               }) */
             }
             if (arg.length) 
                delete defaults.listen
