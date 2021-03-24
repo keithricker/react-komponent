@@ -1,13 +1,15 @@
 const nodeEnv = process.env.NODE_ENV || 'production'
 Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true,enumerable:true,configurable:true})
-const ReactServerHTMLPlugin = require("react-komponent/config/react-server-html")
+const ReactServerHTMLPlugin = (ssr) => new (require("react-komponent/config/react-server-html"))(ssr)
 const MiniCssExtractPlugin = require(process.cwd()+'/node_modules/mini-css-extract-plugin')
-
+const HtmlWebpackPlugin = require(process.cwd()+'/node_modules/html-webpack-plugin')
+let _global
+try { _global = window } catch { _global = global }
 
 exports.webpack = function webpackCompiler(custom,cb) {
-
+   
    let path = require('path')
-   let config = custom && custom.config
+   let config = custom.config
    let isDefault = false
    if (!custom.config && !custom.overrides && custom.entry) {
       config = custom; custom = {config}
@@ -23,7 +25,7 @@ exports.webpack = function webpackCompiler(custom,cb) {
    Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
    let SSR = custom.SSR
    let server = SSR && SSR.server
-   let overrides = custom.overrides || {}
+   let overrides = custom.overrides || { output: {} }
 
    let If = (exp,more) => { 
       if (!(more) && typeof exp === 'function') {
@@ -46,7 +48,7 @@ exports.webpack = function webpackCompiler(custom,cb) {
       SSR.protocol = SSR.protocol || (SSR.port === 443 || (custom.https && custom.https.key && custom.https.cert)) ? 'https' : 'http'
       SSR.port = SSR.port || process.env.Port || process.env.PORT || 3000
       SSR.host = SSR.host || custom.url ? getHost(custom.url) : 'localhost'
-      config.plugins.push(new ReactServerHTMLPlugin(SSR))
+      config.plugins.push(ReactServerHTMLPlugin(SSR))
    }
    config.entry = overrides.entry || config.entry
    if (typeof config.entry === 'string') config.entry = path.resolve(process.cwd(),config.entry)
@@ -55,7 +57,7 @@ exports.webpack = function webpackCompiler(custom,cb) {
    config.module = config.module || {}
    overrides.optimization = overrides.optimization || {}
    config.plugins = config.plugins.concat(overrides.plugins || [])
-   config.output.path = SSR ? path.resolve(SSR.appRoot) : overrides.output.path || 'dist'  
+   config.output.path = SSR && SSR.appRoot ? path.resolve(process.cwd(),SSR.appRoot) : (overrides.output && overrides.output.path) ? overrides.output.path : path.resolve(process.cwd(),'dist')  
    if (overrides.output) config.output = Object.assign(config.output,overrides.output)
    
    config.mode = overrides.mode || 'development'
@@ -84,14 +86,47 @@ exports.webpack = function webpackCompiler(custom,cb) {
    delete config.output.jsonpFunction
    delete config.output.futureEmitAssets
 
+
+   config.plugins.forEach((plug,ind) => { 
+     if (plug.constructor.name === 'IgnorePlugin' || plug.constructor.name === 'ManifestPlugin' || (config.target === 'node' && plug.constructor.name === 'HtmlWebpackPlugin')) 
+       delete config.plugins[ind]
+     else if (plug.constructor.name === 'IgnorePlugin') 
+       config.plugins[ind] = new webpack.IgnorePlugin({ resourceRegExp:/^\.\/locale$/, contextRegExp:/moment$/ })
+   })
+   Reflect.ownKeys(overrides).forEach(key => { if (typeof config[key] === 'undefined') config[key] = overrides[key] })
+
+   config.entry.runtimeChunk = true
+   
+   if (config.target === 'node' || SSR) {
+     delete config.optimization.splitChunks
+     delete config.optimization.runtimeChunk
+     config.optimization.minimize = false,
+     config.plugins.unshift(
+        new webpack.optimize.LimitChunkCountPlugin({
+           maxChunks: 1
+        })
+     )
+     config.plugins.forEach((plug,ind)=> {
+        if (plug instanceof HtmlWebpackPlugin)
+           config.plugins.splice(ind,1)
+     })
+     delete config.output.chunkFilename
+   }
+
+   config.plugins = Array(...config.plugins).filter(Boolean)
+   
    console.log('config',config)
    console.log('overrides',overrides)
 
-   Reflect.ownKeys(overrides).forEach(key => { if (typeof config[key] === 'undefined') config[key] = overrides[key] })
+   config = overrides
+
    let callback = function(...arg) { 
       if (!cb) cb = (err, stats) => { if (err) console.error(err) }
-      let ran = cb(...arg)
       Object.defineProperty(process.env,'NODE_ENV',{value: nodeEnv || 'development',writable:true})
+      let globalType = _global.constructor.name.toLowerCase() === 'window' ? 'window' : 'global'
+      if (config.output.library && globalType === 'window' && window[config.output.library])
+         arg.push(window[config.output.library])
+      let ran = cb(...arg)
       return ran
    }
    return webpack(config).run(callback)

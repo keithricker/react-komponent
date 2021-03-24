@@ -1,7 +1,7 @@
 import React from 'react'
 import server from '../../server/modules'
 import ReactDom from 'react-dom'
-import ReactDOMServer from 'react-dom/server'
+import ReactDOMServer from 'react-dom/SSR'
 import { combineReducers } from 'redux'
 import { connect as connectFunc } from 'react-redux'
 

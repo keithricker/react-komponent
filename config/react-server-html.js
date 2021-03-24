@@ -58,12 +58,12 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
       virtualConsole.sendTo(console);
 
       let jsdOptions = {
-            url: fullURL,
-            runScripts: "dangerously",
-            resources: "usable"
+         url: fullURL,
+         runScripts: "dangerously",
+         resources: "usable"
       }
 
-      let ssrHooks = modules && modules.SSR && modules.SSR.hooks
+      let ssrHooks = (modules && modules.SSR) ? modules.SSR.hooks : {}
       
       let callbacks = Object.keys(ssrHooks).reduce((obj,key) => {
          obj[key] = ssrHooks[key].callbacks
@@ -177,9 +177,9 @@ ReactServerHTMLPlugin.prototype.apply = function(compiler) {
                   (hooked) => {
                      if (typeof hooked === 'string')
                         modHTML = hooked
-                     else if (hooked.constructor && hooked.constructor === JSDOM) jsd = hooked
+                     else if (hooked.constructor && hooked instanceof JSDOM) jsd = hooked
                      if (ind === hooks.length-1 && modHTML !== HTML)
-                        jsd.setHtml(modHTML)
+                        jsd.html(modHTML)
                      return hooked
                   }
                )

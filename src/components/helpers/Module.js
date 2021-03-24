@@ -21,6 +21,7 @@ let req = (reqString, base) => {
 const getClone = (...arg) => req("./utils").getClone(...arg);
 const isURL = (...arg) => req("./utils").isURL(...arg);
 const merge = (...arg) => req("./utils").merge(...arg);
+const serverHooks = (name) => req("../../../server/server.js").hooks[name]
 let imports = new WeakMap([[dynamicImport, { imports: {} }]]);
 
 function functionalImport(required) {
@@ -415,7 +416,16 @@ const theMod = new Constructor(_Module, {
          
          if (!library) {
           library = parsed.name
-          if (library === 'index') library = path.basename(path.dirname(output))
+          if (library === 'index') {
+            library = path.basename(path.dirname(output))
+            if (library === 'src') {
+              let pjson = path.resolve(output,'../','package.json')
+              if (require('fs').existsSync(pjson)) {
+                let parsed = JSON.parse(require('fs').readFileSync(src, { encoding: "utf8" }))
+                if (parsed.name) library = parsed.name
+              }              
+            }
+          }
         }
        }
        let defaultOverrides = {
@@ -435,7 +445,7 @@ const theMod = new Constructor(_Module, {
         defaultOverrides.output.library = library,
         defaultOverrides.output.libraryTarget = overrides.output.libraryTarget || 'commonjs2'
       }
-      overrides = Object.assign(overrides,defaultOverrides)
+      overrides = Object.assign(overrides,defaultOverrides) 
 
       let conf = { overrides };
       let compiler = require("../../../server/compiler").webpack
@@ -457,7 +467,6 @@ const theMod = new Constructor(_Module, {
          compiler(conf,function callback(...arg) {
            let result
            if (asObject) {
-             console.log('arg',arg)
              result = require(output)
              if (result.default && Object.keys(result).filter(key => key !== 'library').length === 1) result = result.default
            } else result = fs.readFileSync(output)
@@ -471,9 +480,7 @@ const theMod = new Constructor(_Module, {
      }.bind(thiss)
    };
   },
-  dynamicImport(...arg) {
-    return dynamicImport(...arg)
-  }
+  dynamicImport: dynamicImport
 });
 
 function dynamicImport(script, id, callback) {
@@ -499,14 +506,15 @@ function dynamicImport(script, id, callback) {
     if (dir) output = path.resolve(dir,id+'-dynamicImport.js')
   } else output = path.resolve(process.cwd(),output)
 
-  let dom = new (require("./DOM"))()
-  let scriptTag = dom.create("script", {
+  let globalType =  (_global.constructor.name.toLowerCase() !== 'window') ? 'node' : 'window'
+  
+  let scriptArg = {
     id,
     src: script,
     async: false
-  });
+  }
 
-  if (!output) return insertTag(scriptTag,callback)
+  if (!output) return insertTag(callback)
 
   if (isURL(script)) {
     let fetchData = require('../../server/fetchData.js')
@@ -518,6 +526,7 @@ function dynamicImport(script, id, callback) {
   let asyncRes, newProps;
   let overrides = {
     entry: entry || path.resolve(process.cwd(),script),
+    target: 'web'
   }
 
   let filename = path.basename(output)
@@ -531,21 +540,37 @@ function dynamicImport(script, id, callback) {
   }
 
   theMod.compile.webpack(overrides, (res) => {
-    scriptTag.setAttribute('src',output)
-    return insertTag(scriptTag,callback)
+    console.log('res!',res)
+    scriptArg.src = output
+    return insertTag(callback)
   })
+
   if (!callback)
     return new Promise((res) => {
       asyncRes = res;
     });
-  function insertTag(script,cb=callback) {
-    script.onload = loaded
-    dom.head.insertBefore(script, dom.head.firstElementChild);
-    function loaded(res) {
-      console.log('locked and loaded')
-      if (asyncRes) return asyncRes(script,res);
-      return cb(script,res);
+
+  function insertTag(cb=callback) {
+    let dom
+    if (globalType === 'node') {
+      let hook = serverHooks('constructor')
+      return hook(it,true)
+    } 
+    dom = new (require("./DOM"))()
+
+    function it(dom) {
+      let theTag = dom.create("script", scriptArg);
+      function loaded(res) {
+        console.log('locked and loaded')
+        if (global[id]) theTag = global[id]
+        if (asyncRes) return asyncRes(theTag,res);
+        return cb(theTag,res);
+      }
+      theTag.onload = loaded
+      dom.head.insertBefore(theTag, dom.head.firstElementChild);
+      return theTag
     }
+
   }
 }
 

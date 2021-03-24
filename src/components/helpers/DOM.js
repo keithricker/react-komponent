@@ -1,5 +1,6 @@
 let _global
 try { _global = global } catch { global = window }
+let pv = new WeakMap()
 
 const DOM = module.exports = function DOM(...arg) {
     // require('jsdom-global')()
@@ -7,21 +8,14 @@ const DOM = module.exports = function DOM(...arg) {
     const { JSDOM } = jsdom
     class DOM extends JSDOM {
        constructor(...arg) {
-          if (!arg[1]) arg[1] = { runScripts: "dangerously" }
-          if (!arg[0]) arg[0] = `<!doctype html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <title></title>
-          </head>
-          <body>
-          </body>
-          </html>`
+          if (!arg[1]) arg[1] = { runScripts: "dangerously", resources: "usable" }
+          if (!arg[0]) arg[0] = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title></title></head><body></body></html>`
           super(...arg)
           let self = this
           let env = (_global.document && _global.document.constructor.name === 'HTMLDocument') ? 'web' : 'node'
           let _window = (arguments.length || env === 'node') ? self.window : window
           let _document = _window.document
+          pv.set(this,{window:_window,document:_document})
          
           const docHandler = {
             get(ob,prop,prox) {
@@ -52,9 +46,9 @@ const DOM = module.exports = function DOM(...arg) {
          return docProx
        }
        elements(key,val) {
-          if (key === 'class') return this.getElementsByClassName(key)
-          else if (key === 'tag') return this.getElementsByTagName(key)
-          let query = (cb) => [...document.querySelectorAll("*")].filter(item => cb(item))
+          if (key === 'class') return pv.get(this).document.getElementsByClassName(key)
+          else if (key === 'tag') return pv.get(this).document.getElementsByTagName(key)
+          let query = (cb) => [...pv.get(this).document.querySelectorAll("*")].filter(item => cb(item))
           if (arguments.length === 1 && typeof key === 'object') {
              return query((item) => Object.keys(item).every(key => item.getAttribute(key) === val))
           }
@@ -87,7 +81,7 @@ const DOM = module.exports = function DOM(...arg) {
          let pattern2 = `([^ ]*)=(?:["|'])([^ ]*?)["|']`
          */
          
-         newEl = newEl || this.window.document.createElement(type)
+         newEl = newEl || pv.get(this).document.createElement(type)
          if (attributes)
             Object.keys(attributes).forEach(key => newEl.setAttribute(key,attributes[key])) 
          if (appendTo) appendTo.appendChild(newEl)
@@ -95,22 +89,22 @@ const DOM = module.exports = function DOM(...arg) {
          Object.setPrototypeOf(newEl,Object.setPrototypeOf({ set(...arg) { this.setAttribute(...arg); return this } },Object.getPrototypeOf(newEl)))
          return newEl  
        }
-       tags(name) { return this.getElementsByTagName(name) }
+       tags(name) { return pv.get(this).document.getElementsByTagName(name) }
        tag(name) {
          return this.tags(name)[0]
        }
        html(html) { 
            if (!html) {
-             let prop = (_global.document && this === _global.document) ? 'outerHTML' : 'innerHTML'  
-             this.getElementsByTagName('html')[prop] = html
+             let prop = (_global.document && pv.get(this).document === _global.document) ? 'outerHTML' : 'innerHTML'  
+             pv.get(this).document.getElementsByTagName('html')[prop] = html
              return this.tag('html').outerHTML
            }
            let newJdom = html instanceof DOM ? html : new DOM(html); 
            let newHTML = this.tag('html').innerHTML = newJdom(html).tag('html').innerHTML; 
            return newHTML
        }
-       query(search) { return this.querySelector(search) }
-       queryAll(search) { return this.querySelectorAll(search) }
+       query(search) { return pv.get(this).document.querySelector(search) }
+       queryAll(search) { return pv.get(this).document.querySelectorAll(search) }
        static [Symbol.hasInstance](instance) {
           return instance['{{constructor}}'].prototype instanceof this
        } 

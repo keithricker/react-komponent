@@ -1,6 +1,5 @@
 const path = require('path')
 const fs = require('fs')
-const { webpack } = require('./compiler.js')
 const fetchData = require('./fetchData.js')
 const theDirectory = __dirname
 const appRoot = process.cwd()
@@ -17,12 +16,43 @@ const makeFunction = (func,props,pro) => {
    return props ? merge(func,props) : func 
 }
 
+const ssrHooks = (function() { 
+   let hooks = {}; let callbacks = {}
+   Array('load','constructor','componentDidMount','render','window').forEach(key => {
+      callbacks[key] = { temp:[],perm:[] }
+      hooks[key] = 
+      makeFunction(function(hook,perm=false) {
+        callbacks[key][perm ? 'perm' : 'temp'].push(hook)
+      },
+      { get callbacks() { return { temp:[...callbacks[key].temp], perm:[...callbacks[key].perm] }}})
+   })
+   return hooks
+})()
+
 function reactServer(custom = {}) {
-   
-   let config = custom.webpack && custom.webpack.config ? custom.webpack.config : require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
-   let port = custom.port || process.env.Port || process.env.PORT || 3000
+   custom.webpack = custom.webpack || {}
+   let config = custom.webpack.config
+   if (!config) {
+      const nodeEnv = process.env.NODE_ENV || 'production'
+      Object.defineProperty(process.env,'NODE_ENV',{value:'development',writable:true})
+      config = require(process.cwd()+'/node_modules/react-scripts/config/webpack.config')('production')
+      Object.defineProperty(process.env,'NODE_ENV',{value:nodeEnv,writable:true})
+      config.optimization = config.optimization || {}; config.optimization.minimize = false
+      custom.webpack.config = config
+   } else {
+      config.optimization = config.optimization || {}; config.optimization.minimize = config.optimization.minimize || false
+   }
+   let port,protocol
+   if (custom.url) {
+      let split = custom.url.split(':')
+      if (split.length > 1) port = split[split.length -1]
+      split = custom.url.split('https')
+      if (split.length > 1) protocol = 'https'
+      else if (custom.url.split('http').length > 1) protocol = 'http'
+   }
+   port = port || custom.port || process.env.Port || process.env.PORT || 3000
    const app = express()
-   let protocol = (port === 443 || (custom.https && custom.https.key && custom.https.cert)) ? 'https' : 'http'
+   if (!protocol) protocol = (port === 443 || (custom.https && custom.https.key && custom.https.cert)) ? 'https' : 'http'
    const options = (protocol === 'http') ? [app] : [custom.https,app]
    const server = require(protocol).Server(...options)
    const appEnv = app.get('env')
@@ -65,20 +95,9 @@ function reactServer(custom = {}) {
          return getTheData(cb)
       },
       SSR: makeFunction(function SSR(prepost=pre,cb) {
-         modules.SSR.callbacks.push({function:cb,prepost})
+         // modules.SSR.callbacks.push({function:cb,prepost})
       },{
-         hooks: (function() { 
-            let hooks = {}; let callbacks = {}
-            Array('constructor','componentDidMount','render','window').forEach(key => {
-               callbacks[key] = { temp:[],perm:[] }
-               hooks[key] = 
-               makeFunction(function(hook,perm=false) {
-                  callbacks[key][perm ? 'perm' : 'temp'].push(hook)
-               },
-               { get callbacks() { return { temp:[...callbacks[key].temp], perm:[...callbacks[key].perm] }}})
-            })
-            return hooks
-         })()
+         hooks: ssrHooks
       })
    }
    if (!customData) {
@@ -88,8 +107,7 @@ function reactServer(custom = {}) {
 
    modules.SSR.hooks.window((wind) => { wind.reactSSR = modules.SSR })
 
-   custom.webpack = custom.webpack || {}
-   const htmlPluginOptions = custom.webpack.SSR = custom.webpack.SSR || { 
+   if (!custom.webpack.SSR) custom.webpack.SSR = { 
       enabled:true,
       server, protocol, host, port, modules,
       prepend: `<script>window.serverURL = '${serverUrl()}'</script>;`,
@@ -97,6 +115,8 @@ function reactServer(custom = {}) {
          wind.reactServer = modules
       }
    }
+   const htmlPluginOptions = custom.webpack.SSR
+
    if (custom.url) htmlPluginOptions.url = custom.url
 
    let socket
@@ -132,7 +152,7 @@ function reactServer(custom = {}) {
                socket = require('socket.io')(server)
                htmlPluginOptions.socket = true
                // copy the client version of socket to the web root
-               fs.copyFileSync(`${modulePath}/node_modules/socket.io-client/dist/socket.io.min.js`, 'dist/socket.io.min.js')
+               fs.copyFileSync(`${modulePath}/node_modules/socket.io-client/dist/socket.io.min.js`, require('path').resolve(process.cwd(),'dist/socket.io.min.js'))
                // commandLine(`mkdir -p ${indexPath}/react-komponent && cp ${modulePath}/node_modules/socket.io-client/dist/socket.io.min.js ${indexPath}/react-komponent/socket.io.min.js`)
                socket.on('connection', (sock) => {
                   sock.on('reducer', (reduced) => {
@@ -163,14 +183,13 @@ function reactServer(custom = {}) {
             const Mod = require('../src/components/helpers/Module')
             let dir = '../src'
             let entry = path.resolve(__dirname,dir,'./components/helpers/theObj/src/index.js')
+       
             
-
-
-            Mod.dynamicImport(entry,'objectify',(res) => { 
-               console.log('res',res); 
-               throw new Error 
+            Mod.dynamicImport(entry,'THE-obj',(res) => {
+               console.log('res!',res)
             })
-            
+
+
             function compileDir(dir) {
               let dirPath = path.resolve(__dirname,dir)
               let files = fs.readdirSync(''+dirPath)
@@ -194,12 +213,12 @@ function reactServer(custom = {}) {
             const realProp = prop
             if (prop === 'start') prop = 'listen'
             calls.push(prop)
-            compileDir(dir)
+
+
+            // compileDir(dir)
+
+
             let cb = () => {}; 
-
-
-
-
             // if first argument isn't a port number then add the port number
             if (isNaN(arg[0])) arg.unshift(defaults.listen[0][0])
             arg.forEach((ar,ind) => { 
@@ -207,19 +226,36 @@ function reactServer(custom = {}) {
                   cb = ar; arg[ind] = listenCallback 
             }})
 
-            console.log('listening ....')
-
-
             function listenCallback(err) {
-               cb(err)
-               // commandLine(`rm -r ./dist/*`)
+               if (err) return cb(err)
+
+               let dir = require('path').resolve(process.cwd(),'dist')
+               const files = require('fs').readdirSync(dir)
+
+               files.forEach(file => {
+                  let filePath = path.join(dir,file)
+                  statsObj = fs.statSync(filePath)
+                  if (statsObj.isDirectory())
+                     require('fs').rmdirSync(filePath, { recursive: true })
+                  else require("fs").unlinkSync(filePath);
+               })
+
                config.module = config.module || {}
                if (parsedData) HtmlPluginOptions.data = parsedData
-               /* const build = webpack(config,(err, stats) => {
-                  if (err) {
-                     console.error(err)
-                  }
-               }) */
+
+
+               
+               const build = require('./compiler').webpack(custom.webpack,(err, stats) => {
+                 if (err) {
+                   console.error(err)
+                 }
+               }) 
+                            
+
+
+              return cb(...arguments)
+
+               
             }
             if (arg.length) 
                delete defaults.listen
@@ -235,12 +271,18 @@ function reactServer(custom = {}) {
                   })
                }
             })
+
+
             if (prop === 'listen' && !defaults.listen) return server.listen(...arg)
+
+
             return listening
+
          }
       }
    })
    return appServer
 }
+reactServer.hooks =  ssrHooks
 
 module.exports = reactServer
