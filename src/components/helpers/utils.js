@@ -1,18 +1,31 @@
-const React = require("react");
 const path = require("path");
 // const Obj = require('./Obj')
 const _Proxy = (...args) => {
-  let Prox = require("./_Proxy").default;
+  let Prox = require("./_ProxyCompiled").default;
   return !args.length ? Prox : new Prox(...args);
 };
 const proto = { get: Object.getPrototypeOf, set: Object.setPrototypeOf };
 
-let _global;
-try {
-  _global = window;
-} catch {
-  _global = global;
+let _global
+function globalType() {
+  try { 
+    if (global && global.constructor && global.constructor.name.toLowerCase() === 'window') {
+      _global = global
+      return 'window'
+    }
+    if (window) {
+      _global = window
+      return 'window'
+    }
+    _global = global
+    return 'node'
+  } catch { _global = global; return 'node' }
 }
+globalType()
+let requireFunction = require
+const caches = {}
+Array('require','isURL','isJSON','isDescriptor').forEach(key => caches[key] = new Map())
+
 function _if(exp, more) {
   if (!more && typeof exp === "function") {
     let cb = (res) => res || undefined;
@@ -112,13 +125,85 @@ let thiss = (module.exports = {
   _undef(varble) {
     return typeof varble === "undefined";
   },
+  get Earl() {
+   
+    const Earl = function(_url) {
+
+      var thePort; var thePathname
+
+      if (!thiss.isURL(_url))
+        thePathname = _url
+
+      if (!_url || thePathname) {
+        if (globalType() === 'node') {
+          _url = process.env.serverUrl;
+        } else {
+          _url = _global.location.origin;
+          thePort = _global.location.port;
+        }
+      }
+
+      var portMatch = _url.match(/(?:[0-9]+(?:\/|))$/);
+
+      if (portMatch && portMatch[0]) {
+        _url.slice(_url.lastIndexOf(portMatch[0]), portMatch[0].length);
+        thePort = portMatch[0].replace(/\/$/, '');
+      }
+
+      var urls = (globalType() === 'node') ? require('url') : { URL: URL }
+      var URLz = urls.URL
+
+      var burl = new URLz(_url);
+      if (thePort) burl.port = thePort;
+      if (thePathname) burl.pathname = thePathname
+      let furl = {}
+
+      Reflect.ownKeys(Object.getPrototypeOf(burl)).concat(Reflect.ownKeys(burl)).filter(function (key) {
+        return key !== 'constructor';
+      }).forEach(function (key) {
+        Object.defineProperty(furl, key, {
+          get: function get() {
+            let prop = Reflect.get(burl,key,burl);
+            return typeof prop === 'function' ? prop.bind(burl) : burl[key]
+          },
+          set: function set(val) {
+            return !!(burl[key] = val);
+          },
+          enumerable: typeof burl[key] === 'function' ? false : true
+        });
+      });
+      return furl;
+    }
+    Earl.format = function(obj) {
+      if (!obj.hostname) throw new Error('Could not format new URL: hostname is a required option')
+      obj.protocol = obj.protocol || 'http'
+      let sturl = obj.protocol+'//'+obj.hostname
+      let newURL = Earl(sturl)
+      let origin = obj.origin ? Earl(obj.origin) : {}
+      Object.keys(origin).filter(key => typeof origin[key] === 'string' && key !== 'origin').forEach(key => { try { newURL[key] = origin[key] } catch {} })
+      Object.keys(newURL).filter(key => typeof obj[key] === 'string' && key !== 'origin').forEach(key => { try { newURL[key] = obj[key] } catch {} })
+
+      if (!obj.search && obj.query) {
+        let theSearch = '?'
+        Object.keys(obj.query).forEach((key,ind) => {
+          if (ind !== 0) theSearch += '&'
+          theSearch += key+'='+obj.query[key]
+        })
+        newURL.search = theSearch
+      }
+      return newURL.toString()
+    } 
+    return Earl
+  },
   isURL(url) {
+    if (caches.isURL.has(url)) return caches.isURL.get(url)
     if (typeof url !== "string") return false;
     if (!thiss.isURL.pattern)
       thiss.isURL.pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-    return thiss.isURL.pattern.test(url) ? true : false;
+    return thiss.isURL.pattern.test(url)
   },
   isJSON(data) {
+    if (caches.isJSON.has(data)) return caches.isJSON.get(url)
     if (typeof data !== "string") return false;
     data = data.trim();
     let match = data.match(/\{[^{}]+\}/) || [];
@@ -130,6 +215,475 @@ let thiss = (module.exports = {
     )
       .toString(36)
       .slice(1);
+  },
+  fetchit: function(url,params={},wind) {
+    let theFetch,theWindow,callback
+    callback = Array(...arguments).find(arg => typeof arg === 'function')
+    if (globalType() === 'node') {
+      theFetch = require('node-fetch')
+      theWindow = wind || { location: thiss.Earl(thiss.Earl().toString()) }
+    } else {
+      theFetch = require('react-komponent/modules/browser').fetch
+      theWindow = wind || _global
+    }
+    let isurl = thiss.isURL(url)
+    var location = isurl ? thiss.Earl(url) : { ...theWindow.location};
+    if (!isurl && String(url)[0] !== '/') url = '/' + url;
+    if (!isurl) location.pathname = url;
+    let earlOptions = {...location,query:params};
+    let earl = thiss.Earl.format(earlOptions);
+
+    return thiss.fetchResponse(theFetch(earl)).then(res => callback ? callback(res) : res)
+    // For text: theFetch(earl).then(res => res.text()).then(res => callback(res))
+  },
+  fetchResponse(response) {
+
+    let isErr = (ob) => ob instanceof Error
+    let obj = {}
+    let theRes
+    let prom = (resolve) => new Promise(res => res(resolve))
+
+    return response.then(res => { theRes = res; try { return res.text() } catch(err) { return prom(err) } })
+      .then(txt => { 
+        obj.text = function() { if (isErr(txt)) throw txt; return txt } 
+        obj.json = function() { return JSON.parse(obj.text()) }
+        obj.arrayBuffer = function() { 
+          return new TextEncoder(obj.text()).buffer // always utf-8 
+        }
+        try { return theRes.clone().blob() } catch(err) { return prom(err) } 
+      })
+      .then(blb => { obj.blob = function() { if (isErr(blb)) throw blb; return blb }; try { return theRes.clone().formData() } catch(err) { return prom(err) } })
+      .then(fd => { obj.formData = function() { if (isErr(fd)) throw fd; return fd }; return prom(obj) })
+      .then(obj => obj)
+  },
+  postRequest: async function(url,data={},format,callback) {
+
+    let fetchit = require('react-komponent/modules/browser').fetch
+    if (!thiss.isURL(url)) {
+      let earl = thiss.Earl().toString(); 
+      earl = thiss.Earl(earl)
+      earl.pathname = url.indexOf('/') === 0 ? url : '/'+url
+      url = earl.toString()
+    }
+
+    if (arguments.length < 3 && typeof format === 'function') {
+      callback = format; format = 'path'
+    }
+    data.format = format
+ 
+    // Default options are marked with *
+    let response = fetchit(url, {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, *cors, same-origin
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, *same-origin, omit
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      redirect: 'follow', // manual, *follow, error
+      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+    response = await(thiss.fetchResponse(response))
+
+    if (format === 'string' || format === 'path') response = response.text() 
+    else if (format && response[format]) response = response[format]()
+    else response = response.json()
+    return callback ? callback(response) : response
+  },
+  get jsdom() { 
+    return function(...arg) { 
+      let jsdom = global.reactKomponent.jsdom
+      const JSDOM = jsdom.JSDOM
+      const virtualConsole = new (jsdom.VirtualConsole)();
+      virtualConsole.on("error", (err) => { throw new Error(err) });
+      virtualConsole.sendTo(console);
+      return new JSDOM(...arg) 
+    }
+  },
+  get baseRequire() {
+    let requireFunction = require
+    let reqr
+    if (globalType() === 'node') reqr = requireFunction
+    else if (_global.reactKomponent.require) reqr = _global.reactKomponent.require
+
+    return function(func,theBase,theString) {
+
+      let reqFunc = function require(reqString=theString,base=theBase,...additional) {
+
+        if (globalType() === 'node' || _global.reactKomponent.require) {
+
+          let resolved
+          if (!base) resolved = resolvEr(process.cwd())
+          else resolved = resolvEr(base)
+          return func(resolved,base,...additional)
+          
+          function resolvEr(theBase) {
+            try { if (require.resolve(thePath) || thePath.indexOf(theBase) === 0) return require.resolve(thePath) } catch {}
+            if (thePath.indexOf('/') === 1) resolved = path.resolve(theBase,'.'+thePath)
+            else if (!thePath.indexOf('.') === 1) resolved = path.resolve(theBase,'./'+thePath)
+            try { if (require.resolve(resolved)) return require.resolve(resolved) } catch {}
+            try { if (require.resolve(path.resolve(thePath))) return require.resolve(path.resolve(thePath)) } catch {}
+            return thePath
+          }
+
+        }
+
+        let basename = (pth) => {
+          let parse = path.parse(pth)
+          if (parse) return parse.base
+          return pth
+        }
+        const dirname = (pth) => {
+          let parsed = path.parse(pth)
+          return (!parsed.base.includes('.')) ? pth : parsed.dir
+        }        
+        let newBase = dirname(thiss.browserRequire.resolve(base,reqString).path)
+        let newBaseReq = thiss.baseRequire(func,newBase)
+        let bn = (reqString.includes('/')) ? basename(reqString) : reqString
+        return newBaseReq(bn,newBase,...additional)  
+
+        /*
+        if (!base && reqFunc.base) base = reqFunc.base
+        if (thiss.isURL(reqString) && func.name === 'browserRequire')
+          return func(...arguments)
+
+        if (!base) {
+          if (reqString.indexOf(process.cwd()) === 0)
+            return func(...arguments)
+          if (reqString.indexOf('/') === 0) reqString = '.'+reqString
+          if (reqString.indexOf('.') !== 0 && reqString.indexOf('/') !== 0 && !path.parse(reqString).base.includes('.'))
+            try { 
+              return func(...arguments) 
+            } catch {
+              return func(reqr('path').resolve(process.cwd(),reqString),base,...additional)
+            }
+          return func(reqr('path').resolve(process.cwd(),reqString),base,...additional)
+        }
+
+        let path = reqr('path')
+        if (path.basename(base).includes('.')) 
+          base = path.dirname(base)
+
+        let newBase,newBaseReq
+
+        let basename = (pth) => {
+          let parse = path.parse(pth)
+          if (parse) return parse.base
+          return pth
+        }
+        const dirname = (pth) => {
+          let parsed = path.parse(pth)
+          return (!parsed.base.includes('.')) ? pth : parsed.dir
+        }
+
+        function tryRequire(bs,reslv) {
+          let result
+          try {  
+            newBase = dirname(reqr.resolve(reslv))
+            newBaseReq = thiss.baseRequire(func,newBase)
+            result = newBaseReq(basename(reqString),newBase,...additional)
+          } catch {}
+          if (result) return result
+          try {
+            newBase = bs                 
+            newBaseReq = thiss.baseRequire(func,newBase)
+            let bn = (reqString.includes('/')) ? basename(reqString) : reqString
+            return newBaseReq(bn,newBase,...additional)    
+
+          } catch { return }                
+        }
+
+        if ((!(reqString.indexOf('/') === 0) && !(reqString.indexOf('.') === 0)) || (reqString.indexOf('/') === 0 && !(reqString.indexOf(process.pwd()) === 0)) && !(reqString.indexOf(base) === 0)) {
+    
+          let returnReq = Array(base,process.cwd(),reqBase).map(bs => tryRequire(bs,reqString).filter(Boolean))
+          if (returnReq.length) return returnReq[0]
+          
+          reqString = './'+reqString
+          let reslv = path.resolve(base,reqString)
+          let returnReq = Array(
+            path.resolve(base,dirname(reqString)),
+            path.resolve(process.cwd(),dirname(reqString))
+          )
+          .map(res => tryRequire(res,reslv).filter(Boolean))
+          if (returnReq.length) return returnReq[0]  
+        }            
+
+        if (reqString.indexOf('.') === 0) {
+
+          let resolved = path.resolve(base,reqString)
+          newBase = dirname(resolved)
+          return tryRequire(newBase,resolved)
+        }
+        if (reqString.indexOf(process.cwd()) === 0) {
+          newReq = reqString
+          newBase = dirname(reqString)
+          return tryRequire(newBase,reqString)
+        }
+        if (reqString.indexOf(base) === 0 || path.resolve(reqString).indexOf(path.resolve(base)) === 0) {
+          newReq = reqString
+          newBase = base
+          return tryRequire(newBase,reqString)
+        }
+        */
+
+        let newFunc = thiss.baseRequire(func,base)
+        return newFunc(reqString)
+      }
+      if (theBase) reqFunc.base = theBase
+      if (theString) return reqFunc()
+      return thiss.cloneFunc(func,reqFunc)
+    }
+  },
+  resolve(path,base) {
+
+    let req; try { req = require } catch { req = global.reactKomponent.require }
+    if (globalType() === 'node' || global.reactKomponent.require) {
+      if (!base) {
+        return req.resolve(path)
+      }
+    } else return thiss.serverFetch('resolver', {path,base,type:'resolve'})
+    
+    let pth = require('path')
+    let appRoot; try { appRoot = global.reactKomponent.paths.appPath || process.cwd() } catch { appRoot = process.cwd() }
+    let alternate = base,theBase = base, originalBase= theBase, newBass, resolved
+    if (pth.basename(theBase).includes('.')) theBase = pth.dirname(theBase)
+    
+    theBase = pth.resolve(theBase)
+
+    if (theBase.indexOf("/") === 0 && theBase.indexOf(appRoot) !== 0)
+      theBase = theBase.replace('/',appRoot)
+    if (
+      path.indexOf("/") === 0 &&
+      String(path)[1] !== "/" &&
+      path.indexOf(appRoot) !== 0 && 
+      (!originalBase || path.indexOf(originalBase) !== 0)
+    )
+      try { 
+        path = path.replace("/", appRoot);
+        resolved = req.resolve(path);                    
+      } 
+      catch { path = '.'+path }
+    if (
+      path.indexOf(appRoot) === 0 ||
+      path.indexOf(alternate) === 0
+    ) {
+      newBass = pth.dirname(path);
+      path = pth.basename(path);
+      console.log({ newBass, path });
+      Array(newBass, alternate).some((str) => {
+        try {
+          resolved = pth.resolve(str, path);
+          req.resolve(resolved);
+        } catch (err) {
+          console.error(err);
+        }
+      });
+      console.log("resolved!", resolved);
+    }
+    if (
+      (!resolved &&
+      path.indexOf(".") !== 0 &&
+      path.indexOf("/") !== 0 &&
+      !pth.basename(path).includes("."))
+      || thePath.indexOf(process.cwd() === 0)
+    ) {
+      try {
+        if (req.resolve(path)) {
+          resolved = req.resolve(path);
+          newBass = pth.dirname(resolved);
+          path = pth.basename(resolved);
+        }
+      } catch {}
+    } else if (base && thePath.indexOf(base) === 0)
+      try { resolved = require.resolve(path.resolve(path.resolve(base),thePath)) } catch {
+        try { resolved = require.resolve(path.resolve(require.resolve(base),thePath)) } catch {}
+      }
+    if (!resolved && path.indexOf("/") === 0 && path.indexOf(appRoot) !== 0)
+      path = "." + path;
+    if (!resolved) {
+      let bass = newBass || base;
+      resolved = pth.resolve(bass, path);
+    } else resolved = resolved || path;
+
+    if (
+      resolved.indexOf(process.cwd()) === 0 &&
+      resolved.indexOf(appRoot) !== 0
+    ) {
+      resolved = resolved.replace(process.cwd(), appRoot);
+    }
+    if (resolved) console.log("resolved", resolved);
+    return resolved
+  },
+  get require() {
+    let req
+    if (globalType() === 'node') req = requireFunction
+    else if (_global.reactKomponent.require) req = _global.reactKomponent.require
+    else req = thiss.browserRequire
+
+    const reqFunc = function require(modPath,base) {
+      if (base) reqFunc.base = base
+      else base = reqFunc.base
+      return base ? req(thiss.resolve(modPath,base)) : req(modPath)
+    }
+    Object.defineProperties(reqFunc,Object.getOwnPropertyDescriptors(req))
+    reqFunc.resolve = function resolve(...arg) { return arg.length > 1 ? thiss.resolve(...arg) : req.resolve(...arg) }
+    // const reqFunc = thiss.baseRequire(req)
+    // Object.defineProperties(reqFunc,Object.getOwnPropertyDescriptors(req))
+    return reqFunc
+  },
+  get serverFetch() {
+    return global.reactKomponent.serverFetch
+  },
+  get newRequire() {
+    
+    function theRequirer(theBase) {
+      
+      const theRequire = function (path,base) {
+        console.log("received", path);
+        console.log("referrerer", theRequire.referrer);
+        if (!base) base = theRequire.base;
+        console.log("the base", base);
+
+        let fetched = thiss.serverFetch('resolver',{ path:encodeURIComponent(path),base:encodeURIComponent(base) })
+        console.log('fetched',fetched)
+        throw new Error('fwayer')
+        let { code,newBase,resolved } = fetched
+
+        let modl = { exports: {} };
+        let args = {
+          module: modl,
+          exports: modl.exports,
+          global,
+          window,
+          document,
+          require: theRequirer(newBase)
+        };
+        newBass = require('path').dirname(resolved);
+        args.require.base = newBase;
+        args.require.referrer = resolved;
+  
+        new Function(...Object.keys(args), code)(...Object.values(args));
+  
+        let App = modl.exports;
+        if (Object.keys(modl.exports).length === 1 && modl.exports.default)
+          App = modl.exports.default;
+        return App;
+        
+      };
+      if (theBase) theRequire.base = theBase;
+      if (arguments.length === 2) return theRequire(...arguments)
+      return theRequire;
+    }
+    return theRequirer
+  },
+
+
+
+  get browserRequire() {
+    const browserRequire = function(script,base,compile=true,format='json') {
+
+      if (!base) base = browserRequire.base
+      if (globalType() === 'node' || _global.reactKomponent.require) {
+        let reqr; try { reqr = require } catch { reqr = _global.reactKomponent.require }
+        if (!base) return reqr(script)
+        else return thiss.baseRequire(reqr,base,script)
+      }
+
+      if (!thiss.isURL(script)) {
+        let port =  !!(window.location.port) ? ':'+window.location.port : ''
+        let query = `?path=${encodeURIComponent(script)}&compile=${compile}&base=${base}&format=${format}`
+        script = window.location.protocol+"//"+window.location.host+'/require'+port+query
+      }     
+      let theScript = function() {  
+        let request = new XMLHttpRequest();
+        request.open('GET', script, false);  // `false` makes the request synchronous
+        request.send(null);
+        
+        if (request.status === 200) {
+          window.dynamicScriptResult = request.responseText
+        }
+      }
+      let fn = theScript.toString().replace(`'GET', script,`,`'GET', '${script}',`)
+      let scriptToString = fn.substring(fn.indexOf("{") + 1, fn.lastIndexOf("}"))
+      let dom = thiss.jsdom(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title></title><script id="theScript">${scriptToString}</script></head><body></body></html>`)
+      if (format === 'resolve') return JSON.parse(dom.window.dynamicScriptResult)
+      let { code, parsed } = JSON.parse(dom.window.dynamicScriptResult)
+      return thiss.requireFromString(code,false,parsed.dir) 
+    }
+    browserRequire.resolve = function(script,base) {
+      return browserRequire(script,base,false,'resolve')
+    }
+    return thiss.baseRequire(browserRequire)
+  },
+
+  get requireFromString() {
+    let requireCache = caches.require
+    if (globalType() === 'node') return require('require-from-string')
+    if (_global.reactKomponent.requireFromString) return _global.reactKomponent.requireFromString
+
+    const requireFromString = function(code,compile=true,base) {
+      if (!requireCache.has('requireFromString')) requireCache.set('requireFromString',new Map())
+      let rfsCache = requireCache.get('requireFromString')
+      if (rfsCache.has(code)) return rfsCache.get(code).exports
+
+      if (compile) {
+        const transform = require('./babel-compiler')
+        code = transform(code,'string')
+      }
+
+      if (!base) base = requireFromString.base
+      let globals; try { globals = require('react-komponent/modules/universal').globals } catch { globals = reactKomponent.globals }
+      let modl = {exports:{}}
+      let wind = Object.defineProperties({},Object.getOwnPropertyDescriptors(window))
+      let args = { ...global,window,self:window,this:window,...globals }
+      Object.assign(args,{module:modl,exports:modl.exports,window:wind})
+      args.require = thiss.browserRequire; args.require.base = base
+      new Function(...Object.keys(args),code)(...Object.values(args))
+      
+      rfsCache.set(code,modl)
+      let App = modl.exports
+      if (Object.keys(modl.exports).length === 1 && modl.exports.default)
+      App = modl.exports.default
+      return App
+    }
+    return requireFromString
+  },
+
+  get requireFromUrl() {
+    let requireCache = caches.require
+    if (globalType() === 'node') return require('require-from-url')
+    if (_global.reactKomponent.browserNode) return _global.reactKomponent.require('require-from-url/sync')
+    return function(name) {
+      if (!requireCache.has('requireFromUrl')) requireCache.set('requireFromUrl',new Map())
+      let rfuCache = requireCache.get('requireFromUrl')
+      if (rfuCache.has(name)) return rfuCache.get(name)
+      let request = new XMLHttpRequest();
+      request.open('GET', name, false);
+      request.send();
+      code = request.responseText;
+      const mojule = thiss.requireFromString(code)
+      rfuCache.set(name,mojule)
+      return mojule
+    }
+  },
+
+  get dynamicRequire() {
+    const dynamicRequire = function(name) { 
+      let requireCache = caches.require
+      if (thiss.isURL(name)) return thiss.requireFromUrl(name)
+
+      if (!requireCache.has('dynamicRequire')) requireCache.set('dynamicRequire',new Map())
+      let drCache = requireCache.get('dynamicRequire')
+      if (drCache.has(name)) return drCache.get(name).exports
+     
+      let code = require('fs').readFileSync(name,'utf8');
+      let mod = thiss.requireFromString(code)
+      drCache.set(name,mod)
+      return mod
+    }
+    Object.defineProperties(dynamicRequire,Object.getOwnPropertyDescriptors(require))
+    return dynamicRequire
   },
   Problem: class Problem extends Error {
     constructor(...arg) {
@@ -149,7 +703,7 @@ let thiss = (module.exports = {
         if (find) find = find[1] || find[2];
         if (typeof find !== "string") return;
         trace[find] = st;
-        let url = st.match(isURL.pattern);
+        let url = st.match(thiss.isURL.pattern);
         trace[find] = url ? url[0] : st;
       });
       return trace;
@@ -274,7 +828,7 @@ let thiss = (module.exports = {
   },
   Args(cb) {
     let newfunc = function (...arg) {
-      return cb(argsProxy(arg));
+      return cb(thiss.argsProxy(arg));
     };
     return newfunc;
   },
@@ -296,7 +850,7 @@ let thiss = (module.exports = {
       }
       let funktion = {
         [name]: function (...ar) {
-          let ao = argsProxy(ar);
+          let ao = thiss.argsProxy(ar);
           let binder = new Proxy(this || _global, {
             get(ob, prop) {
               if (prop in ob) return ob[prop];
@@ -350,7 +904,7 @@ let thiss = (module.exports = {
     return new Date() - start;
   },
   contract(input, then) {
-    if (isPromise(input))
+    if (input instanceof Promise)
       return then ? input.then((done) => then(done)) : input;
     return then ? then(input) : input;
   },
@@ -359,7 +913,7 @@ let thiss = (module.exports = {
     function iterate(prev) {
       if (iteration === arr.length - 1) return prev;
       iteration++;
-      return contract(
+      return thiss.contract(
         cb.call(ths, arr[iteration], iteration, prev, arr),
         (res) => {
           prev = res;
@@ -373,7 +927,7 @@ let thiss = (module.exports = {
     if (funcs.length === 1 && Array.isArray(funcs[0])) funcs = funcs[0];
     if (funcs.constructor && !Array.isArray(funcs))
       funcs = Object.values(funcs);
-    return asyncForEach(funcs, (func, ind, res) => {
+    return thiss.asyncForEach(funcs, (func, ind, res) => {
       return func(res);
     });
   },
@@ -405,6 +959,7 @@ let thiss = (module.exports = {
     res = res || Reflect.get(...args);
     return typeof res === "function" ? res.bind(bnd) : res;
   },
+  simpleMixin,
   _mixin({ target, source, priority = source, bind = target }) {
     function objFunc(trg) {
       let apply = (ob, ...arg) => {
@@ -414,42 +969,31 @@ let thiss = (module.exports = {
           ? trg
           : thiss.suppress(() => ob() === trg, ob === trg);
       };
-      let handler = _Proxy().handlers.default(trg);
-      return new Proxy(apply, handler);
+      return _Proxy({target:apply,virtualTarget:trg});
     }
     let obj = objFunc(target);
     let mix = objFunc(source);
     let rank = objFunc(priority);
     let bound = objFunc(bind);
 
-    let type = (o1, o2) =>
-      !o2 ? Obj(o1).Type().class() : Obj(o1).Type() === Obj(o2).Type();
-
-    let clonedMix = Obj(Obj(mix).descriptors)
-      .filter(key, () => {
-        if (key in obj && rank(obj())) return false;
-        if (
-          key in type(obj).prototype &&
-          !(
-            type(mix).prototype instanceof type(obj) ||
-            type(obj).prototype instanceof mix()
-          ) &&
-          type(obj) !== Object &&
-          bound(obj)
-        )
-          return false;
-      })
-      .map((key, val) => {
-        delete val.value;
-        val.get = function () {
-          return mix(key);
-        };
-        return val;
-      });
+    var type = function type(o1, o2) {
+      return !o2 ? thiss._typeof["class"](o1) : thiss._typeof(o1) === thiss._typeof(o2);
+    };
+    var clonedMix = {}
+    Object.entries(Object.getOwnPropertyDescriptors(mix)).filter(([key,desc]) => {
+      if (key in obj && rank(obj())) return false;
+      if (key in type(obj).prototype && !(type(mix).prototype instanceof type(obj) || type(obj).prototype instanceof type(mix)) && type(obj) !== Object && bound(obj)) return false;
+    }).map(function([key,desc]) {
+      delete desc.value;
+      desc.get = function () {
+        return mix(key);
+      };
+      clonedMix[key] = desc
+    });
     return simpleMixin(obj, clonedMix);
   },
   mixin(...ar) {
-    return _mixin(argsProxy(ar));
+    return thiss._mixin(thiss.argsProxy(ar));
   },
   captured: function () {
     let captured = { get: {}, set: {} };
@@ -684,7 +1228,7 @@ let thiss = (module.exports = {
   */
 
   ObjectMap(obMap = {}) {
-    (vars = require("../Komponent/privateVariables")),
+    (vars = require("../Komponent/privateVariablesCompiled")),
       vars.default(ObjectMap, { keys: new WeakMap() });
     let keys = vars(ObjectMap).keys;
     let origSet = keys.set.bind(keys);
@@ -795,7 +1339,7 @@ let thiss = (module.exports = {
     let comp = proto.set({}, komp);
     while ((comp = proto.get(comp))) {
       if (proto.get(comp) === Komponent) break;
-      if (proto.get(comp) === React.Component) {
+      if (proto.get(comp) === require('react').Component) {
         proto.set(comp, Komponent);
         break;
       }
@@ -806,7 +1350,7 @@ let thiss = (module.exports = {
     while ((comp = proto.get(comp))) {
       console.log(comp.constructor.name);
       if (proto.get(comp) && proto.get(comp).constructor === Komponent) break;
-      if (proto.get(comp) && proto.get(comp).constructor === React.Component) {
+      if (proto.get(comp) && proto.get(comp).constructor === require("react").Component) {
         proto.set(comp, Komponent.prototype);
         break;
       }
@@ -1079,6 +1623,10 @@ let thiss = (module.exports = {
     }
     let cb = typeof exclude === "function" ? exclude : undefined;
     let constructorName = capitalize(thiss._typeof(obj));
+    globalType()
+    console.log('constructorName',constructorName)
+    console.log('theobject',_global[constructorName])
+ 
     let typeConstructor = _global[constructorName];
     let target;
     let arg;

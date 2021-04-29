@@ -1,4 +1,4 @@
- import priv from '.../Komponent/privateVariables'
+ import priv from '../Komponent/privateVariables'
  import { descriptors } from './utils'
 
  const objToDescs = (trg) => {

@@ -1,0 +1,7 @@
+{
+  "name": "ssr",
+  "version": "0.0.0",
+  "dependencies": {
+    "hooks": "file:hooks"
+  }
+}

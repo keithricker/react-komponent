@@ -1,28 +1,53 @@
+
 let thisMod = module;
-let _global;
-try {
-  _global = global;
-} catch {
-  _global = window;
+let _global
+function globalType() {
+  try { 
+    if (global && global.constructor && global.constructor.name.toLowerCase() === 'window') {
+      _global = global
+      return 'window'
+    }
+    if (window) {
+      _global = window
+      return 'window'
+    }
+    _global = global
+    return 'node'
+  } catch { _global = global; return 'node' }
 }
+globalType()
+
 const fs = require("fs");
+const ownProp = (ob,prop) => Reflect.ownKeys(ob).includes(prop)
+const requireThis = () => (globalType() === 'node') ? require : _global.reactKomponent.require
+
+/*
+let params = '?path='+str
+let url = window.location.protocol+"//"+window.location.host+'/require'+params 
+
+let requiredModule = require('require-from-url/sync')(''+url)
+return requiredModule;
+*/
 
 const resolve = function (reqString, base) {
   if (!base) base = this && this !== _global && this.id ? this.id : thisMod.id;
-  return require.resolve(
+  let reslv = requireThis().resolve(
     require("path").resolve(require("path").dirname(base), reqString)
-  );
+  )
+  console.log('reslv!',reslv)
+  return reslv;
 };
-let req = (reqString, base) => {
-  if (!base) base = this && this !== _global && this.id ? this.id : thisMod.id;
-  let dest = resolve(reqString, base);
-  return require("" + dest);
-};
-const getClone = (...arg) => req("./utils").getClone(...arg);
-const isURL = (...arg) => req("./utils").isURL(...arg);
-const merge = (...arg) => req("./utils").merge(...arg);
-const serverHooks = (name) => req("../../../server/server.js").hooks[name]
+
+let req = requireThis()("react-komponent/utils").require
+
+req.base = require('path').resolve(process.cwd(),thisMod.id)
+const getClone = (...arg) => req("./utilsCompiled").getClone(...arg);
+const isURL = (...arg) => req("./utilsCompiled").isURL(...arg);
+const merge = (...arg) => req("./utilsCompiled").merge(...arg);
+const serverHooks = (name) => req("../../../server/ssrHooks.js").ssrHooks[name]
+const postRequest = (...arg) => req("./utilsCompiled").postRequest(...arg)
 let imports = new WeakMap([[dynamicImport, { imports: {} }]]);
+const requireFromUrl = require('./utilsCompiled').requireFromUrl
 
 function functionalImport(required) {
   let _mod = this;
@@ -31,6 +56,7 @@ function functionalImport(required) {
     {
       get(ob, prop) {
         let returnVal = function (...arg) {
+          console.log('requireModz!',[required, _mod.id])
           let requireMod = req(required, _mod.id);
           if (
             prop !== "default" &&
@@ -65,6 +91,7 @@ function functionalImport(required) {
 }
 
 function _Module(_module, type = "single") {
+  let theArgs = [...arguments]
   if (!_module.exports) _module.exports = {};
   let thiss = this;
   let resolveThis = resolve.bind(this);
@@ -73,11 +100,11 @@ function _Module(_module, type = "single") {
     arguments[1] === "single"
       ? undefined
       : new Proxy(_module.exports, {
-          set(ob, key, val) {
+          set(ob,key,val,prx) {
             let returnVal;
             if (key !== "__esModule")
               returnVal = !!Object.defineProperty(ob, key, { value: val });
-            returnVal = !!Reflect.set(...arguments);
+            returnVal = !!Reflect.set(...theArgs);
             if (returnVal) exportSets[key] = val;
           }
         });
@@ -95,10 +122,10 @@ function _Module(_module, type = "single") {
     imports: new Map(),
     requirements: new Map(),
     get type() {
-      if (typeof arguments[1] === "string") return arguments[1];
+      if (typeof theArgs[1] === "string") return theArgs[1];
 
       if (this.mode === "es") {
-        if (Reflect.hasOwnProperty(this[priv].exports, "default")) {
+        if (ownProp(this[priv].exports, "default")) {
           if (Object.keys(this[priv].exports).length === 1) return "single";
         }
         return "multiple";
@@ -129,7 +156,7 @@ function _Module(_module, type = "single") {
         return this[priv].exports;
       }
       let exp = getClone(this[priv].exports);
-      if (!Reflect.hasOwnProperty(exp, "default"))
+      if (!ownProp(exp, "default"))
         Object.defineProperty(exp, "default", {
           get() {
             return self[priv].exports;
@@ -164,7 +191,8 @@ function _Module(_module, type = "single") {
             exportSets = exportSets || {};
             exportSets[name] = exp;
             let returnVal = function (...arg) {
-              let requireMod = require(require.resolve(this[priv].module.id));
+              console.log('requireModder!',requireThis().resolve(this[priv].module.id))
+              let requireMod = require(requireThis().resolve(this[priv].module.id));
               if (
                 !(name in requireMod) &&
                 requireMod.default &&
@@ -180,7 +208,7 @@ function _Module(_module, type = "single") {
               get() {
                 return new Proxy(returnVal, {
                   get(obj, prp) {
-                    let requireMod = require(require.resolve(
+                    let requireMod = require(requireThis().resolve(
                       this[priv].module.id
                     ));
                     return Reflect.get(requiredMod, prp, requiredMod);
@@ -268,7 +296,7 @@ function _Module(_module, type = "single") {
               obj = obj.default;
             else if (obj.default) {
               let name = require("path").parse(mod.id).name;
-              if (!Reflect.hasOwnProperty(mod, name)) {
+              if (!ownProp(mod, name)) {
                 obj = getClone(obj);
                 Object.defineProperty(obj, name, {
                   get() {
@@ -284,7 +312,7 @@ function _Module(_module, type = "single") {
 
           return obj;
         }.bind(thiss);
-        importer.dynamicImport = dynamicImport.bind(thiss);
+        importer.dynamic = dynamicImport.bind(thiss);
         importer.onDemand = functionalImport.bind(thiss);
         return importer;
       })(this),
@@ -305,7 +333,7 @@ function _Module(_module, type = "single") {
             } catch (err) {
             */
             // console.error(err)
-            required = this.compile.babel(resolveThis(mod, base));
+            required = this.compile.babel(resolveThis(mod,base),'object');
             //}
           } else required = req(mod, base);
         }
@@ -345,7 +373,8 @@ function _Module(_module, type = "single") {
     });
   return newModule;
 }
-let Constructor = require("./Obj/helpers").Constructor;
+let Constructor = require("./Obj/helpersCompiled").Constructor;
+
 const theMod = new Constructor(_Module, {
   get imports() {
     if (!imports.has(this)) imports.set(this, new Map());
@@ -356,47 +385,55 @@ const theMod = new Constructor(_Module, {
    return {
      // for transforming es to common
      babel: function (src, path) {
-       src = require("path").resolve(process.cwd(), src || thiss.id);
-       let processed;
-
-       let asString = fs.readFileSync(src, { encoding: "utf8" });
-
-       const babel = require("@babel/standalone");
-       const transform = babel.transform;
-       processed = transform(asString, {
-         presets: ["react", "env"]
-       });
-       /*
-       processed = require("@babel/core").transformFile("" + asString, {
-         presets: ["@babel/preset-react","@babel/preset-env"],
-         plugins: ["@babel/plugin-transform/react-jsx"],
-       });
-       */
-
-       asString = processed.code;
-
-       if (!path) {
-         let parsed = require("path").parse(src);
-         path = `${parsed.dir}/${parsed.name}-Module-babel-compiled.${parsed.ext}`;
+       if (globalType() === 'node') {
+         src = require("path").resolve(process.cwd(), src || thiss.id);
+         return require('./babel-compiler')(src,path)
        }
-       let dest = require("path").resolve(process.cwd(), path);
-       require("fs").writeFileSync(dest, asString);
+       if (path === 'object')
+         path = arguments[1] = undefined
+      
+       let params = '?src='+src
+       if (path) params+='&path='+path
+       let url = window.location.protocol+"//"+window.location.host+'/compile/babel'+params 
+
        if (!arguments[1]) {
-         let dest = src;
-         let requiredModule = req("" + dest, thiss.id);
-         // let requiredModule = require(''+dest)
-         // fs.unlinkSync(dest);
-         return requiredModule;
+         require('./babel-compiler')(src,path)
+         return requireFromUrl(url)
        }
-       return dest;
+       
+       return src;
+
      }.bind(thiss),
-     webpack: function (entry, output, cb) {
-       let nodeExternals = require('webpack-node-externals')
-       let path = require('path')
-       let overrides = [...arguments].find((arg) => typeof arg === "object") || { output:{},resolve:{} }
-       cb =
-         [...arguments].find((arg) => typeof arg === "function") ||
-         function () {};
+     webpack: function (entry, output, id, cb) {
+
+      let args = [...arguments]
+      cb = args.find((arg,ind) => { 
+        if (typeof arg === "function") return args.slice(ind,1)
+      }) || function (...arg) { console.log(arg); return arg };
+
+      let config
+      if (typeof entry === 'object') {
+        config = entry; entry = undefined
+      }
+
+      function compileIt(custom,callback) {
+        let earl = require('react-komponent/utils').Earl
+        var url = earl()
+        url.pathname = '/compile/webpack';
+        return postRequest(url.toString(), custom, 'json', callback);
+      }
+
+      return new Promise(resolve => {
+        const theCb = (res) => {
+          if (id && global[id]) res.id = global[id]
+          let returnVal = [res]
+          if (cb) cb(...returnVal); resolve(...returnVal); 
+        }
+        let argus = config ? { config } : { input:entry,output,id }
+        compileIt(argus,theCb)
+      })
+
+/*
        if (typeof arguments[1] !== 'string') output = undefined
        entry = overrides.entry || entry
        if (typeof entry === "string")
@@ -404,26 +441,32 @@ const theMod = new Constructor(_Module, {
        
        if (typeof output === "string")
          output = path.resolve(process.cwd(), output);
-
-       let asObject = typeof arguments[1] !== "string", library = overrides.output.library
+       else if (overrides.output && overrides.output.filename) {
+         overrides.output.path = overrides.output.path || process.cwd()
+         output = path.resolve(process.cwd(),overrides.output.path,overrides.output.filename)
+       }
+         
+       let asObject = !output, library = overrides.output.library
        if (asObject) {
          let parsed = path.parse(entry),outputName
          if (!overrides.output.path && !overrides.output.filename) {
             outputName = parsed.name+'-webpack-compiled'+parsed.ext
             output = path.resolve(entry.replace(path.basename(entry),''),outputName)
-         } else 
-           output = path.resolve(process.cwd(),overrides.output.path,overrides.output.filename)
+         } 
          
          if (!library) {
           library = parsed.name
           if (library === 'index') {
             library = path.basename(path.dirname(output))
-            if (library === 'src') {
-              let pjson = path.resolve(output,'../','package.json')
-              if (require('fs').existsSync(pjson)) {
-                let parsed = JSON.parse(require('fs').readFileSync(src, { encoding: "utf8" }))
-                if (parsed.name) library = parsed.name
-              }              
+            if (library === 'src') { 
+              if (globalType() === 'node') {
+                let pjson = path.resolve(output,'../','package.json')
+                if (require('fs').existsSync(pjson)) {
+                  let parsed = JSON.parse(require('fs').readFileSync(src, { encoding: "utf8" }))
+                  if (parsed.name) library = parsed.name
+                }
+              }
+              else library = path.dirname(library)           
             }
           }
         }
@@ -448,7 +491,9 @@ const theMod = new Constructor(_Module, {
       overrides = Object.assign(overrides,defaultOverrides) 
 
       let conf = { overrides };
-      let compiler = require("../../../server/compiler").webpack
+
+*/
+    
     
        /*
        let compiled = compiler(conf,function callback(...arg) {
@@ -462,20 +507,19 @@ const theMod = new Constructor(_Module, {
          }
          cb(...arg);
        }); */
-
+/*
        return new Promise((res) => {
          compiler(conf,function callback(...arg) {
            let result
            if (asObject) {
-             result = require(output)
+             result = req(output)
              if (result.default && Object.keys(result).filter(key => key !== 'library').length === 1) result = result.default
-           } else result = fs.readFileSync(output)
-           console.log('result',result)
-           cb(result, ...arg)
-           res(result)
-           return
+           } 
+           if (cb) res(cb(result, ...arg))
+           else res(result)
+           return result
          });
-       });
+       }); */
 
      }.bind(thiss)
    };
@@ -483,87 +527,83 @@ const theMod = new Constructor(_Module, {
   dynamicImport: dynamicImport
 });
 
-function dynamicImport(script, id, callback) {
-  let entry,dir, fs = require("fs"), path = require('path')
-  let output = (typeof callback === 'string') ? arguments[2] : undefined
-  if (output) callback = arguments[3]
-
-  let parsed = require("path").parse(script)
-  let newPath = require('path').resolve(process.cwd(),parsed.dir+'/'+id+'-dynamicImport'+parsed.ext)
-  let isLocal = fs.existsSync(newPath)
-  let isModule = isLocal && !!((function() { try { return !!(Object.keys(require(script)).length) } catch { return false } })())
-
-  if (!output && !isModule) {
-    if (process.env.PUBLIC_URL) dir = process.env.PUBLIC_URL
-    else {
-      Array('public','build','dist').forEach(dirName => {
-        let stat = fs.statSync(path.resolve(process.cwd(),dirName))
-        if (stat && stat.isDirectory()) {
-          dir = dir || dirName
-        }
-      })
-    }
-    if (dir) output = path.resolve(dir,id+'-dynamicImport.js')
-  } else output = path.resolve(process.cwd(),output)
-
-  let globalType =  (_global.constructor.name.toLowerCase() !== 'window') ? 'node' : 'window'
+function dynamicImport(script, output, id, callback) {
   
+  // let entry,dir, fs = require("fs"), path = require('path')
+  callback = Array(...arguments).find(ar => typeof ar === 'function')
+  let theWindow = (globalType() === 'node') ? { location: require('./utilsCompiled').Earl(process.env.serverUrl) } : _global
+  let fetchit = require('./utilsCompiled').fetchit
+
+  if (!isURL(script)) {
+    if (!script.indexOf(process.cwd()) === 0) {
+      if (script.indexOf('/') === 0) script = '.'+script
+      script = require('path').resolve(process.cwd(),script)
+    }
+  }
+  let params = {
+    url: encodeURIComponent(script),
+    format:'url',
+    cache:'true'
+  }
+
+  if (arguments[1]) params.id = id
+  if (output) params.output = encodeURIComponent(require('path').resolve(process.cwd(),output))
+
   let scriptArg = {
     id,
     src: script,
     async: false
   }
+ 
+  let url = 'dynamicScript'
+  let earl = req("./utilsCompiled").Earl
 
-  if (!output) return insertTag(callback)
-
-  if (isURL(script)) {
-    let fetchData = require('../../server/fetchData.js')
-    return fetchData(script,(res) => {
-      fs.writeFileSync(res,output,'utf-8')
-      return dynamicImport(output,id,output,callback)
-    })
-  }
-  let asyncRes, newProps;
-  let overrides = {
-    entry: entry || path.resolve(process.cwd(),script),
-    target: 'web'
+  if (!output) {
+    params.format = 'file'
+    scriptArg.src = earl.format({...theWindow.location,pathname:'/'+url,query:params})
+    fetchit(url,params,theWindow,res => insertTag(callback)) 
+    return 
   }
 
-  let filename = path.basename(output)
-  let splitPath = output.split(filename)
-  let thePath = splitPath[splitPath.length -2]
-  overrides.output = { 
-    path:thePath,
-    filename,
-    library:id,
-    libraryTarget:'umd'
-  }
+  return new Promise(resolve => {
 
-  theMod.compile.webpack(overrides, (res) => {
-    console.log('res!',res)
-    scriptArg.src = output
-    return insertTag(callback)
+    const cb = (res) => {
+      let text = res.text()
+      let eventHook = function(...arg) {  
+
+        if (window[id]) arg.unshift(window[id])
+        else arg.unshift(require('react-komponent/utils').browserRequire(scriptArg.src))
+        let result = arg
+        if (callback) {
+          result = callback(...arg) 
+          resolve(result)
+          return result
+        } 
+        resolve(...arg) 
+        return
+      }
+      scriptArg.src = text || output
+      insertTag(eventHook)
+    }
+    let file = fetchit(url,params,window,cb)
   })
 
-  if (!callback)
-    return new Promise((res) => {
-      asyncRes = res;
-    });
-
   function insertTag(cb=callback) {
-    let dom
-    if (globalType === 'node') {
+    if (globalType() === 'node') {
       let hook = serverHooks('constructor')
       return hook(it,true)
     } 
-    dom = new (require("./DOM"))()
 
+    let domarg = Array(globalType() === 'window' ? document : undefined).filter(Boolean)
+    return it(require("./DOMCompiled")(...domarg))
+    
     function it(dom) {
+
       let theTag = dom.create("script", scriptArg);
       function loaded(res) {
         console.log('locked and loaded')
         if (global[id]) theTag = global[id]
-        if (asyncRes) return asyncRes(theTag,res);
+        console.log('-----theRes---------',res)
         return cb(theTag,res);
       }
       theTag.onload = loaded

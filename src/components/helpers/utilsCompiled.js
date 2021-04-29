@@ -1,68 +1,54 @@
 "use strict";
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+var _typeof3 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-function _typeof2(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _toConsumableArray2(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+var _toConsumableArray3 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof2(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-var React = require("react");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var path = require("path"); // const Obj = require('./Obj')
 
 
 var _Proxy = function _Proxy() {
-  var Prox = require("./_Proxy")["default"];
+  var Prox = require("./_ProxyCompiled")["default"];
 
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
     args[_key] = arguments[_key];
   }
 
-  return !args.length ? Prox : _construct(Prox, args);
+  return !args.length ? Prox : (0, _construct2["default"])(Prox, args);
 };
 
 var proto = {
@@ -72,11 +58,32 @@ var proto = {
 
 var _global;
 
-try {
-  _global = window;
-} catch (_unused) {
-  _global = global;
+function globalType() {
+  try {
+    if (global && global.constructor && global.constructor.name.toLowerCase() === 'window') {
+      _global = global;
+      return 'window';
+    }
+
+    if (window) {
+      _global = window;
+      return 'window';
+    }
+
+    _global = global;
+    return 'node';
+  } catch (_unused) {
+    _global = global;
+    return 'node';
+  }
 }
+
+globalType();
+var requireFunction = require;
+var caches = {};
+Array('require', 'isURL', 'isJSON', 'isDescriptor').forEach(function (key) {
+  return caches[key] = new Map();
+});
 
 function _if(exp, more) {
   if (!more && typeof exp === "function") {
@@ -181,12 +188,99 @@ var thiss = module.exports = {
   _undef: function _undef(varble) {
     return typeof varble === "undefined";
   },
+
+  get Earl() {
+    var Earl = function Earl(_url) {
+      var thePort;
+      var thePathname;
+      if (!thiss.isURL(_url)) thePathname = _url;
+
+      if (!_url || thePathname) {
+        if (globalType() === 'node') {
+          _url = process.env.serverUrl;
+        } else {
+          _url = _global.location.origin;
+          thePort = _global.location.port;
+        }
+      }
+
+      var portMatch = _url.match(/(?:[0-9]+(?:\/|))$/);
+
+      if (portMatch && portMatch[0]) {
+        _url.slice(_url.lastIndexOf(portMatch[0]), portMatch[0].length);
+
+        thePort = portMatch[0].replace(/\/$/, '');
+      }
+
+      var urls = globalType() === 'node' ? require('url') : {
+        URL: URL
+      };
+      var URLz = urls.URL;
+      var burl = new URLz(_url);
+      if (thePort) burl.port = thePort;
+      if (thePathname) burl.pathname = thePathname;
+      var furl = {};
+      Reflect.ownKeys(Object.getPrototypeOf(burl)).concat(Reflect.ownKeys(burl)).filter(function (key) {
+        return key !== 'constructor';
+      }).forEach(function (key) {
+        Object.defineProperty(furl, key, {
+          get: function get() {
+            var prop = Reflect.get(burl, key, burl);
+            return typeof prop === 'function' ? prop.bind(burl) : burl[key];
+          },
+          set: function set(val) {
+            return !!(burl[key] = val);
+          },
+          enumerable: typeof burl[key] === 'function' ? false : true
+        });
+      });
+      return furl;
+    };
+
+    Earl.format = function (obj) {
+      if (!obj.hostname) throw new Error('Could not format new URL: hostname is a required option');
+      obj.protocol = obj.protocol || 'http';
+      var sturl = obj.protocol + '//' + obj.hostname;
+      var newURL = Earl(sturl);
+      var origin = obj.origin ? Earl(obj.origin) : {};
+      Object.keys(origin).filter(function (key) {
+        return typeof origin[key] === 'string' && key !== 'origin';
+      }).forEach(function (key) {
+        try {
+          newURL[key] = origin[key];
+        } catch (_unused5) {}
+      });
+      Object.keys(newURL).filter(function (key) {
+        return typeof obj[key] === 'string' && key !== 'origin';
+      }).forEach(function (key) {
+        try {
+          newURL[key] = obj[key];
+        } catch (_unused6) {}
+      });
+
+      if (!obj.search && obj.query) {
+        var theSearch = '?';
+        Object.keys(obj.query).forEach(function (key, ind) {
+          if (ind !== 0) theSearch += '&';
+          theSearch += key + '=' + obj.query[key];
+        });
+        newURL.search = theSearch;
+      }
+
+      return newURL.toString();
+    };
+
+    return Earl;
+  },
+
   isURL: function isURL(url) {
+    if (caches.isURL.has(url)) return caches.isURL.get(url);
     if (typeof url !== "string") return false;
     if (!thiss.isURL.pattern) thiss.isURL.pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-    return thiss.isURL.pattern.test(url) ? true : false;
+    return thiss.isURL.pattern.test(url);
   },
   isJSON: function isJSON(data) {
+    if (caches.isJSON.has(data)) return caches.isJSON.get(url);
     if (typeof data !== "string") return false;
     data = data.trim();
     var match = data.match(/\{[^{}]+\}/) || [];
@@ -196,22 +290,654 @@ var thiss = module.exports = {
     var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 32;
     return Math.round(Math.pow(36, length + 1) - Math.random() * Math.pow(36, length)).toString(36).slice(1);
   },
-  Problem: /*#__PURE__*/function (_Error) {
-    _inherits(Problem, _Error);
+  fetchit: function fetchit(url) {
+    var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var wind = arguments.length > 2 ? arguments[2] : undefined;
+    var theFetch, theWindow, callback;
+    callback = Array.apply(void 0, arguments).find(function (arg) {
+      return typeof arg === 'function';
+    });
 
-    var _super = _createSuper(Problem);
+    if (globalType() === 'node') {
+      theFetch = require('node-fetch');
+      theWindow = wind || {
+        location: thiss.Earl(thiss.Earl().toString())
+      };
+    } else {
+      theFetch = require('react-komponent/modules/browser').fetch;
+      theWindow = wind || _global;
+    }
 
-    function Problem() {
-      _classCallCheck(this, Problem);
+    var isurl = thiss.isURL(url);
+    var location = isurl ? thiss.Earl(url) : _objectSpread({}, theWindow.location);
+    if (!isurl && String(url)[0] !== '/') url = '/' + url;
+    if (!isurl) location.pathname = url;
+
+    var earlOptions = _objectSpread(_objectSpread({}, location), {}, {
+      query: params
+    });
+
+    var earl = thiss.Earl.format(earlOptions);
+    return thiss.fetchResponse(theFetch(earl)).then(function (res) {
+      return callback ? callback(res) : res;
+    }); // For text: theFetch(earl).then(res => res.text()).then(res => callback(res))
+  },
+  fetchResponse: function fetchResponse(response) {
+    var isErr = function isErr(ob) {
+      return ob instanceof Error;
+    };
+
+    var obj = {};
+    var theRes;
+
+    var prom = function prom(resolve) {
+      return new Promise(function (res) {
+        return res(resolve);
+      });
+    };
+
+    return response.then(function (res) {
+      theRes = res;
+
+      try {
+        return res.text();
+      } catch (err) {
+        return prom(err);
+      }
+    }).then(function (txt) {
+      obj.text = function () {
+        if (isErr(txt)) throw txt;
+        return txt;
+      };
+
+      obj.json = function () {
+        return JSON.parse(obj.text());
+      };
+
+      obj.arrayBuffer = function () {
+        return new TextEncoder(obj.text()).buffer; // always utf-8 
+      };
+
+      try {
+        return theRes.clone().blob();
+      } catch (err) {
+        return prom(err);
+      }
+    }).then(function (blb) {
+      obj.blob = function () {
+        if (isErr(blb)) throw blb;
+        return blb;
+      };
+
+      try {
+        return theRes.clone().formData();
+      } catch (err) {
+        return prom(err);
+      }
+    }).then(function (fd) {
+      obj.formData = function () {
+        if (isErr(fd)) throw fd;
+        return fd;
+      };
+
+      return prom(obj);
+    }).then(function (obj) {
+      return obj;
+    });
+  },
+  postRequest: function () {
+    var _postRequest = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(url) {
+      var data,
+          format,
+          callback,
+          fetchit,
+          earl,
+          response,
+          _args = arguments;
+      return _regenerator["default"].wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              data = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
+              format = _args.length > 2 ? _args[2] : undefined;
+              callback = _args.length > 3 ? _args[3] : undefined;
+              fetchit = require('react-komponent/modules/browser').fetch;
+
+              if (!thiss.isURL(url)) {
+                earl = thiss.Earl().toString();
+                earl = thiss.Earl(earl);
+                earl.pathname = url.indexOf('/') === 0 ? url : '/' + url;
+                url = earl.toString();
+              }
+
+              if (_args.length < 3 && typeof format === 'function') {
+                callback = format;
+                format = 'path';
+              }
+
+              data.format = format; // Default options are marked with *
+
+              response = fetchit(url, {
+                method: 'POST',
+                // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors',
+                // no-cors, *cors, same-origin
+                cache: 'no-cache',
+                // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin',
+                // include, *same-origin, omit
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                redirect: 'follow',
+                // manual, *follow, error
+                referrerPolicy: 'no-referrer',
+                // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify(data) // body data type must match "Content-Type" header
+
+              });
+              _context.next = 10;
+              return thiss.fetchResponse(response);
+
+            case 10:
+              response = _context.sent;
+              if (format === 'string' || format === 'path') response = response.text();else if (format && response[format]) response = response[format]();else response = response.json();
+              return _context.abrupt("return", callback ? callback(response) : response);
+
+            case 13:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    function postRequest(_x) {
+      return _postRequest.apply(this, arguments);
+    }
+
+    return postRequest;
+  }(),
+
+  get jsdom() {
+    return function () {
+      var jsdom = global.reactKomponent.jsdom;
+      var JSDOM = jsdom.JSDOM;
+      var virtualConsole = new jsdom.VirtualConsole();
+      virtualConsole.on("error", function (err) {
+        throw new Error(err);
+      });
+      virtualConsole.sendTo(console);
 
       for (var _len2 = arguments.length, arg = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
         arg[_key2] = arguments[_key2];
       }
 
+      return (0, _construct2["default"])(JSDOM, arg);
+    };
+  },
+
+  get baseRequire() {
+    var requireFunction = require;
+    var reqr;
+    if (globalType() === 'node') reqr = requireFunction;else if (_global.reactKomponent.require) reqr = _global.reactKomponent.require;
+    return function (func, theBase, theString) {
+      var reqFunc = function require() {
+        var reqString = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : theString;
+        var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : theBase;
+
+        for (var _len3 = arguments.length, additional = new Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+          additional[_key3 - 2] = arguments[_key3];
+        }
+
+        if (globalType() === 'node' || _global.reactKomponent.require) {
+          var resolvEr = function resolvEr(theBase) {
+            try {
+              if (require.resolve(thePath) || thePath.indexOf(theBase) === 0) return require.resolve(thePath);
+            } catch (_unused7) {}
+
+            if (thePath.indexOf('/') === 1) resolved = path.resolve(theBase, '.' + thePath);else if (!thePath.indexOf('.') === 1) resolved = path.resolve(theBase, './' + thePath);
+
+            try {
+              if (require.resolve(resolved)) return require.resolve(resolved);
+            } catch (_unused8) {}
+
+            try {
+              if (require.resolve(path.resolve(thePath))) return require.resolve(path.resolve(thePath));
+            } catch (_unused9) {}
+
+            return thePath;
+          };
+
+          var resolved;
+          if (!base) resolved = resolvEr(process.cwd());else resolved = resolvEr(base);
+          return func.apply(void 0, [resolved, base].concat(additional));
+        }
+
+        var basename = function basename(pth) {
+          var parse = path.parse(pth);
+          if (parse) return parse.base;
+          return pth;
+        };
+
+        var dirname = function dirname(pth) {
+          var parsed = path.parse(pth);
+          return !parsed.base.includes('.') ? pth : parsed.dir;
+        };
+
+        var newBase = dirname(thiss.browserRequire.resolve(base, reqString).path);
+        var newBaseReq = thiss.baseRequire(func, newBase);
+        var bn = reqString.includes('/') ? basename(reqString) : reqString;
+        return newBaseReq.apply(void 0, [bn, newBase].concat(additional));
+        /*
+        if (!base && reqFunc.base) base = reqFunc.base
+        if (thiss.isURL(reqString) && func.name === 'browserRequire')
+          return func(...arguments)
+         if (!base) {
+          if (reqString.indexOf(process.cwd()) === 0)
+            return func(...arguments)
+          if (reqString.indexOf('/') === 0) reqString = '.'+reqString
+          if (reqString.indexOf('.') !== 0 && reqString.indexOf('/') !== 0 && !path.parse(reqString).base.includes('.'))
+            try { 
+              return func(...arguments) 
+            } catch {
+              return func(reqr('path').resolve(process.cwd(),reqString),base,...additional)
+            }
+          return func(reqr('path').resolve(process.cwd(),reqString),base,...additional)
+        }
+         let path = reqr('path')
+        if (path.basename(base).includes('.')) 
+          base = path.dirname(base)
+         let newBase,newBaseReq
+         let basename = (pth) => {
+          let parse = path.parse(pth)
+          if (parse) return parse.base
+          return pth
+        }
+        const dirname = (pth) => {
+          let parsed = path.parse(pth)
+          return (!parsed.base.includes('.')) ? pth : parsed.dir
+        }
+         function tryRequire(bs,reslv) {
+          let result
+          try {  
+            newBase = dirname(reqr.resolve(reslv))
+            newBaseReq = thiss.baseRequire(func,newBase)
+            result = newBaseReq(basename(reqString),newBase,...additional)
+          } catch {}
+          if (result) return result
+          try {
+            newBase = bs                 
+            newBaseReq = thiss.baseRequire(func,newBase)
+            let bn = (reqString.includes('/')) ? basename(reqString) : reqString
+            return newBaseReq(bn,newBase,...additional)    
+           } catch { return }                
+        }
+         if ((!(reqString.indexOf('/') === 0) && !(reqString.indexOf('.') === 0)) || (reqString.indexOf('/') === 0 && !(reqString.indexOf(process.pwd()) === 0)) && !(reqString.indexOf(base) === 0)) {
+               let returnReq = Array(base,process.cwd(),reqBase).map(bs => tryRequire(bs,reqString).filter(Boolean))
+          if (returnReq.length) return returnReq[0]
+          
+          reqString = './'+reqString
+          let reslv = path.resolve(base,reqString)
+          let returnReq = Array(
+            path.resolve(base,dirname(reqString)),
+            path.resolve(process.cwd(),dirname(reqString))
+          )
+          .map(res => tryRequire(res,reslv).filter(Boolean))
+          if (returnReq.length) return returnReq[0]  
+        }            
+         if (reqString.indexOf('.') === 0) {
+           let resolved = path.resolve(base,reqString)
+          newBase = dirname(resolved)
+          return tryRequire(newBase,resolved)
+        }
+        if (reqString.indexOf(process.cwd()) === 0) {
+          newReq = reqString
+          newBase = dirname(reqString)
+          return tryRequire(newBase,reqString)
+        }
+        if (reqString.indexOf(base) === 0 || path.resolve(reqString).indexOf(path.resolve(base)) === 0) {
+          newReq = reqString
+          newBase = base
+          return tryRequire(newBase,reqString)
+        }
+        */
+
+        var newFunc = thiss.baseRequire(func, base);
+        return newFunc(reqString);
+      };
+
+      if (theBase) reqFunc.base = theBase;
+      if (theString) return reqFunc();
+      return thiss.cloneFunc(func, reqFunc);
+    };
+  },
+
+  resolve: function resolve(path, base) {
+    var req;
+
+    try {
+      req = require;
+    } catch (_unused10) {
+      req = global.reactKomponent.require;
+    }
+
+    if (globalType() === 'node' || global.reactKomponent.require) {
+      if (!base) {
+        return req.resolve(path);
+      }
+    } else return thiss.serverFetch('resolver', {
+      path: path,
+      base: base,
+      type: 'resolve'
+    });
+
+    var pth = require('path');
+
+    var appRoot;
+
+    try {
+      appRoot = global.reactKomponent.paths.appPath || process.cwd();
+    } catch (_unused11) {
+      appRoot = process.cwd();
+    }
+
+    var alternate = base,
+        theBase = base,
+        originalBase = theBase,
+        newBass,
+        resolved;
+    if (pth.basename(theBase).includes('.')) theBase = pth.dirname(theBase);
+    theBase = pth.resolve(theBase);
+    if (theBase.indexOf("/") === 0 && theBase.indexOf(appRoot) !== 0) theBase = theBase.replace('/', appRoot);
+    if (path.indexOf("/") === 0 && String(path)[1] !== "/" && path.indexOf(appRoot) !== 0 && (!originalBase || path.indexOf(originalBase) !== 0)) try {
+      path = path.replace("/", appRoot);
+      resolved = req.resolve(path);
+    } catch (_unused12) {
+      path = '.' + path;
+    }
+
+    if (path.indexOf(appRoot) === 0 || path.indexOf(alternate) === 0) {
+      newBass = pth.dirname(path);
+      path = pth.basename(path);
+      console.log({
+        newBass: newBass,
+        path: path
+      });
+      Array(newBass, alternate).some(function (str) {
+        try {
+          resolved = pth.resolve(str, path);
+          req.resolve(resolved);
+        } catch (err) {
+          console.error(err);
+        }
+      });
+      console.log("resolved!", resolved);
+    }
+
+    if (!resolved && path.indexOf(".") !== 0 && path.indexOf("/") !== 0 && !pth.basename(path).includes(".") || thePath.indexOf(process.cwd() === 0)) {
+      try {
+        if (req.resolve(path)) {
+          resolved = req.resolve(path);
+          newBass = pth.dirname(resolved);
+          path = pth.basename(resolved);
+        }
+      } catch (_unused13) {}
+    } else if (base && thePath.indexOf(base) === 0) try {
+      resolved = require.resolve(path.resolve(path.resolve(base), thePath));
+    } catch (_unused14) {
+      try {
+        resolved = require.resolve(path.resolve(require.resolve(base), thePath));
+      } catch (_unused15) {}
+    }
+
+    if (!resolved && path.indexOf("/") === 0 && path.indexOf(appRoot) !== 0) path = "." + path;
+
+    if (!resolved) {
+      var bass = newBass || base;
+      resolved = pth.resolve(bass, path);
+    } else resolved = resolved || path;
+
+    if (resolved.indexOf(process.cwd()) === 0 && resolved.indexOf(appRoot) !== 0) {
+      resolved = resolved.replace(process.cwd(), appRoot);
+    }
+
+    if (resolved) console.log("resolved", resolved);
+    return resolved;
+  },
+
+  get require() {
+    var req;
+    if (globalType() === 'node') req = requireFunction;else if (_global.reactKomponent.require) req = _global.reactKomponent.require;else req = thiss.browserRequire;
+
+    var reqFunc = function require(modPath, base) {
+      if (base) reqFunc.base = base;else base = reqFunc.base;
+      return base ? req(thiss.resolve(modPath, base)) : req(modPath);
+    };
+
+    Object.defineProperties(reqFunc, Object.getOwnPropertyDescriptors(req));
+
+    reqFunc.resolve = function resolve() {
+      var _req;
+
+      return arguments.length > 1 ? thiss.resolve.apply(thiss, arguments) : (_req = req).resolve.apply(_req, arguments);
+    }; // const reqFunc = thiss.baseRequire(req)
+    // Object.defineProperties(reqFunc,Object.getOwnPropertyDescriptors(req))
+
+
+    return reqFunc;
+  },
+
+  get serverFetch() {
+    return global.reactKomponent.serverFetch;
+  },
+
+  get newRequire() {
+    function theRequirer(theBase) {
+      var theRequire = function theRequire(path, base) {
+        console.log("received", path);
+        console.log("referrerer", theRequire.referrer);
+        if (!base) base = theRequire.base;
+        console.log("the base", base);
+        var fetched = thiss.serverFetch('resolver', {
+          path: encodeURIComponent(path),
+          base: encodeURIComponent(base)
+        });
+        console.log('fetched', fetched);
+        throw new Error('fwayer');
+        var code = fetched.code,
+            newBase = fetched.newBase,
+            resolved = fetched.resolved;
+        var modl = {
+          exports: {}
+        };
+        var args = {
+          module: modl,
+          exports: modl.exports,
+          global: global,
+          window: window,
+          document: document,
+          require: theRequirer(newBase)
+        };
+        newBass = require('path').dirname(resolved);
+        args.require.base = newBase;
+        args.require.referrer = resolved;
+        (0, _construct2["default"])(Function, (0, _toConsumableArray3["default"])(Object.keys(args)).concat([code])).apply(void 0, (0, _toConsumableArray3["default"])(Object.values(args)));
+        var App = modl.exports;
+        if (Object.keys(modl.exports).length === 1 && modl.exports["default"]) App = modl.exports["default"];
+        return App;
+      };
+
+      if (theBase) theRequire.base = theBase;
+      if (arguments.length === 2) return theRequire.apply(void 0, arguments);
+      return theRequire;
+    }
+
+    return theRequirer;
+  },
+
+  get browserRequire() {
+    var browserRequire = function browserRequire(script, base) {
+      var compile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      var format = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'json';
+      if (!base) base = browserRequire.base;
+
+      if (globalType() === 'node' || _global.reactKomponent.require) {
+        var reqr;
+
+        try {
+          reqr = require;
+        } catch (_unused16) {
+          reqr = _global.reactKomponent.require;
+        }
+
+        if (!base) return reqr(script);else return thiss.baseRequire(reqr, base, script);
+      }
+
+      if (!thiss.isURL(script)) {
+        var port = !!window.location.port ? ':' + window.location.port : '';
+        var query = "?path=".concat(encodeURIComponent(script), "&compile=").concat(compile, "&base=").concat(base, "&format=").concat(format);
+        script = window.location.protocol + "//" + window.location.host + '/require' + port + query;
+      }
+
+      var theScript = function theScript() {
+        var request = new XMLHttpRequest();
+        request.open('GET', script, false); // `false` makes the request synchronous
+
+        request.send(null);
+
+        if (request.status === 200) {
+          window.dynamicScriptResult = request.responseText;
+        }
+      };
+
+      var fn = theScript.toString().replace("'GET', script,", "'GET', '".concat(script, "',"));
+      var scriptToString = fn.substring(fn.indexOf("{") + 1, fn.lastIndexOf("}"));
+      var dom = thiss.jsdom("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title></title><script id=\"theScript\">".concat(scriptToString, "</script></head><body></body></html>"));
+      if (format === 'resolve') return JSON.parse(dom.window.dynamicScriptResult);
+
+      var _JSON$parse = JSON.parse(dom.window.dynamicScriptResult),
+          code = _JSON$parse.code,
+          parsed = _JSON$parse.parsed;
+
+      return thiss.requireFromString(code, false, parsed.dir);
+    };
+
+    browserRequire.resolve = function (script, base) {
+      return browserRequire(script, base, false, 'resolve');
+    };
+
+    return thiss.baseRequire(browserRequire);
+  },
+
+  get requireFromString() {
+    var requireCache = caches.require;
+    if (globalType() === 'node') return require('require-from-string');
+    if (_global.reactKomponent.requireFromString) return _global.reactKomponent.requireFromString;
+
+    var requireFromString = function requireFromString(code) {
+      var compile = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var base = arguments.length > 2 ? arguments[2] : undefined;
+      if (!requireCache.has('requireFromString')) requireCache.set('requireFromString', new Map());
+      var rfsCache = requireCache.get('requireFromString');
+      if (rfsCache.has(code)) return rfsCache.get(code).exports;
+
+      if (compile) {
+        var transform = require('./babel-compiler');
+
+        code = transform(code, 'string');
+      }
+
+      if (!base) base = requireFromString.base;
+      var globals;
+
+      try {
+        globals = require('react-komponent/modules/universal').globals;
+      } catch (_unused17) {
+        globals = reactKomponent.globals;
+      }
+
+      var modl = {
+        exports: {}
+      };
+      var wind = Object.defineProperties({}, Object.getOwnPropertyDescriptors(window));
+
+      var args = _objectSpread(_objectSpread({}, global), {}, {
+        window: window,
+        self: window,
+        "this": window
+      }, globals);
+
+      Object.assign(args, {
+        module: modl,
+        exports: modl.exports,
+        window: wind
+      });
+      args.require = thiss.browserRequire;
+      args.require.base = base;
+      (0, _construct2["default"])(Function, (0, _toConsumableArray3["default"])(Object.keys(args)).concat([code])).apply(void 0, (0, _toConsumableArray3["default"])(Object.values(args)));
+      rfsCache.set(code, modl);
+      var App = modl.exports;
+      if (Object.keys(modl.exports).length === 1 && modl.exports["default"]) App = modl.exports["default"];
+      return App;
+    };
+
+    return requireFromString;
+  },
+
+  get requireFromUrl() {
+    var requireCache = caches.require;
+    if (globalType() === 'node') return require('require-from-url');
+    if (_global.reactKomponent.browserNode) return _global.reactKomponent.require('require-from-url/sync');
+    return function (name) {
+      if (!requireCache.has('requireFromUrl')) requireCache.set('requireFromUrl', new Map());
+      var rfuCache = requireCache.get('requireFromUrl');
+      if (rfuCache.has(name)) return rfuCache.get(name);
+      var request = new XMLHttpRequest();
+      request.open('GET', name, false);
+      request.send();
+      code = request.responseText;
+      var mojule = thiss.requireFromString(code);
+      rfuCache.set(name, mojule);
+      return mojule;
+    };
+  },
+
+  get dynamicRequire() {
+    var dynamicRequire = function dynamicRequire(name) {
+      var requireCache = caches.require;
+      if (thiss.isURL(name)) return thiss.requireFromUrl(name);
+      if (!requireCache.has('dynamicRequire')) requireCache.set('dynamicRequire', new Map());
+      var drCache = requireCache.get('dynamicRequire');
+      if (drCache.has(name)) return drCache.get(name).exports;
+
+      var code = require('fs').readFileSync(name, 'utf8');
+
+      var mod = thiss.requireFromString(code);
+      drCache.set(name, mod);
+      return mod;
+    };
+
+    Object.defineProperties(dynamicRequire, Object.getOwnPropertyDescriptors(require));
+    return dynamicRequire;
+  },
+
+  Problem: /*#__PURE__*/function (_Error) {
+    (0, _inherits2["default"])(Problem, _Error);
+
+    var _super = _createSuper(Problem);
+
+    function Problem() {
+      (0, _classCallCheck2["default"])(this, Problem);
+
+      for (var _len4 = arguments.length, arg = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        arg[_key4] = arguments[_key4];
+      }
+
       return _super.call.apply(_super, [this].concat(arg));
     }
 
-    _createClass(Problem, [{
+    (0, _createClass2["default"])(Problem, [{
       key: "log",
       get: function get() {
         var stackTrace;
@@ -226,20 +952,19 @@ var thiss = module.exports = {
           if (find) find = find[1] || find[2];
           if (typeof find !== "string") return;
           trace[find] = st;
-          var url = st.match(isURL.pattern);
+          var url = st.match(thiss.isURL.pattern);
           trace[find] = url ? url[0] : st;
         });
         return trace;
       }
     }]);
-
     return Problem;
-  }( /*#__PURE__*/_wrapNativeSuper(Error)),
+  }( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Error)),
   isClass: function isClass(func) {
     return is["class"](func);
   },
   _last: function _last(arr) {
-    return _toConsumableArray2(arr).pop();
+    return (0, _toConsumableArray3["default"])(arr).pop();
   },
   tryCatch: function tryCatch(exp, cb) {
     var res;
@@ -261,8 +986,8 @@ var thiss = module.exports = {
     var thiss = this;
     var RB = {
       descriptor: function descriptor(object, property) {
-        for (var _len3 = arguments.length, bindArgument = new Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-          bindArgument[_key3 - 2] = arguments[_key3];
+        for (var _len5 = arguments.length, bindArgument = new Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+          bindArgument[_key5 - 2] = arguments[_key5];
         }
 
         var _ref = arguments.length === 1 ? arguments[0] : {},
@@ -286,12 +1011,12 @@ var thiss = module.exports = {
             var _desc$key;
 
             var _original = desc[key];
-            desc[key] = (_desc$key = desc[key]).bind.apply(_desc$key, _toConsumableArray2(bind));
+            desc[key] = (_desc$key = desc[key]).bind.apply(_desc$key, (0, _toConsumableArray3["default"])(bind));
             Array("bind", "apply", "call").forEach(function (meth) {
               Object.defineProperty(desc[key], meth, {
                 value: function value() {
-                  for (var _len4 = arguments.length, arg = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-                    arg[_key4] = arguments[_key4];
+                  for (var _len6 = arguments.length, arg = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+                    arg[_key6] = arguments[_key6];
                   }
 
                   if (arg[0]) {
@@ -315,8 +1040,8 @@ var thiss = module.exports = {
       ownDescriptor: function ownDescriptor(object, property) {
         if (!object.hasOwnProperty(property)) return;
 
-        for (var _len5 = arguments.length, bind = new Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
-          bind[_key5 - 2] = arguments[_key5];
+        for (var _len7 = arguments.length, bind = new Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
+          bind[_key7 - 2] = arguments[_key7];
         }
 
         return this.descriptor.apply(this, [object, property].concat(bind));
@@ -354,8 +1079,8 @@ var thiss = module.exports = {
     };
 
     var ReflectBind = function ReflectBind() {
-      for (var _len6 = arguments.length, bind = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
-        bind[_key6] = arguments[_key6];
+      for (var _len8 = arguments.length, bind = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+        bind[_key8] = arguments[_key8];
       }
 
       if (!bind.length) return RB;
@@ -363,8 +1088,8 @@ var thiss = module.exports = {
         var property = RB[key];
 
         RB[key] = function () {
-          for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
-            args[_key7] = arguments[_key7];
+          for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
+            args[_key9] = arguments[_key9];
           }
 
           args.splice.apply(args, [2, 0].concat(bind));
@@ -391,45 +1116,44 @@ var thiss = module.exports = {
   },
   Args: function Args(cb) {
     var newfunc = function newfunc() {
-      for (var _len8 = arguments.length, arg = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
-        arg[_key8] = arguments[_key8];
+      for (var _len10 = arguments.length, arg = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
+        arg[_key10] = arguments[_key10];
       }
 
-      return cb(argsProxy(arg));
+      return cb(thiss.argsProxy(arg));
     };
 
     return newfunc;
   },
   Funktion: /*#__PURE__*/function (_Function) {
-    _inherits(Funktion, _Function);
+    (0, _inherits2["default"])(Funktion, _Function);
 
     var _super2 = _createSuper(Funktion);
 
     function Funktion(func, props) {
       var _this;
 
-      _classCallCheck(this, Funktion);
-
-      props = arguments[1] || _typeof2(arguments[0]) === "object" && arguments[0];
+      (0, _classCallCheck2["default"])(this, Funktion);
+      props = arguments[1] || (0, _typeof3["default"])(arguments[0]) === "object" && arguments[0];
       func = typeof arguments[0] === "function" ? arguments[0] : props && props["function"] && props["function"];
       if (props) delete props["function"];
       var name = props.hasOwnProperty("name") && props.name || func.name || "funktion";
       delete props.name;
 
       function funktionCaller(fun, binder) {
-        for (var _len9 = arguments.length, ar = new Array(_len9 > 2 ? _len9 - 2 : 0), _key9 = 2; _key9 < _len9; _key9++) {
-          ar[_key9 - 2] = arguments[_key9];
+        for (var _len11 = arguments.length, ar = new Array(_len11 > 2 ? _len11 - 2 : 0), _key11 = 2; _key11 < _len11; _key11++) {
+          ar[_key11 - 2] = arguments[_key11];
         }
 
         return fun.call.apply(fun, [binder].concat(ar));
       }
 
-      var funktion = _defineProperty({}, name, function () {
-        for (var _len10 = arguments.length, ar = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
-          ar[_key10] = arguments[_key10];
+      var funktion = (0, _defineProperty2["default"])({}, name, function () {
+        for (var _len12 = arguments.length, ar = new Array(_len12), _key12 = 0; _key12 < _len12; _key12++) {
+          ar[_key12] = arguments[_key12];
         }
 
-        var ao = argsProxy(ar);
+        var ao = thiss.argsProxy(ar);
         var binder = new Proxy(this || _global, {
           get: function get(ob, prop) {
             if (prop in ob) return ob[prop];
@@ -439,7 +1163,6 @@ var thiss = module.exports = {
         });
         return !ao ? funktionCaller.apply(void 0, [func, binder].concat(Array.prototype.slice.call(arguments))) : funktionCaller(func, binder, ao);
       })[name];
-
       Object.defineProperty(funktion, "name", {
         value: name,
         writable: false,
@@ -452,15 +1175,15 @@ var thiss = module.exports = {
       });
       _this = _super2.call(this);
       if (props && "__proto__" in props) Object.setPrototypeOf(funktion, props["__proto__"]);
-      merge(funktion, _assertThisInitialized(_this), ["name"]);
+      merge(funktion, (0, _assertThisInitialized2["default"])(_this), ["name"]);
       if (props) merge(funktion, props, ["name", "__proto__"]);
       if (!props["__proto__"]) proto.set(funktion, _this.constructor.prototype);
       funktion.prototype.constructor = funktion;
-      return _possibleConstructorReturn(_this, funktion);
+      return (0, _possibleConstructorReturn2["default"])(_this, funktion);
     }
 
     return Funktion;
-  }( /*#__PURE__*/_wrapNativeSuper(Function)),
+  }( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Function)),
 
   /*  alternative to the switch statement  */
   swap: function swap(cond, mp) {
@@ -482,7 +1205,7 @@ var thiss = module.exports = {
     return new Date() - start;
   },
   contract: function contract(input, then) {
-    if (isPromise(input)) return then ? input.then(function (done) {
+    if (input instanceof Promise) return then ? input.then(function (done) {
       return then(done);
     }) : input;
     return then ? then(input) : input;
@@ -493,7 +1216,7 @@ var thiss = module.exports = {
     function iterate(prev) {
       if (iteration === arr.length - 1) return prev;
       iteration++;
-      return contract(cb.call(ths, arr[iteration], iteration, prev, arr), function (res) {
+      return thiss.contract(cb.call(ths, arr[iteration], iteration, prev, arr), function (res) {
         prev = res;
         return iterate(prev);
       });
@@ -502,13 +1225,13 @@ var thiss = module.exports = {
     return iterate();
   },
   sequence: function sequence() {
-    for (var _len11 = arguments.length, funcs = new Array(_len11), _key11 = 0; _key11 < _len11; _key11++) {
-      funcs[_key11] = arguments[_key11];
+    for (var _len13 = arguments.length, funcs = new Array(_len13), _key13 = 0; _key13 < _len13; _key13++) {
+      funcs[_key13] = arguments[_key13];
     }
 
     if (funcs.length === 1 && Array.isArray(funcs[0])) funcs = funcs[0];
     if (funcs.constructor && !Array.isArray(funcs)) funcs = Object.values(funcs);
-    return asyncForEach(funcs, function (func, ind, res) {
+    return thiss.asyncForEach(funcs, function (func, ind, res) {
       return func(res);
     });
   },
@@ -530,15 +1253,16 @@ var thiss = module.exports = {
 
     if (arguments.length < 3) {
       if (!key) return obj;
-      if (typeof key === "string" || _typeof2(key) === "symbol") return obj[key];
+      if (typeof key === "string" || (0, _typeof3["default"])(key) === "symbol") return obj[key];
       bnd = key;
       res = obj;
     }
 
     args = [obj, key, bnd].filter(Boolean);
-    res = res || Reflect.get.apply(Reflect, _toConsumableArray2(args));
+    res = res || Reflect.get.apply(Reflect, (0, _toConsumableArray3["default"])(args));
     return typeof res === "function" ? res.bind(bnd) : res;
   },
+  simpleMixin: simpleMixin,
   _mixin: function _mixin(_ref2) {
     var target = _ref2.target,
         source = _ref2.source,
@@ -557,9 +1281,10 @@ var thiss = module.exports = {
         }, ob === trg);
       };
 
-      var handler = _Proxy().handlers["default"](trg);
-
-      return new Proxy(apply, handler);
+      return _Proxy({
+        target: apply,
+        virtualTarget: trg
+      });
     }
 
     var obj = objFunc(target);
@@ -568,29 +1293,38 @@ var thiss = module.exports = {
     var bound = objFunc(bind);
 
     var type = function type(o1, o2) {
-      return !o2 ? Obj(o1).Type()["class"]() : Obj(o1).Type() === Obj(o2).Type();
+      return !o2 ? thiss._typeof["class"](o1) : thiss._typeof(o1) === thiss._typeof(o2);
     };
 
-    var clonedMix = Obj(Obj(mix).descriptors).filter(key, function () {
-      if (key in obj && rank(obj())) return false;
-      if (key in type(obj).prototype && !(type(mix).prototype instanceof type(obj) || type(obj).prototype instanceof mix()) && type(obj) !== Object && bound(obj)) return false;
-    }).map(function (key, val) {
-      delete val.value;
+    var clonedMix = {};
+    Object.entries(Object.getOwnPropertyDescriptors(mix)).filter(function (_ref3) {
+      var _ref4 = (0, _slicedToArray2["default"])(_ref3, 2),
+          key = _ref4[0],
+          desc = _ref4[1];
 
-      val.get = function () {
+      if (key in obj && rank(obj())) return false;
+      if (key in type(obj).prototype && !(type(mix).prototype instanceof type(obj) || type(obj).prototype instanceof type(mix)) && type(obj) !== Object && bound(obj)) return false;
+    }).map(function (_ref5) {
+      var _ref6 = (0, _slicedToArray2["default"])(_ref5, 2),
+          key = _ref6[0],
+          desc = _ref6[1];
+
+      delete desc.value;
+
+      desc.get = function () {
         return mix(key);
       };
 
-      return val;
+      clonedMix[key] = desc;
     });
     return simpleMixin(obj, clonedMix);
   },
   mixin: function mixin() {
-    for (var _len12 = arguments.length, ar = new Array(_len12), _key12 = 0; _key12 < _len12; _key12++) {
-      ar[_key12] = arguments[_key12];
+    for (var _len14 = arguments.length, ar = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
+      ar[_key14] = arguments[_key14];
     }
 
-    return _mixin(argsProxy(ar));
+    return thiss._mixin(thiss.argsProxy(ar));
   },
   captured: function captured() {
     var captured = {
@@ -664,23 +1398,20 @@ var thiss = module.exports = {
     return mapFunc;
   },
   WeakerMap: /*#__PURE__*/function (_WeakMap) {
-    _inherits(WeakerMap, _WeakMap);
+    (0, _inherits2["default"])(WeakerMap, _WeakMap);
 
     var _super3 = _createSuper(WeakerMap);
 
     function WeakerMap() {
       var _this2;
 
-      for (var _len13 = arguments.length, arg = new Array(_len13), _key13 = 0; _key13 < _len13; _key13++) {
-        arg[_key13] = arguments[_key13];
+      for (var _len15 = arguments.length, arg = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
+        arg[_key15] = arguments[_key15];
       }
 
-      _classCallCheck(this, WeakerMap);
-
+      (0, _classCallCheck2["default"])(this, WeakerMap);
       _this2 = _super3.call.apply(_super3, [this].concat(arg));
-
-      var WM = _assertThisInitialized(_this2);
-
+      var WM = (0, _assertThisInitialized2["default"])(_this2);
       var random = randomString();
 
       var mapFunction = function mapFunction(obj, properties) {
@@ -721,7 +1452,7 @@ var thiss = module.exports = {
     }
 
     return WeakerMap;
-  }( /*#__PURE__*/_wrapNativeSuper(WeakMap)),
+  }( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(WeakMap)),
 
   /*
   function ObjectMap(obMap={}) {
@@ -853,20 +1584,20 @@ var thiss = module.exports = {
     return ObjectMap;
   }(function () {
     var obMap = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    vars = require("../Komponent/privateVariables"), vars["default"](ObjectMap, {
+    vars = require("../Komponent/privateVariablesCompiled"), vars["default"](ObjectMap, {
       keys: new WeakMap()
     });
     var keys = vars(ObjectMap).keys;
     var origSet = keys.set.bind(keys);
 
     keys.set = function (arg) {
-      if (_typeof2(arg) === "symbol") return origSet(arg, {
+      if ((0, _typeof3["default"])(arg) === "symbol") return origSet(arg, {
         key: arg
       });else return origSet(arg);
     };
 
     var mapKey = function mapKey(obj, key, text) {
-      _classCallCheck(this, mapKey);
+      (0, _classCallCheck2["default"])(this, mapKey);
 
       var _mapKey = Symbol(text || "MapKey");
 
@@ -917,12 +1648,12 @@ var thiss = module.exports = {
 
     var omProto = {
       get: function get(key) {
-        if (!(typeof key === "string" || _typeof2(key) === "symbol")) key = this.symbolFromKey(this, key);
+        if (!(typeof key === "string" || (0, _typeof3["default"])(key) === "symbol")) key = this.symbolFromKey(this, key);
         return obj(this)[key];
       },
       set: function set(key, val, alt) {
         mpro(this).set(key);
-        var obkey = typeof key === "string" || _typeof2(key) === "symbol" ? key : new mapKey(obj(this), key, alt);
+        var obkey = typeof key === "string" || (0, _typeof3["default"])(key) === "symbol" ? key : new mapKey(obj(this), key, alt);
         obj(this)[obkey] = val;
       },
       "delete": function _delete(key) {
@@ -930,7 +1661,7 @@ var thiss = module.exports = {
         return delete obj(this)[key];
       },
       has: function has(key) {
-        if (!(typeof key === "string" || _typeof2(key) === "symbol")) key = this.symbolFromKey(key);
+        if (!(typeof key === "string" || (0, _typeof3["default"])(key) === "symbol")) key = this.symbolFromKey(key);
         return !!obj(this)[key];
       },
       clear: function clear() {
@@ -945,18 +1676,18 @@ var thiss = module.exports = {
           mpro(_this3).set(key, ob(_this3)[key]);
         });
         var objEnt = entries(obj(this)).filter(function () {
-          var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ent,
-              _ref4 = _slicedToArray(_ref3, 2),
-              key = _ref4[0],
-              val = _ref4[1];
+          var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ent,
+              _ref8 = (0, _slicedToArray2["default"])(_ref7, 2),
+              key = _ref8[0],
+              val = _ref8[1];
 
           return !mpro(_this3).has(key);
         });
         objEnt.forEach(function () {
-          var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ent,
-              _ref6 = _slicedToArray(_ref5, 2),
-              key = _ref6[0],
-              val = _ref6[1];
+          var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ent,
+              _ref10 = (0, _slicedToArray2["default"])(_ref9, 2),
+              key = _ref10[0],
+              val = _ref10[1];
 
           return mpro(_this3).set(key, val);
         });
@@ -985,7 +1716,7 @@ var thiss = module.exports = {
     while (comp = proto.get(comp)) {
       if (proto.get(comp) === Komponent) break;
 
-      if (proto.get(comp) === React.Component) {
+      if (proto.get(comp) === require('react').Component) {
         proto.set(comp, Komponent);
         break;
       }
@@ -998,7 +1729,7 @@ var thiss = module.exports = {
       console.log(comp.constructor.name);
       if (proto.get(comp) && proto.get(comp).constructor === Komponent) break;
 
-      if (proto.get(comp) && proto.get(comp).constructor === React.Component) {
+      if (proto.get(comp) && proto.get(comp).constructor === require("react").Component) {
         proto.set(comp, Komponent.prototype);
         break;
       }
@@ -1016,17 +1747,15 @@ var thiss = module.exports = {
       }
 
       var funcName = func.name;
-
-      var newFunc = _defineProperty({}, funcName, function () {
+      var newFunc = (0, _defineProperty2["default"])({}, funcName, function () {
         var _newFunc$originalFunc, _newFunc$originalFunc2;
 
-        for (var _len14 = arguments.length, arg = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
-          arg[_key14] = arguments[_key14];
+        for (var _len16 = arguments.length, arg = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
+          arg[_key16] = arguments[_key16];
         }
 
         return newFunc.tie.bind ? (_newFunc$originalFunc = newFunc.originalFunc).call.apply(_newFunc$originalFunc, [newFunc.tie.bind].concat(arg)) : (_newFunc$originalFunc2 = newFunc.originalFunc).call.apply(_newFunc$originalFunc2, arg);
       })[funcName];
-
       Object.setPrototypeOf(newFunc, func);
       Object.defineProperty(newFunc, "name", {
         value: funcName
@@ -1101,7 +1830,7 @@ var thiss = module.exports = {
   })
   */
   cloneFunc: function (_cloneFunc) {
-    function cloneFunc(_x, _x2, _x3) {
+    function cloneFunc(_x2, _x3, _x4) {
       return _cloneFunc.apply(this, arguments);
     }
 
@@ -1112,18 +1841,16 @@ var thiss = module.exports = {
     return cloneFunc;
   }(function (func, cb, binder) {
     var clonedFunctionName = func.name;
-
-    var cloned = _defineProperty({}, clonedFunctionName, function _target() {
+    var cloned = (0, _defineProperty2["default"])({}, clonedFunctionName, function _target() {
       var bnd = binder || this;
 
-      for (var _len15 = arguments.length, props = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
-        props[_key15] = arguments[_key15];
+      for (var _len17 = arguments.length, props = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
+        props[_key17] = arguments[_key17];
       }
 
-      if (this instanceof _target ? this.constructor : void 0) return _construct(func, props);
+      if (this instanceof _target ? this.constructor : void 0) return (0, _construct2["default"])(func, props);
       return cb.call.apply(cb, [bnd, binder].concat(props));
     })[clonedFunctionName];
-
     cloned.prototype = func.prototype;
 
     if (!binder) {
@@ -1186,7 +1913,7 @@ var thiss = module.exports = {
     return new Promise(poll);
   },
   merge: function (_merge) {
-    function merge(_x4, _x5, _x6, _x7) {
+    function merge(_x5, _x6, _x7, _x8) {
       return _merge.apply(this, arguments);
     }
 
@@ -1199,7 +1926,7 @@ var thiss = module.exports = {
     if (typeof target === "undefined" || typeof src === "undefined") throw new Error("Invalid arguments at merge function. Must have a valid target and source.");
     var callback = typeof exclude === "function" ? exclude : undefined;
     if (!Array.isArray(exclude)) exclude = [];
-    if (Array.isArray(target) && Array.isArray(src)) return [].concat(_toConsumableArray2(target), _toConsumableArray2(src.filter(function (item) {
+    if (Array.isArray(target) && Array.isArray(src)) return [].concat((0, _toConsumableArray3["default"])(target), (0, _toConsumableArray3["default"])(src.filter(function (item) {
       return !exclude.includes(item) && target;
     })));
 
@@ -1207,11 +1934,11 @@ var thiss = module.exports = {
       if (target instanceof HTMLCollection) {
         var _target$parentNode;
 
-        (_target$parentNode = target.parentNode).replaceChildren.apply(_target$parentNode, _toConsumableArray2(target.children).concat(_toConsumableArray2(src)));
-      } else if (target.set) _toConsumableArray2(src).forEach(function (item) {
-        return target.set.apply(target, _toConsumableArray2(item));
+        (_target$parentNode = target.parentNode).replaceChildren.apply(_target$parentNode, (0, _toConsumableArray3["default"])(target.children).concat((0, _toConsumableArray3["default"])(src)));
+      } else if (target.set) (0, _toConsumableArray3["default"])(src).forEach(function (item) {
+        return target.set.apply(target, (0, _toConsumableArray3["default"])(item));
       });else if (target.add) {
-        _toConsumableArray2(src).forEach(function (item) {
+        (0, _toConsumableArray3["default"])(src).forEach(function (item) {
           return target.add(item);
         });
       }
@@ -1221,21 +1948,21 @@ var thiss = module.exports = {
 
     if (thiss._typeof(target) === 'element' || thiss._typeof(target) === 'htmlElement') {
       if (thiss._typeof(src) === 'element' || thiss._typeof(src) === 'htmlElement') {
-        target.replaceChildren.apply(target, _toConsumableArray2(target.children).concat(_toConsumableArray2(src.children)));
+        target.replaceChildren.apply(target, (0, _toConsumableArray3["default"])(target.children).concat((0, _toConsumableArray3["default"])(src.children)));
         Reflect.ownKeys(src).filter(function (key) {
           return key !== "children" && key !== "childNodes";
         }).forEach(function (key) {
           if (target[key][Symbol.iterator]) {
             try {
               merge(target[key], src[key]);
-            } catch (_unused5) {}
+            } catch (_unused18) {}
           } else try {
             target.setAttribute(key, src[key]);
-          } catch (_unused6) {}
+          } catch (_unused19) {}
         });
       } else if (thiss._typeof(src) === 'hTMLCollection') target.replaceChildren.apply(target, _toConsumableArray(target.children).concat(_toConsumableArray(src)));
 
-      target.replaceChildren.apply(target, _toConsumableArray2(target.children).concat(_toConsumableArray2(src)));
+      target.replaceChildren.apply(target, (0, _toConsumableArray3["default"])(target.children).concat((0, _toConsumableArray3["default"])(src)));
       return target;
     }
 
@@ -1259,7 +1986,7 @@ var thiss = module.exports = {
 
         try {
           val = Reflect.get(targetDesc, type, target);
-        } catch (_unused7) {
+        } catch (_unused20) {
           val = Reflect.get(targetDesc, type, src);
         }
 
@@ -1276,7 +2003,7 @@ var thiss = module.exports = {
 
         if (callback) {
           cbResult = callback(key, desc, target);
-          desc = cbResult === true ? desc : cbResult && _typeof2(cbResult) === "object" && !Array.isArray(cbResult) && !cbResult instanceof Error ? cbResult : desc;
+          desc = cbResult === true ? desc : cbResult && (0, _typeof3["default"])(cbResult) === "object" && !Array.isArray(cbResult) && !cbResult instanceof Error ? cbResult : desc;
 
           if (cbResult instanceof Error || typeof cbResult === "string") {
             throwThis = cbResult;
@@ -1310,20 +2037,22 @@ var thiss = module.exports = {
 
     var cb = typeof exclude === "function" ? exclude : undefined;
     var constructorName = capitalize(thiss._typeof(obj));
+    globalType();
+    console.log('constructorName', constructorName);
+    console.log('theobject', _global[constructorName]);
     var typeConstructor = _global[constructorName];
     var target;
     var arg;
 
     if (Symbol.iterator in obj) {
-      if (Array.isArray(obj)) target = _toConsumableArray2(obj).filter(function (item) {
+      if (Array.isArray(obj)) target = (0, _toConsumableArray3["default"])(obj).filter(function (item) {
         return !exclude.includes(item);
       });else if (obj instanceof String) {
         if (Object(obj) !== obj) return obj;
         target = Object.setPrototypeOf(String(Object(obj).toString()), Object.getPrototypeOf(obj));
       } else {
-        var argSpread = _toConsumableArray2(obj);
-
-        arg = _toConsumableArray2(argSpread.entries());
+        var argSpread = (0, _toConsumableArray3["default"])(obj);
+        arg = (0, _toConsumableArray3["default"])(argSpread.entries());
 
         if (arg.every(function (ent) {
           return Array.isArray(ent[1]);
@@ -1342,9 +2071,9 @@ var thiss = module.exports = {
         var consTarget = thiss.suppress(function () {
           return new obj.constructor(arg);
         }, false);
-        if (consTarget && JSON.stringify(_toConsumableArray2(consTarget)) === JSON.stringify(arg)) target = consTarget;else {
+        if (consTarget && JSON.stringify((0, _toConsumableArray3["default"])(consTarget)) === JSON.stringify(arg)) target = consTarget;else {
           var typeTarget = new typeConstructor(arg);
-          if (typeTarget && JSON.stringify(_toConsumableArray2(typeTarget)) === JSON.stringify(arg)) target = typeTarget;
+          if (typeTarget && JSON.stringify((0, _toConsumableArray3["default"])(typeTarget)) === JSON.stringify(arg)) target = typeTarget;
         }
       }
     }
@@ -1363,10 +2092,10 @@ var thiss = module.exports = {
       return Object.defineProperties(target, descs);
     }
 
-    Object.entries(descs).forEach(function (_ref7) {
-      var _ref8 = _slicedToArray(_ref7, 2),
-          key = _ref8[0],
-          desc = _ref8[1];
+    Object.entries(descs).forEach(function (_ref11) {
+      var _ref12 = (0, _slicedToArray2["default"])(_ref11, 2),
+          key = _ref12[0],
+          desc = _ref12[1];
 
       if (cb) descs[key] = cb(key, desc, obj) || descs[key]; // if (binder) descs[key] = boundDescriptor(obj,key,binder);
     });
@@ -1395,7 +2124,7 @@ var thiss = module.exports = {
       Reflect.ownKeys(cloned).forEach(function (key) {
         if (!Reflect.has(obj, key)) try {
           Reflect.deleteProperty(clone, key);
-        } catch (_unused8) {}
+        } catch (_unused21) {}
       });
     }
 
@@ -1405,7 +2134,7 @@ var thiss = module.exports = {
       if (cloneDesc && cloneDesc.configurable === false && cloneDesc.writable === false) return;else if (cloneDesc && cloneDesc.configurable === false) {
         try {
           cloned[key] = obj[key];
-        } catch (_unused9) {}
+        } catch (_unused22) {}
 
         return;
       }
@@ -1510,7 +2239,7 @@ var thiss = module.exports = {
   }
   */
   safe: function (_safe) {
-    function safe(_x8) {
+    function safe(_x9) {
       return _safe.apply(this, arguments);
     }
 

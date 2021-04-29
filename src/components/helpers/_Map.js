@@ -1,4 +1,4 @@
-import {boundProperties} from './Obj'
+import {boundProperties} from './Obj/indexCompiled.js'
 let or = (thing,...conditions) => conditions.some(cond => thing === cond)
 
  function entries(obj) {

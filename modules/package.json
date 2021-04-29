@@ -1,0 +1,11 @@
+{
+  "name": "modules",
+  "main": "index.js",
+  "version": "0.0.0",
+  "dependencies": {
+    "browser": "file:browser",
+    "node": "file:node",
+    "server": "file:server",
+    "universal": "file:universal"
+  }
+}

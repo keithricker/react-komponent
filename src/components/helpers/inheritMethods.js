@@ -1,5 +1,5 @@
 import React from 'react'
-import { Standin,getLevel,tie,ReflecTie,getProp,WeakerMap,getDescriptor,contract } from '../helpers/utils'
+import { Standin,getLevel,tie,MirrorTie,getProp,WeakerMap,getDescriptor,contract } from '../helpers/utils'
 import privates from '../Komponent/privateVariables'
 import {combineReducers} from 'redux'
 
@@ -203,7 +203,7 @@ export function alterKompProto(object) {
          // const Bind = getBind(ob,thiss)
          let prop = Reflect.get(obj,key,thiss)
          if (typeof prop !== 'function') return prop
-         prop = ReflecTie(obj,key,thiss)
+         prop = MirrorTie(obj,key,thiss)
          return function(...arg) { 
             let propCall = callIt(ob,prop,thiss,...arg) 
             if ((key === 'mapStateToProps' || key === 'mapDisPatchToProps') && typeof propCall === 'function')

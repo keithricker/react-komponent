@@ -1,56 +1,36 @@
 "use strict";
 
-var _Obj = require("./Obj");
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _typeof3 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _indexCompiled = require("./Obj/indexCompiled.js");
 
 var _arguments = arguments;
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _typeof2(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof2(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var or = function or(thing) {
   for (var _len = arguments.length, conditions = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -72,7 +52,7 @@ function entries(obj) {
 
 var bindIt = function bindIt(ob, prop, bnd) {
   bnd = _arguments.length === 2 ? prop : bnd;
-  var fetched = _arguments.length === 2 ? ob : Reflect.get.apply(Reflect, _toConsumableArray([ob, prop].concat(_toConsumableArray(bnd)).filter(Boolean)));
+  var fetched = _arguments.length === 2 ? ob : Reflect.get.apply(Reflect, (0, _toConsumableArray2["default"])([ob, prop].concat((0, _toConsumableArray2["default"])(bnd)).filter(Boolean)));
   return typeof fetched === 'function' ? typeof bnd !== 'undefined' ? fetched.bind(bnd) : fetched : fetched;
 };
 
@@ -98,7 +78,7 @@ var _Map = function () {
   }
 
   var mapKey = function mapKey(object, key, text) {
-    _classCallCheck(this, mapKey);
+    (0, _classCallCheck2["default"])(this, mapKey);
 
     var _mapKey = Symbol(text || key.name || key.constructor.name || 'mapKey');
 
@@ -107,36 +87,35 @@ var _Map = function () {
   };
 
   var _Map = /*#__PURE__*/function (_Map2) {
-    _inherits(_Map, _Map2);
+    (0, _inherits2["default"])(_Map, _Map2);
 
     var _super = _createSuper(_Map);
 
     function _Map() {
       var _this;
 
-      _classCallCheck(this, _Map);
-
+      (0, _classCallCheck2["default"])(this, _Map);
       var entr;
       var obj;
 
       if (arguments.length) {
-        if (arguments.length === 1 && _typeof2(arguments.length <= 0 ? undefined : arguments[0]) === 'object' && !Array.isArray(arguments.length <= 0 ? undefined : arguments[0])) {
+        if (arguments.length === 1 && (0, _typeof3["default"])(arguments.length <= 0 ? undefined : arguments[0]) === 'object' && !Array.isArray(arguments.length <= 0 ? undefined : arguments[0])) {
           entr = entries(arguments.length <= 0 ? undefined : arguments[0]);
           obj = arguments.length <= 0 ? undefined : arguments[0];
-        } else if ((arguments.length <= 0 ? undefined : arguments[0]) instanceof Map) entr = _toConsumableArray(arguments.length <= 0 ? undefined : arguments[0]);else entr = arguments.length <= 0 ? undefined : arguments[0];
+        } else if ((arguments.length <= 0 ? undefined : arguments[0]) instanceof Map) entr = (0, _toConsumableArray2["default"])(arguments.length <= 0 ? undefined : arguments[0]);else entr = arguments.length <= 0 ? undefined : arguments[0];
       }
 
       _this = _super.call(this, entr);
-      Object.defineProperty(_assertThisInitialized(_this), '_entries', {
+      Object.defineProperty((0, _assertThisInitialized2["default"])(_this), '_entries', {
         get: function get() {
-          if (!priv(_assertThisInitialized(_this)).newTarget) {
-            entrs = entries(priv(_assertThisInitialized(_this)).object);
+          if (!priv((0, _assertThisInitialized2["default"])(_this)).newTarget) {
+            entrs = entries(priv((0, _assertThisInitialized2["default"])(_this)).object);
             entrs.forEach(function (_ref) {
-              var _ref2 = _slicedToArray(_ref, 2),
+              var _ref2 = (0, _slicedToArray2["default"])(_ref, 2),
                   key = _ref2[0],
                   val = _ref2[1];
 
-              if (key instanceof mapKey) entr[0] = _this.keyFromSymbol(priv(_assertThisInitialized(_this)).object, key);
+              if (key instanceof mapKey) entr[0] = _this.keyFromSymbol(priv((0, _assertThisInitialized2["default"])(_this)).object, key);
             });
           }
 
@@ -144,7 +123,7 @@ var _Map = function () {
         }
       });
       var object;
-      Object.defineProperty(priv(_assertThisInitialized(_this)), 'object', {
+      Object.defineProperty(priv((0, _assertThisInitialized2["default"])(_this)), 'object', {
         get: function get() {
           object = obj && !priv(this).newTarget ? obj : this.asObject();
           priv(object).map = this;
@@ -155,7 +134,7 @@ var _Map = function () {
       return _this;
     }
 
-    _createClass(_Map, [{
+    (0, _createClass2["default"])(_Map, [{
       key: "clear",
       value: function clear() {
         var _this2 = this;
@@ -180,7 +159,7 @@ var _Map = function () {
       key: "forEach",
       value: function forEach(cb, ths) {
         var newCb = function newCb(_ref3) {
-          var _ref4 = _slicedToArray(_ref3, 2),
+          var _ref4 = (0, _slicedToArray2["default"])(_ref3, 2),
               key = _ref4[0],
               val = _ref4[1];
 
@@ -215,7 +194,7 @@ var _Map = function () {
         this._entries.push(newEntry);
 
         if (!this.newTarget) {
-          key = typeof key === 'string' || _typeof2(key) === 'symbol' ? key : _construct(mapKey, _toConsumableArray([priv(this).object, key, typeof alt === 'string' && alt].filter(Boolean)));
+          key = typeof key === 'string' || (0, _typeof3["default"])(key) === 'symbol' ? key : (0, _construct2["default"])(mapKey, (0, _toConsumableArray2["default"])([priv(this).object, key, typeof alt === 'string' && alt].filter(Boolean)));
           Object.defineProperty(priv(this).object, key, Object.getOwnPropertyDescriptor(newEntry, 1));
         }
 
@@ -295,26 +274,26 @@ var _Map = function () {
           var objConstructor = _typeof(obj);
 
           var argus = [];
-          if (objConstructor.prototype[Symbol.iterator]) argus = Array.isArray(obj) ? [obj] : [_toConsumableArray(obj)];
+          if (objConstructor.prototype[Symbol.iterator]) argus = Array.isArray(obj) ? [obj] : [(0, _toConsumableArray2["default"])(obj)];
 
           if (objConstructor === constructor) {
-            obj = _construct(constructor, _toConsumableArray(argus));
+            obj = (0, _construct2["default"])(constructor, (0, _toConsumableArray2["default"])(argus));
           } else try {
             obj = new constructor();
             if (obj[Symbol.iterator]) Object.defineProperties(obj, Object.getOwnPropertyDescriptors(this._entries));
           } catch (_unused2) {
-            obj = _construct(objConstructor, _toConsumableArray(argus));
+            obj = (0, _construct2["default"])(objConstructor, (0, _toConsumableArray2["default"])(argus));
           }
         }
 
-        Object.setPrototypeOf(obj, Object.setPrototypeOf((0, _Obj.boundProperties)(Map.prototype, this), prototype));
+        Object.setPrototypeOf(obj, Object.setPrototypeOf((0, _indexCompiled.boundProperties)(Map.prototype, this), prototype));
 
         if (!obj[Symbol.iterator]) {
           var newDescs = {};
 
           this._entries.forEach(function (ent) {
             var key = ent[0];
-            key = typeof key === 'string' || _typeof2(key) === 'symbol' ? key : new mapKey(obj, key);
+            key = typeof key === 'string' || (0, _typeof3["default"])(key) === 'symbol' ? key : new mapKey(obj, key);
             newDescs[key] = Object.getOwnPropertyDescriptor(ent, 1);
           });
 
@@ -342,8 +321,8 @@ var _Map = function () {
           ob = priv(this).object;
         }
 
-        return _toConsumableArray(keys(ob)).find(function (_ref5) {
-          var _ref6 = _slicedToArray(_ref5, 2),
+        return (0, _toConsumableArray2["default"])(keys(ob)).find(function (_ref5) {
+          var _ref6 = (0, _slicedToArray2["default"])(_ref5, 2),
               key = _ref6[0],
               val = _ref6[1];
 
@@ -351,9 +330,8 @@ var _Map = function () {
         });
       }
     }]);
-
     return _Map;
-  }( /*#__PURE__*/_wrapNativeSuper(Map));
+  }( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Map));
 
   var map = _Map;
 
@@ -362,8 +340,7 @@ var _Map = function () {
       arg[_key2] = arguments[_key2];
     }
 
-    var newMap = _construct(map, arg);
-
+    var newMap = (0, _construct2["default"])(map, arg);
     priv(newMap).newTarget = this instanceof _target ? this.constructor : void 0;
   };
 

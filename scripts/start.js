@@ -32,12 +32,10 @@ execSync(`cd ${modulePath} && npm run-script server-setup`, (error, stdout, stde
 */
 
 
-
-
-
 // const Mod = require('../src/components/helpers/Module')
 // const modulePath = process.cwd()+'/node_modules/react-komponent'
 // const commandLine = require(`${modulePath}/src/components/helpers/utilsCompiled.js`).commandLine
+
 
 
 // const fs = require('fs');
@@ -47,27 +45,13 @@ var process = require("process");
 
 
 
-// "babel-compile": "babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js && babel src/components/Komponent/higherOrder.js -d dist --copy-files && mv dist/higherOrder.js src/components/Komponent/higherOrderCompiled.js && babel src/components/RootComponent.js -d dist --copy-files && mv dist/RootComponent.js src/components/RootComponentCompiled.js && babel src/components/helpers/utils.js -d dist --copy-files && mv dist/utils.js src/components/helpers/utilsCompiled.js",
-
+// "babel-compile": "babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js && babel src/components/Komponent/higherOrder.js -d dist --copy-files && mv dist/higherOrder.js src/components/Komponent/higherOrderCompiled.js && babel src/components/RootComponent.js -d dist --copy-files && mv dist/RootComponent.js src/components/RootComponentCompiled.js && babel src/components/helpers/utils.js -d dist --copy-files && mv dist/utils.js src/components/helpersCompiled.js",
 
 // commandLine(`cd ${modulePath} && npm run-script babel-compile`);
 
 // commandLine(`npm run-script build`);
 
 let server = require(process.cwd()+'/server/server.js')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 server = server()

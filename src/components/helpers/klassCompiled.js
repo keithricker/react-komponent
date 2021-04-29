@@ -1,34 +1,20 @@
 "use strict";
 
-var _privateVariables = _interopRequireDefault(require(".../Komponent/privateVariables"));
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _privateVariables = _interopRequireDefault(require("../Komponent/privateVariables"));
 
 var _utils = require("./utils");
 
 var _arguments = arguments;
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 var objToDescs = function objToDescs(trg) {
   var descs = Object.getOwnPropertyDescriptors(trg);
@@ -42,7 +28,7 @@ var descsToObj = function descsToObj(desc) {
 function klass(func) {
   var argus = Array.prototype.slice.call(arguments);
   var temp = argus.find(function (ar) {
-    return _typeof(ar) === 'object';
+    return (0, _typeof2["default"])(ar) === 'object';
   }) || {};
   func = argus.find(function (ar) {
     return typeof ar === 'function';
@@ -91,7 +77,7 @@ function klass(func) {
       arg[_key] = arguments[_key];
     }
 
-    var props = _defineProperty({
+    var props = (0, _defineProperty2["default"])({
       get _extends() {
         return obj.constructor === Object.getPrototypeOf(obj.constructor) === Function ? Object : Object.getPrototypeOf(obj.constructor);
       },
@@ -107,7 +93,7 @@ function klass(func) {
           Object.setPrototypeOf(this.constructor.prototype, val.prototype);
         }
 
-        this._target = _construct(val, arg);
+        this._target = (0, _construct2["default"])(val, arg);
         return throwIt(this, this._target, "extends");
       },
 
@@ -189,14 +175,14 @@ function klass(func) {
           return this;
         }
 
-        if (_privateVariables["default"].get(this).newTarget === false) return _construct(ext, arg);
-        obj._target = _construct(ext, arg);
+        if (_privateVariables["default"].get(this).newTarget === false) return (0, _construct2["default"])(ext, arg);
+        obj._target = (0, _construct2["default"])(ext, arg);
 
         var superFunc = function superFunc() {
           return obj._target;
         };
 
-        var superTarget = _construct(ext, arg);
+        var superTarget = (0, _construct2["default"])(ext, arg);
 
         var descs = props._descriptors(superTarget, {
           writable: false,
@@ -241,7 +227,6 @@ function klass(func) {
         return Reflect.set.apply(Reflect, args);
       }
     }, '{{klass}}', true);
-
     Object.defineProperties(props, props._descriptors(props, {
       enumerable: false
     }));
@@ -306,8 +291,8 @@ function klass(func) {
     }
   }
 
-  if (argus.length === 1 && _typeof(argus[0]) === "object") {
-    newFunc = _defineProperty({}, temp.name, function _target() {
+  if (argus.length === 1 && (0, _typeof2["default"])(argus[0]) === "object") {
+    newFunc = (0, _defineProperty2["default"])({}, temp.name, function _target() {
       var instance = this; // Object.defineProperties(this,Object.getOwnPropertyDescriptors(this.constructor._template.properties))
 
       if (!_privateVariables["default"].get(this)) _privateVariables["default"].set(this, {});
@@ -359,14 +344,14 @@ function klass(func) {
     Object.setPrototypeOf(newFunc, temp["extends"]);
     instance = proxIt(Object.setPrototypeOf(new temp["extends"](), newFunc.prototype));
     temp.defaults.properties = instance;
-    Array.apply(void 0, _toConsumableArray(new Set(['static', 'extends'].concat(_toConsumableArray(Reflect.ownKeys(temp.defaults).filter(function (key) {
+    Array.apply(void 0, (0, _toConsumableArray2["default"])(new Set(['static', 'extends'].concat((0, _toConsumableArray2["default"])(Reflect.ownKeys(temp.defaults).filter(function (key) {
       return key !== 'properties';
     })))))).forEach(function (key) {
       console.log('key', key);
       instance['_' + key] = temp[key];
     });
     return newFunc;
-  } else newFunc = _defineProperty({}, name, function () {
+  } else newFunc = (0, _defineProperty2["default"])({}, name, function () {
     _privateVariables["default"].set(this, {
       newTarget: true
     });
@@ -425,6 +410,6 @@ function klass(func) {
 
 var bindIt = function bindIt(ob, prop, bnd) {
   bnd = _arguments.length === 2 ? prop : bnd;
-  var fetched = _arguments.length === 2 ? ob : Reflect.get.apply(Reflect, _toConsumableArray([ob, prop].concat(_toConsumableArray(bnd)).filter(Boolean)));
+  var fetched = _arguments.length === 2 ? ob : Reflect.get.apply(Reflect, (0, _toConsumableArray2["default"])([ob, prop].concat((0, _toConsumableArray2["default"])(bnd)).filter(Boolean)));
   return typeof fetched === 'function' ? typeof bnd !== 'undefined' ? fetched.bind(bnd) : fetched : fetched;
 };

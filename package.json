@@ -25,17 +25,6 @@
   "_where": "/Users/TravelComputer/Desktop/node_sandbox/reactapp",
   "author": "",
   "private": false,
-  "babel": {
-    "presets": [
-      "@babel/preset-react",
-      "@babel/preset-env"
-    ],
-    "plugins": [
-      [
-        "@babel/plugin-transform-react-jsx"
-      ]
-    ]
-  },
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -44,32 +33,53 @@
   },
   "bundleDependencies": false,
   "dependencies": {
-    "@babel/cli": "^7.12.1",
-    "@babel/core": "^7.12.13",
-    "@babel/plugin-transform-react-jsx": "^7.12.5",
-    "@babel/preset-env": "^7.12.1",
-    "@babel/preset-react": "^7.12.5",
+    "@babel/plugin-transform-runtime": "^7.13.15",
     "@babel/standalone": "^7.13.11",
+    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.8.3",
+    "Map": "file:Map",
+    "Module": "file:Module",
+    "Proxy": "file:Proxy",
+    "aliasify": "^2.1.0",
+    "babelify": "^10.0.0",
+    "body-parser": "^1.19.0",
     "browser-es-module-loader": "^0.4.1",
+    "browserify": "^17.0.0",
+    "browserify-fs": "^1.0.0",
+    "buffer": "^6.0.3",
     "child_process": "^1.0.2",
+    "dom": "file:dom",
     "esprima": "^4.0.1",
     "express": "^4.17.1",
+    "http-browserify": "^1.7.0",
     "ip": "^1.1.5",
-    "jsdom": "^16.4.0",
+    "isomorphic-fetch": "^3.0.0",
+    "jsdom": "^16.5.3",
     "jsdom-global": "^3.0.2",
-    "mini-css-extract-plugin": "^1.3.5",
+    "modules": "file:modules",
     "node-fetch": "^2.6.1",
+    "node-sass": "^5.0.0",
     "npm-add-script": "^1.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
     "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
     "redux-saga": "^1.1.3",
     "redux-thunk": "^2.3.0",
+    "regenerator-runtime": "^0.13.7",
+    "require-from-path": "^1.0.4",
     "require-from-string": "^2.0.2",
+    "require-from-url": "^3.1.3",
     "reselect": "^4.0.0",
     "socket.io": "^3.1.0",
     "socket.io-client": "^3.1.0",
-    "webpack": "^5.27.0",
-    "webpack-node-externals": "^2.5.2"
+    "ssr": "file:ssr",
+    "utils": "file:utils",
+    "web-vitals": "^1.1.1",
+    "xmlhttprequest": "^1.8.0"
   },
   "deprecated": false,
   "description": "",
@@ -85,8 +95,17 @@
     "compile": "node scripts/compile.js",
     "babel-compile": "babel src/components/fetchingOverlay.js -d dist --copy-files && mv dist/fetchingOverlay.js src/components/fetchingOverlayCompiled.js && babel src/components/Komponent/higherOrder.js -d dist --copy-files && mv dist/higherOrder.js src/components/Komponent/higherOrderCompiled.js && babel src/components/RootComponent.js -d dist --copy-files && mv dist/RootComponent.js src/components/RootComponentCompiled.js && babel src/components/helpers/utils.js -d dist --copy-files && mv dist/utils.js src/components/helpers/utilsCompiled.js",
     "server-setup": "cd ../../ && mkdir -p server && cp node_modules/react-komponent/server/server.js server/server.js && npmAddScript -k server -v 'komponent-scripts start'",
-    "postinstall": "npm link --ignore-scripts && npm run-script server-setup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ],
+    "plugins": [
+      "@babel/transform-runtime"
+    ]
+  },
+  "aliasify": "./aliasifyConfig.js",
   "version": "1.1.0"
 }

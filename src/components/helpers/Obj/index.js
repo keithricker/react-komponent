@@ -1,10 +1,10 @@
-import * as helpers from './helpers'
-import _Proxy from '../_Proxy'
-import priv from '../../Komponent/privateVariables'
-import Mod from '../Module'
+import * as helpers from './helpersCompiled'
+import _Proxy from '../_ProxyCompiled'
+import priv from '../../Komponent/privateVariablesCompiled'
+import Mod from '../ModuleCompiled'
 
 let theMod = Mod(module)
-const { clone,merge,_typeof,getLevel,ReflectBind } = theMod.import.onDemand('../utils')
+const { clone,merge,_typeof,getLevel,ReflectBind } = theMod.import.onDemand('../utilsCompiled')
 
 let privKeys = new WeakMap()
 
@@ -401,7 +401,7 @@ let Obj = function (obj) {
         let lvl = this.getLevel(this, (lv) => {
           if (
             val.name &&
-            Reflect.hasOwnProperty(lvl,val.name) &&
+            Reflect.ownKeys(lvl).includes(val.name) &&
             iz.equivalent(val, lvl[val.name], false)
           )
             key = val.name;
@@ -478,7 +478,7 @@ merge(module.exports,{
   get Obj() { return Obj },
   get is() {return is},
   get Descriptors() {
-    return require('./helpers').Descriptors
+    return require('./helpersCompiled').Descriptors
   }
 })
 

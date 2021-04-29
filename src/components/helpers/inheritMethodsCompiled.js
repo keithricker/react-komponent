@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -11,6 +13,10 @@ exports.protoFromProp = protoFromProp;
 exports.alterKompProto = alterKompProto;
 exports.getBind = exports.onSets = void 0;
 
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _react = _interopRequireDefault(require("react"));
 
 var _utils = require("../helpers/utils");
@@ -19,25 +25,9 @@ var _privateVariables = _interopRequireDefault(require("../Komponent/privateVari
 
 var _redux = require("redux");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var proto = {
   get: Object.getPrototypeOf,
@@ -211,7 +201,7 @@ function alterProps(obj, cb) {
     }
 
     var propName = key + 'Caller';
-    def[type] = _defineProperty({}, propName, function () {
+    def[type] = (0, _defineProperty2["default"])({}, propName, function () {
       obj = protoFromProp(this, key, def[type]);
       var thiss = this['{{target}}'] || this;
       var arg = [arguments].concat();
@@ -219,10 +209,10 @@ function alterProps(obj, cb) {
       console.log('this in ' + key, this); // let Bind = getBind(obj,this)
 
       var prop = backup.bind(this);
-      var propCall = callIt.apply(void 0, [obj, prop, thiss].concat(_toConsumableArray(arg)));
+      var propCall = callIt.apply(void 0, [obj, prop, thiss].concat((0, _toConsumableArray2["default"])(arg)));
 
       if ((key === 'mapStateToProps' || key === 'mapDisPatchToProps' || type === 'get') && typeof propCall === 'function' && arg.length) {
-        return callIt.apply(void 0, [obj, propCall, thiss].concat(_toConsumableArray(arg)));
+        return callIt.apply(void 0, [obj, propCall, thiss].concat((0, _toConsumableArray2["default"])(arg)));
       }
 
       return propCall;
@@ -248,7 +238,7 @@ function alterKompProto(object) {
       configurable: true
     };
     var propName = key + 'Caller';
-    def.get = _defineProperty({}, propName, function () {
+    def.get = (0, _defineProperty2["default"])({}, propName, function () {
       var thiss = this['{{target}}'] || this;
       console.log('key', key);
       console.log('this in ' + key, thiss);
@@ -276,7 +266,7 @@ function alterKompProto(object) {
 
       var prop = Reflect.get(obj, key, thiss);
       if (typeof prop !== 'function') return prop;
-      prop = (0, _utils.ReflecTie)(obj, key, thiss);
+      prop = (0, _utils.MirrorTie)(obj, key, thiss);
       return function () {
         for (var _len2 = arguments.length, arg = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
           arg[_key2] = arguments[_key2];

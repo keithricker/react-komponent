@@ -1,5 +1,7 @@
-const _Proxy = require('../_Proxy')
-const privateVars = require('../../Komponent/privateVariables')
+
+const _Proxy = require('../_ProxyCompiled')
+const privateVars = require('../../Komponent/privateVariablesCompiled')
+
 
 const esprima = require('esprima')
 const escodegen = require('escodegen')
@@ -117,9 +119,9 @@ function findDeclarations(code) {
 }
 
 const util = { clone:'',cloneFunc:'',merge:'',_typeof:'',getLevel:'',ReflectBind:'' } 
-Reflect.ownKeys(util).forEach(key => util[key] = (...arg) => require('../utils')[key](...arg))
-util._typeof.class = (...arg) => require('../utils')._typeof.class(...arg)
-util.ReflectBind.descriptor = (...arg) => require('../utils').ReflectBind.descriptor(...arg)
+Reflect.ownKeys(util).forEach(key => util[key] = (...arg) => require('../utilsCompiled')[key](...arg))
+util._typeof.class = (...arg) => require('../utilsCompiled')._typeof.class(...arg)
+util.ReflectBind.descriptor = (...arg) => require('../utilsCompiled').ReflectBind.descriptor(...arg)
 const { clone,cloneFunc,merge,_typeof,getLevel,ReflectBind } = util
 
 let _global; try { _global = window } catch { _global = global }
@@ -127,10 +129,9 @@ const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1)
 
 const equivalent = (thing1,thing2) => (JSON.stringify(thing1) === JSON.stringify(thing2)) && Reflect.ownKeys(thing1).every(key => thing1[key] === thing2[key])
 
-  
 const ownProp = exports.ownProp = (obj,key) => Reflect.ownKeys(obj).includes(key)
 
-const defineProp = exports.defineProp = (trg,key,desc,...bind) => {
+const defineProp = exports.defineProp = function(trg,key,desc,...bind) {
   if (arguments.length > 3)
     desc = bind.length === 1 ? boundDescriptor(desc,bind) : ReflectBind.descriptor(...[desc,...bind])
   desc = new Descriptor(desc)
@@ -138,7 +139,7 @@ const defineProp = exports.defineProp = (trg,key,desc,...bind) => {
 };
  
 const defineProps = exports.defineProps = function(trg, src, ex = [], ...bind) {
-   let descs = {}
+  let descs = {}
    Reflect.ownKeys(src)
      .forEach((key) => {
        if (ex.includes(key)) return false
@@ -347,8 +348,9 @@ let bindProxies = new Map()
  const bindProxy = exports.bindProxy = function(thiss,properties,bind,softTarget) {
   let bps = bindProxies
   thiss = thiss['{{target}}'] || this
-  arguments[0] = thiss
-  if (bps.has(thiss) && bps.get(thiss).args.every((ar,ind) => ar === arguments[ind])) return bps.get(thiss).bindProx
+  let theArgs = [...arguments]
+  theArgs[0] = thiss
+  if (bps.has(thiss) && bps.get(thiss).args.every((ar,ind) => ar === theArgs[ind])) return bps.get(thiss).bindProx
 
   let bindProx
   bindProx = new _Proxy({
@@ -373,7 +375,7 @@ let bindProxies = new Map()
       }     
     }
   })
-  bps.set(thiss,{bindProx,args:[...arguments]})
+  bps.set(thiss,{bindProx,args:theArgs})
   return bindProx
 }
   
@@ -444,7 +446,7 @@ const mergeProps = exports.mergeProps = function(obj,props,exc=[],overrides={}) 
 
 const Constructor = exports.Constructor = class Constructor {
   constructor(subject,callback) {
-    let staticProps, inits = new WeakSet
+    let staticProps, inits = new WeakSet()
 
     if (arguments.length === 1) 
       [callback,subject] = [...arguments]
@@ -458,7 +460,8 @@ const Constructor = exports.Constructor = class Constructor {
       [theName]: function(...arg) {
 
         let object = this;
-        if (this === _global) {
+
+        if (this === _global || this === undefined) {
           let ext = privateVars(theConstructor)._super
           if (!ext) ext = Object.getPrototypeOf(theConstructor.prototype).constructor
           object = new ext()
@@ -498,7 +501,7 @@ const Constructor = exports.Constructor = class Constructor {
           set [_static](val) {
 
               mergeProps(this[constructor],val,['name'])
-              if (Reflect.hasOwnProperty(val,'name')) {
+              if (ownProp(val,'name')) {
                 Object.defineProperty(this,name,{ 
                   get() { return this.constructor.name },
                   set(val) { return true }
@@ -634,8 +637,12 @@ const Constructor = exports.Constructor = class Constructor {
             })
           }
         }
+        
+        console.log('object',object)
+        console.log('subject',subject)
 
         mergeProps(object,subject,{configurable:true})
+
         let firstPassResult = callback.call(object,...arg)
 
         let fpType = _typeof.class(firstPassResult)
@@ -654,7 +661,7 @@ const Constructor = exports.Constructor = class Constructor {
               let desc = Object.getOwnPropertyDescriptor(object,key)
               if (desc.set) {
                 object[key] = firstPassResult[key];
-                if (Reflect.hasOwnProperty(object,key) && object !== firstPassResult)
+                if (ownProp(object,key) && object !== firstPassResult)
                   delete firstPassResult[key]
               }
             }
@@ -673,7 +680,7 @@ const Constructor = exports.Constructor = class Constructor {
             let desc = Object.getOwnPropertyDescriptor(object,key)
             if (desc.set) {
               object[key] = secondPassResult[key]
-              if (Reflect.hasOwnProperty(object,key) && object !== secondPassResult)
+              if (ownProp(object,key) && object !== secondPassResult)
                 delete secondPassResult[key]
             }
           }
@@ -737,7 +744,7 @@ const Constructor = exports.Constructor = class Constructor {
 privateVars(Constructor).instances = new WeakMap
 
   
-exports.boundObjectMerge = function(trg,src,...bind) {
+function boundObjectMerge(trg,src,...bind) {
   return merge(trg,src,(key,desc) => {
 
     let type = Array("get", "value").find(type => typeof desc[type] === 'function' && key !== 'constructor')
@@ -769,8 +776,9 @@ exports.boundObjectMerge = function(trg,src,...bind) {
     return desc
   })
 }
+exports.boundObjectMerge = boundObjectMerge
   
-exports.boundObject = function(object,bind,callback) {
+function boundObject(object,bind,callback) {
   
   let selfbind = (self) => {
     let firstCall = callback.call(self)
@@ -811,6 +819,7 @@ exports.boundObject = function(object,bind,callback) {
   let subject = boundObjectMerge(trg,props,bind)
   return replaceThis(merge(subject,callback.call(subject)),callback)
 }
+exports.boundObject
 
 function boundProperties(object,...bind) {
   return boundObject({},object,function() {
@@ -829,4 +838,4 @@ function boundProperties(object,...bind) {
     return Object.defineProperties(this,descs)    
   })
 } 
-module.exports = require('../utils').getClone(module.exports)
+module.exports = require('../utilsCompiled').getClone(module.exports)

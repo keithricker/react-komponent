@@ -1,0 +1,1 @@
+module.exports = require('./jsdom-src.js').JSDOM

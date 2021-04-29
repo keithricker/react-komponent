@@ -1,6 +1,24 @@
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -30,51 +48,13 @@ var _fetchingOverlayCompiled = _interopRequireDefault(require("../fetchingOverla
 
 var _actions = _interopRequireDefault(require("../defaults/actions"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var RootClass = _class["default"].RootClass;
 var RCExtension;
@@ -93,41 +73,38 @@ var proto = {
 };
 
 var Render = /*#__PURE__*/function (_Object) {
-  _inherits(Render, _Object);
+  (0, _inherits2["default"])(Render, _Object);
 
   var _super = _createSuper(Render);
 
   function Render(obj) {
     var _this;
 
-    _classCallCheck(this, Render);
-
+    (0, _classCallCheck2["default"])(this, Render);
     _this = _super.call(this, obj);
-    return _possibleConstructorReturn(_this, proto.set(obj, proto.set((0, _utils.clone)(Render.prototype), proto.get(obj))));
+    return (0, _possibleConstructorReturn2["default"])(_this, proto.set(obj, proto.set((0, _utils.clone)(Render.prototype), proto.get(obj))));
   }
 
-  _createClass(Render, [{
+  (0, _createClass2["default"])(Render, [{
     key: "has",
     value: function has(prop) {
       return this.hasOwnProperty(prop);
     }
   }]);
-
   return Render;
-}( /*#__PURE__*/_wrapNativeSuper(Object));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Object));
 
 var Renders = /*#__PURE__*/function (_Array) {
-  _inherits(Renders, _Array);
+  (0, _inherits2["default"])(Renders, _Array);
 
   var _super2 = _createSuper(Renders);
 
   function Renders() {
-    _classCallCheck(this, Renders);
-
+    (0, _classCallCheck2["default"])(this, Renders);
     return _super2.apply(this, arguments);
   }
 
-  _createClass(Renders, [{
+  (0, _createClass2["default"])(Renders, [{
     key: "last",
     get: function get() {
       return this[this.length - 1];
@@ -161,22 +138,20 @@ var Renders = /*#__PURE__*/function (_Array) {
       return this.push.apply(this, arguments);
     }
   }]);
-
   return Renders;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 var SessionsMap = /*#__PURE__*/function (_WeakerMap) {
-  _inherits(SessionsMap, _WeakerMap);
+  (0, _inherits2["default"])(SessionsMap, _WeakerMap);
 
   var _super3 = _createSuper(SessionsMap);
 
   function SessionsMap() {
-    _classCallCheck(this, SessionsMap);
-
+    (0, _classCallCheck2["default"])(this, SessionsMap);
     return _super3.apply(this, arguments);
   }
 
-  _createClass(SessionsMap, [{
+  (0, _createClass2["default"])(SessionsMap, [{
     key: "set",
     value: function set() {
       var _WeakerMap$prototype$;
@@ -187,7 +162,7 @@ var SessionsMap = /*#__PURE__*/function (_WeakerMap) {
 
       var setted = (_WeakerMap$prototype$ = _utils.WeakerMap.prototype.set).call.apply(_WeakerMap$prototype$, [this].concat(arg)).get(arg[0]);
 
-      setted.renders = _construct(Renders, _toConsumableArray(setted.renders || []));
+      setted.renders = (0, _construct2["default"])(Renders, (0, _toConsumableArray2["default"])(setted.renders || []));
       proto.set(setted, proto.set({
         get hasRendered() {
           return this.renders.some(function (ren) {
@@ -198,7 +173,6 @@ var SessionsMap = /*#__PURE__*/function (_WeakerMap) {
       }, proto.get(setted)));
     }
   }]);
-
   return SessionsMap;
 }(_utils.WeakerMap);
 
@@ -257,7 +231,7 @@ var Komponent = function Komponent(comp) {
       instanceProx[key] = typeof gotten === 'function' ? gotten.bind(instanceProx) : gotten;
       if (!instanceProp) delete instanceProx[key];else Object.defineProperty(instanceProx, key, instanceProp);
     });
-    return _objectSpread(_objectSpread({}, props), {}, _defineProperty({}, rand, instanceProx));
+    return _objectSpread(_objectSpread({}, props), {}, (0, _defineProperty2["default"])({}, rand, instanceProx));
   } : undefined);
   return extension;
 
@@ -423,7 +397,7 @@ var Komponent = function Komponent(comp) {
 
           if (thiss.connector && !props[rand]) {
             console.log('first', _objectSpread({}, thiss.state));
-            props = _objectSpread(_objectSpread({}, props), {}, _defineProperty({}, rand, thiss));
+            props = _objectSpread(_objectSpread({}, props), {}, (0, _defineProperty2["default"])({}, rand, thiss));
 
             try {
               renders.push(newerRender);
@@ -436,7 +410,7 @@ var Komponent = function Komponent(comp) {
             }
           }
 
-          if (thiss.connector) props = _objectSpread(_objectSpread({}, props), {}, _defineProperty({}, rand, thiss));
+          if (thiss.connector) props = _objectSpread(_objectSpread({}, props), {}, (0, _defineProperty2["default"])({}, rand, thiss));
           if (!sessions(thiss).hasRendered) try {
             return renderFetchingPage(callee);
           } catch (err) {
@@ -757,15 +731,15 @@ var Komponent = function Komponent(comp) {
       constructor: function constructor(ob) {
         return ob.constructor;
       }
-    }, _defineProperty(_cPHandler$get, '{{handler}}', function handler() {
+    }, (0, _defineProperty2["default"])(_cPHandler$get, '{{handler}}', function handler() {
       return cPHandler;
-    }), _defineProperty(_cPHandler$get, "handler", function handler(ob) {
+    }), (0, _defineProperty2["default"])(_cPHandler$get, "handler", function handler(ob) {
       return ob.handler || cPHandler;
-    }), _defineProperty(_cPHandler$get, "variant", function variant() {
+    }), (0, _defineProperty2["default"])(_cPHandler$get, "variant", function variant() {
       return 'getCompProxy';
-    }), _defineProperty(_cPHandler$get, "socket", function socket(ob) {
+    }), (0, _defineProperty2["default"])(_cPHandler$get, "socket", function socket(ob) {
       return ob.constructor.socket;
-    }), _defineProperty(_cPHandler$get, "default", function _default(ob, key) {
+    }), (0, _defineProperty2["default"])(_cPHandler$get, "default", function _default(ob, key) {
       if (key in Object.prototype) return;
       ob = ob['{{target}}'] || ob;
       var original;
@@ -787,17 +761,17 @@ var Komponent = function Komponent(comp) {
             var arg = Array.prototype.slice.call(arguments);
             var prop = original.bind(cP);
 
-            var propCall = _inheritMethods.callIt.apply(void 0, [obj, prop, cP].concat(_toConsumableArray(arg)));
+            var propCall = _inheritMethods.callIt.apply(void 0, [obj, prop, cP].concat((0, _toConsumableArray2["default"])(arg)));
 
             if ((key === 'mapStateToProps' || key === 'mapDisPatchToProps') && typeof propCall === 'function') {
-              return _inheritMethods.callIt.apply(void 0, [obj, propCall, cP].concat(_toConsumableArray(arg)));
+              return _inheritMethods.callIt.apply(void 0, [obj, propCall, cP].concat((0, _toConsumableArray2["default"])(arg)));
             }
 
             return propCall;
           }, cP);
 
           def[type].originalValue = function (binder) {
-            (0, _utils.ReflecTie)(Object.defineProperty({}, key, _objectSpread(_objectSpread({}, def), {}, _defineProperty({}, type, original))), key, binder);
+            (0, _utils.ReflecTie)(Object.defineProperty({}, key, _objectSpread(_objectSpread({}, def), {}, (0, _defineProperty2["default"])({}, type, original))), key, binder);
           };
 
           Object.defineProperty(def[type], 'originalProp', {

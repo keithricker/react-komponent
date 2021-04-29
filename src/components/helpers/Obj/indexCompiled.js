@@ -1,46 +1,28 @@
 "use strict";
 
-var helpers = _interopRequireWildcard(require("./helpers"));
+var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
 
-var _Proxy2 = _interopRequireDefault(require("../_Proxy"));
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _privateVariables = _interopRequireDefault(require("../../Komponent/privateVariables"));
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
-var _Module = _interopRequireDefault(require("../Module"));
+var _typeof3 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof2(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+var helpers = _interopRequireWildcard(require("./helpersCompiled"));
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+var _ProxyCompiled = _interopRequireDefault(require("../_ProxyCompiled"));
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+var _privateVariablesCompiled = _interopRequireDefault(require("../../Komponent/privateVariablesCompiled"));
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+var _ModuleCompiled = _interopRequireDefault(require("../ModuleCompiled"));
 
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+var theMod = (0, _ModuleCompiled["default"])(module);
 
-function _typeof2(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var theMod = (0, _Module["default"])(module);
-
-var _theMod$import$onDema = theMod["import"].onDemand('../utils'),
+var _theMod$import$onDema = theMod["import"].onDemand('../utilsCompiled'),
     clone = _theMod$import$onDema.clone,
     merge = _theMod$import$onDema.merge,
     _typeof = _theMod$import$onDema._typeof,
@@ -85,12 +67,12 @@ object.i = 'have a prop';
 var cb = function cb() {
   var _ref;
 
-  return _ref = {}, _defineProperty(_ref, prototype, {
+  return _ref = {}, (0, _defineProperty2["default"])(_ref, prototype, {
     "this": 'is',
     so: 'fun'
-  }), _defineProperty(_ref, "thiss", this), _defineProperty(_ref, "getThis", function getThis() {
+  }), (0, _defineProperty2["default"])(_ref, "thiss", this), (0, _defineProperty2["default"])(_ref, "getThis", function getThis() {
     return this;
-  }), _defineProperty(_ref, "hello", "flagrant hello!"), _defineProperty(_ref, "melloww", 'wellow'), _defineProperty(_ref, "mister", this.melloww), _defineProperty(_ref, name, 'fuckingawesome'), _defineProperty(_ref, descriptors, {
+  }), (0, _defineProperty2["default"])(_ref, "hello", "flagrant hello!"), (0, _defineProperty2["default"])(_ref, "melloww", 'wellow'), (0, _defineProperty2["default"])(_ref, "mister", this.melloww), (0, _defineProperty2["default"])(_ref, name, 'fuckingawesome'), (0, _defineProperty2["default"])(_ref, descriptors, {
     mister: {
       configurable: false,
       writable: false
@@ -117,11 +99,9 @@ var is = function () {
       var _this = this;
 
       if (prop === "{{handler}}") return this;
-
-      var propMatch = _toConsumableArray(new Set([].concat(_toConsumableArray(Reflect.ownKeys(proto.get(ob))), _toConsumableArray(Reflect.ownKeys(ob))))).find(function (key) {
+      var propMatch = (0, _toConsumableArray2["default"])(new Set([].concat((0, _toConsumableArray2["default"])(Reflect.ownKeys(proto.get(ob))), (0, _toConsumableArray2["default"])(Reflect.ownKeys(ob))))).find(function (key) {
         return mod(prop) === mod(key);
       });
-
       if (propMatch) return ob[propMatch];
       propMatch = types.includes(mod(prop)) && prop;
 
@@ -133,13 +113,13 @@ var is = function () {
       propMatch = matchKeys.find(function (key) {
         return mod(key) === mod(prop);
       }) || propMatch;
-      if (propMatch) return !!(mod(propMatch) === _typeof(ob).toLowerCase()) || _typeof2(ob) === mod(propMatch);
+      if (propMatch) return !!(mod(propMatch) === _typeof(ob).toLowerCase()) || (0, _typeof3["default"])(ob) === mod(propMatch);
       return prop in ob ? ob[prop] : Function.prototype[prop];
     }
   };
   merge(is, {
     promise: function promise(obj) {
-      return utilTypes().isPromise(obj) || _typeof2(obj) === "object" && obj instanceof Promise;
+      return utilTypes().isPromise(obj) || (0, _typeof3["default"])(obj) === "object" && obj instanceof Promise;
     },
     json: function json(data) {
       if (utilTypes().isJSON()) return utilTypes().isJSON(data);
@@ -159,7 +139,7 @@ var is = function () {
     },
     empty: function empty(ob) {
       if (utilTypes().isEmpty()) return utilTypes().isEmpty(ob);
-      if (ob[Symbol.iterator]) return !_toConsumableArray(ob).length;
+      if (ob[Symbol.iterator]) return !(0, _toConsumableArray2["default"])(ob).length;
       if (this.object(ob) || typeof ob === 'function') return !Reflect.ownKeys(ob).length;
       return !Object(ob).length;
     },
@@ -178,25 +158,22 @@ var is = function () {
       return call && call.message && classText(call.message.toLowerCase()) ? true : false;
     },
     object: function object(ob) {
-      return _typeof2(ob) === 'object' && !this.arrayLikeObject(ob) && Object(ob) === ob;
+      return (0, _typeof3["default"])(ob) === 'object' && !this.arrayLikeObject(ob) && Object(ob) === ob;
     },
     array: function array(ob) {
       return Array.isArray(ob);
     },
     arrayLikeObject: function arrayLikeObject(obj) {
       if (!obj[Symbol.iterator]) return false;
-
-      var argSpread = _toConsumableArray(obj);
-
-      var arg = _toConsumableArray(argSpread.entries());
-
+      var argSpread = (0, _toConsumableArray2["default"])(obj);
+      var arg = (0, _toConsumableArray2["default"])(argSpread.entries());
       return arg.every(function (ent, ind) {
         return obj.hasOwnProperty(ind) && ent[1] === obj[ind];
       });
     },
     instanceOf: function instanceOf(ob) {
       var last = function last(arr) {
-        return _toConsumableArray(arr)[arr.length - 1];
+        return (0, _toConsumableArray2["default"])(arr)[arr.length - 1];
       };
 
       for (var _len = arguments.length, arg = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -217,8 +194,8 @@ var is = function () {
     equivalent: function equivalent(ob1, ob2) {
       ob1 = arguments.length === 1 ? this : ob1;
       ob2 = ob2 || ob1;
-      if (ob1 == ob2 && _typeof2(ob1) === _typeof2(ob2)) return true;
-      if (_typeof2(ob1) !== _typeof2(ob2)) return false;
+      if (ob1 == ob2 && (0, _typeof3["default"])(ob1) === (0, _typeof3["default"])(ob2)) return true;
+      if ((0, _typeof3["default"])(ob1) !== (0, _typeof3["default"])(ob2)) return false;
       ob1 = Object(ob1);
       ob2 = Object(ob2);
       if (Reflect.ownKeys(ob1).length !== Reflect.ownKeys(ob2).length) return false;
@@ -228,7 +205,7 @@ var is = function () {
       return JSON.stringify(Reflect.ownKeys(ob1)) === JSON.stringify(Reflect.ownKeys(ob2)) && Reflect.ownKeys(ob1).every(function (key) {
         return ob1[key] === ob2[key];
       }) && entries(Object.getOwnPropertyDescriptors(ob1)).every(function (_ref2) {
-        var _ref3 = _slicedToArray(_ref2, 2),
+        var _ref3 = (0, _slicedToArray2["default"])(_ref2, 2),
             key = _ref3[0],
             desc = _ref3[1];
 
@@ -242,7 +219,7 @@ var is = function () {
       return this.equivalent(desc, newDesc);
     },
     validDescriptor: function validDescriptor(desc) {
-      if (_typeof2(desc) !== "object") return false;
+      if ((0, _typeof3["default"])(desc) !== "object") return false;
       return suppress(function () {
         var isDescriptor = true;
         var defined = Object.defineProperty({}, "prop", desc);
@@ -312,7 +289,7 @@ var _if = function _if(exp, then) {
 
 var Obj = function Obj(obj) {
   obj = Object(obj);
-  if ((0, _privateVariables["default"])(obj).Obj) return (0, _privateVariables["default"])(obj).Obj;
+  if ((0, _privateVariablesCompiled["default"])(obj).Obj) return (0, _privateVariablesCompiled["default"])(obj).Obj;
   var iz = is;
 
   var Obj = function Obj() {
@@ -323,14 +300,14 @@ var Obj = function Obj(obj) {
           key: undefined
         });
 
-        if (!_privateVariables["default"].has(this)) {
+        if (!_privateVariablesCompiled["default"].has(this)) {
           console.log('they dont have me!');
-          thisPriv = (0, _privateVariables["default"])(this);
+          thisPriv = (0, _privateVariablesCompiled["default"])(this);
           var rando = thisPriv.randomString;
           privKeys.get(this).key = rando;
         }
 
-        return (0, _privateVariables["default"])(this);
+        return (0, _privateVariablesCompiled["default"])(this);
       },
 
       set priv(val) {
@@ -357,7 +334,7 @@ var Obj = function Obj(obj) {
       },
 
       get type() {
-        return Array.isArray(this) ? "array" : _typeof2(this);
+        return Array.isArray(this) ? "array" : (0, _typeof3["default"])(this);
       },
 
       get _type() {
@@ -421,7 +398,7 @@ var Obj = function Obj(obj) {
         if ("size" in this && !isNaN(this.size)) return this.size;
         if (typeof this === "string") return this.length;
         if (suppress(function () {
-          self = _toConsumableArray(_this2);
+          self = (0, _toConsumableArray2["default"])(_this2);
           return self;
         }), false) return self.length;
         self = Object(self);
@@ -504,7 +481,7 @@ var Obj = function Obj(obj) {
       reverseLookup: function reverseLookup(val) {
         var key;
         var lvl = this.getLevel(this, function (lv) {
-          if (val.name && Reflect.hasOwnProperty(lvl, val.name) && iz.equivalent(val, lvl[val.name], false)) key = val.name;
+          if (val.name && Reflect.ownKeys(lvl).includes(val.name) && iz.equivalent(val, lvl[val.name], false)) key = val.name;
           Reflect.ownKeys(lv).some(function (pr) {
             key = iz.equivalent(val, lv[pr]) && pr;
           });
@@ -568,9 +545,9 @@ var Obj = function Obj(obj) {
       },
 
       get is() {
-        if ((0, _privateVariables["default"])(this).is) return (0, _privateVariables["default"])(this).is;
-        (0, _privateVariables["default"])(this).is = iz(this);
-        return (0, _privateVariables["default"])(this).iz;
+        if ((0, _privateVariablesCompiled["default"])(this).is) return (0, _privateVariablesCompiled["default"])(this).is;
+        (0, _privateVariablesCompiled["default"])(this).is = iz(this);
+        return (0, _privateVariablesCompiled["default"])(this).iz;
       },
 
       equivalent: function equivalent(obj) {
@@ -588,8 +565,8 @@ var Obj = function Obj(obj) {
     };
   };
 
-  (0, _privateVariables["default"])(obj).Obj = helpers.boundObject(obj, Obj);
-  return (0, _privateVariables["default"])(obj).Obj;
+  (0, _privateVariablesCompiled["default"])(obj).Obj = helpers.boundObject(obj, Obj);
+  return (0, _privateVariablesCompiled["default"])(obj).Obj;
 };
 
 var thingobj = Obj({
@@ -609,7 +586,7 @@ merge(module.exports, {
   },
 
   get Descriptors() {
-    return require('./helpers').Descriptors;
+    return require('./helpersCompiled').Descriptors;
   }
 
 });

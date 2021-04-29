@@ -1,7 +1,7 @@
 import React from 'react'
 import server from '../../server/modules'
 import ReactDom from 'react-dom'
-import ReactDOMServer from 'react-dom/SSR'
+import ReactDOMServer from 'react-dom/server'
 import { combineReducers } from 'redux'
 import { connect as connectFunc } from 'react-redux'
 
@@ -20,7 +20,7 @@ import { cloneProxy,dynamicImport,sequence } from './helpers/utilsCompiled'
 
 import vars from './Komponent/privateVariables'
 // import Component from './componentFunctionCompiled'
-let url = window.location.href.slice(0,-1)
+let url = window.location.protocol+"//"+window.location.host 
 
 const persistConfig = { 
     key: 'primary',

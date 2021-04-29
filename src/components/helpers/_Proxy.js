@@ -1,6 +1,6 @@
-const priv = require("../Komponent/privateVariables");
 
-const clone = (...args) => require("./utils").clone(...args);
+const priv = require("../Komponent/privateVariablesCompiled");
+const clone = (...args) => require("./utilsCompiled").clone(...args);
 const merge = (trg, src, ex = [], bind) => {
   let descs = {};
   if (!src) return trg;
@@ -47,7 +47,7 @@ const bindIt = function (ob, prop, bind) {
       prop === undefined;
     }
   }
-  if (prop && ob && !(prop in ob)) return ob[prop];
+  if (prop && ob && !(prop in ob)) return
   desc =
     desc ||
     (function () {
@@ -121,6 +121,13 @@ const _Proxy = (function () {
       priv.set(this, opt);
       if (opt.bind === opt.target) delete opt.bind;
 
+      const reflectGet = (ob,prop,bnd) => {
+        let desc = Object.getOwnPropertyDescriptor(ob,prop)
+        if (!desc) return
+        let type = desc.get ? 'get' : desc.value && 'value'
+        return (bnd && type === 'get') ? desc.get.call(bnd) : type === 'get' ? desc.get() : desc.value
+      }
+
       let defaultDefaults = merge({}, Reflect);
       let theProperties = {
         get(ob, prop, prox) {
@@ -139,7 +146,7 @@ const _Proxy = (function () {
           let getResult =
             opt.handler && opt.handler.get
               ? opt.handler.get(...args)
-              : Reflect.get(ob, prop, prox);
+              : reflectGet(ob, prop, prox);
           if (properties && prop in properties)
             results.push([properties, prop, prox]);
           if (properties && properties.default)
@@ -155,14 +162,14 @@ const _Proxy = (function () {
           result =
             typeof result !== "undefined"
               ? result
-              : prop in Object.getPrototypeOf(this)
-              ? this[prop]
+              : prop in Object.getPrototypeOf(self)
+              ? self[prop]
               : undefined;
 
           return result;
         },
         get properties() {
-          let opt = priv.get(this);
+          let opt = priv.get(self);
           let result;
           if (
             typeof opt.properties !== "object" &&
@@ -181,18 +188,16 @@ const _Proxy = (function () {
         set(ob, prop, val) {
           let opt = priv.get(self);
           if (!Reflect.isExtensible(opt.target)) return true;
-          if (Reflect.hasOwnProperty(opt.target, prop)) {
-            let desc = Object.getOwnPropertyDescriptor(opt.target, prop);
-            if (desc.configurable === false && desc.writable === false)
+          let trgDesc = Object.getOwnPropertyDescriptor(opt.target,prop)
+          if (trgDesc && trgDesc.configurable === false && trgDesc.writable === false)
               return true;
-          }
           if (opt.virtualTarget) ob = opt.virtualTarget;
-          let desc = Object.getOwnPropertyDescriptor(this.properties, prop);
+          let desc = Object.getOwnPropertyDescriptor(self.properties, prop);
           if (desc && desc.set === "function")
-            return this.properties[prop] === val;
+            return self.properties[prop] === val;
           return opt.handler.set
             ? !!opt.handler.set(ob, prop, val)
-            : !!(ob[prop] = val);
+            : !!(Object.defineProperty(ob,prop,{value:val,configurable:true,enumerable:true,writable:true}));
         },
         has(ob, prop) {
           let opt = priv.get(self);
@@ -200,9 +205,9 @@ const _Proxy = (function () {
           if (!Reflect.isExtensible(opt.target)) return Reflect.has(opt.target);
           if (vTarget) ob = vTarget;
           else return Reflect.has(ob, prop);
-          let desc = Object.getOwnPropertyDescriptor(ob, prop);
+          let desc = Object.getOwnPropertyDescriptor(opt.target, prop);
           if (desc && desc.configurable === false) return true;
-          return Reflect.has(vTarget, prop);
+          return Reflect.ownKeys(vTarget || ob).includes(prop);
         },
         getPrototypeOf(ob, ...arg) {
           let opt = priv.get(self);
@@ -244,26 +249,34 @@ const _Proxy = (function () {
           let getDesc = Object.getOwnPropertyDescriptor;
           let opt = priv.get(self);
           if (!Reflect.isExtensible(opt.target))
-            return Object.getOwnPropertyDescriptor(opt.target, prop);
+            return Object.getOwnPropertyDescriptor(opt.target, prop)
+
+
           let obDesc = getDesc(ob, prop);
-          if (!opt || !opt.VirtualTarget) return obDesc;
+          if (!opt || !opt.virtualTarget) return obDesc;
+
+
           let vTarget = opt.virtualTarget;
           if (!vTarget) return obDesc;
+
+
+          let targDesc = getDesc(opt.target,prop)
+          if (
+            targDesc &&
+            targDesc.configurable === false &&
+            targDesc.writable === false
+          )
+          return targDesc
+
           let vDesc = getDesc(vTarget, prop);
           if (
             !vDesc &&
-            ((obDesc && obDesc.configurable === false) ||
-              (obDesc && !Reflect.isExtensible(ob)))
+            (targDesc && targDesc.configurable === false)
           )
-            return obDesc;
-          vDesc.configurable = obDesc ? obDesc.configurable : true;
-          if (
-            obDesc &&
-            obDesc.configurable === false &&
-            obDesc.writable === false
-          )
-            return obDesc;
-          return vDesc;
+            return targDesc;
+
+          vDesc.configurable = obDesc ? obDesc.configurable : vDesc.configurable;
+          return vDesc
         },
         defineProperty(ob, prop, desc) {
           let opt = priv.get(self);
@@ -290,6 +303,13 @@ const _Proxy = (function () {
           if (vTarget) ob = vTarget;
           args[0] = ob;
           return Reflect.deleteProperty(...args);
+        },
+        apply: function(ob, thisArg, argumentsList) {
+          let opt = priv.get(self);
+          let vTarget = opt.virtualTarget;
+          if (typeof vTarget === 'function') ob = vTarget;
+          else if (typeof ob !== 'function' && typeof opt.target === 'function') ob = opt.target
+          return ob(...argumentsList);
         }
       };
       if (!handler.defaults) {
@@ -495,7 +515,7 @@ const _Proxy = (function () {
       let oldKey = handler[key];
       Object.defineProperty(handler, key, {
         value: function (ob, ...arg) {
-          let pr = priv.get(this);
+          let pr = priv.get(handler);
           let theTarget = typeof oldKey === "function" ? oldKey : Reflect[key];
           if (pr.clone) ob = clone;
           if (pr.virtualTarget) ob = pr.virtualTarget;

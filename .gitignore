@@ -1,1 +1,2 @@
-.DS_Store
+"postinstall": "npm link --ignore-scripts && npm run-script server-setup",
+

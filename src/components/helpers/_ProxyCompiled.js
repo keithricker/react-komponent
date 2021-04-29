@@ -1,45 +1,29 @@
 "use strict";
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var priv = require("../Komponent/privateVariables");
+var priv = require("../Komponent/privateVariablesCompiled");
 
 var clone = function clone() {
   var _require;
 
-  return (_require = require("./utils")).clone.apply(_require, arguments);
+  return (_require = require("./utilsCompiled")).clone.apply(_require, arguments);
 };
 
 var merge = function merge(trg, src) {
@@ -92,7 +76,7 @@ var bindIt = function bindIt(ob, prop, bind) {
         value: ob
       };
       ob = undefined;
-    } else if (prop && typeof prop !== "string" && _typeof(prop) !== "symbol") {
+    } else if (prop && typeof prop !== "string" && (0, _typeof2["default"])(prop) !== "symbol") {
       bind = prop;
       desc = {
         value: ob
@@ -102,7 +86,7 @@ var bindIt = function bindIt(ob, prop, bind) {
     }
   }
 
-  if (prop && ob && !(prop in ob)) return ob[prop];
+  if (prop && ob && !(prop in ob)) return;
 
   desc = desc || function () {
     desc = Object.getOwnPropertyDescriptor(ob, prop);
@@ -135,8 +119,7 @@ var _Proxy = function () {
         argus[_key] = arguments[_key];
       }
 
-      _classCallCheck(this, _Proxy);
-
+      (0, _classCallCheck2["default"])(this, _Proxy);
       priv(this).newTarget = true;
       var self = this;
       var target = argus[0],
@@ -183,6 +166,14 @@ var _Proxy = function () {
       opt.newTarget = true;
       priv.set(this, opt);
       if (opt.bind === opt.target) delete opt.bind;
+
+      var reflectGet = function reflectGet(ob, prop, bnd) {
+        var desc = Object.getOwnPropertyDescriptor(ob, prop);
+        if (!desc) return;
+        var type = desc.get ? 'get' : desc.value && 'value';
+        return bnd && type === 'get' ? desc.get.call(bnd) : type === 'get' ? desc.get() : desc.value;
+      };
+
       var defaultDefaults = merge({}, Reflect);
       var theProperties = {
         get: function get(ob, prop, prox) {
@@ -196,53 +187,53 @@ var _Proxy = function () {
           var alternate = ob === opt.primary ? opt.alternate : ob;
           var result,
               results = [];
-          var getResult = opt.handler && opt.handler.get ? (_opt$handler = opt.handler).get.apply(_opt$handler, args) : Reflect.get(ob, prop, prox);
+          var getResult = opt.handler && opt.handler.get ? (_opt$handler = opt.handler).get.apply(_opt$handler, args) : reflectGet(ob, prop, prox);
           if (properties && prop in properties) results.push([properties, prop, prox]);
           if (properties && properties["default"]) results.push([properties["default"].apply(properties, args)]);
           results.push([getResult]);
           if (alternate) results.push([alternate, prop, prox]);
           results.some(function (res) {
-            result = self.getProp.apply(self, _toConsumableArray(res));
+            result = self.getProp.apply(self, (0, _toConsumableArray2["default"])(res));
             if (typeof result !== "undefined") return true;
           });
-          result = typeof result !== "undefined" ? result : prop in Object.getPrototypeOf(this) ? this[prop] : undefined;
+          result = typeof result !== "undefined" ? result : prop in Object.getPrototypeOf(self) ? self[prop] : undefined;
           return result;
         },
 
         get properties() {
-          var opt = priv.get(this);
+          var opt = priv.get(self);
           var result;
-          if (_typeof(opt.properties) !== "object" && typeof opt.properties !== "function") return {};
+          if ((0, _typeof2["default"])(opt.properties) !== "object" && typeof opt.properties !== "function") return {};
           return function (ob, prop, bind) {
             ob = ob !== opt.target ? ob : opt.clone || opt.virtualTarget || ob;
             bind = bind !== newProx ? bind : opt.bind || opt.clone;
-            if (_typeof(opt.properties) === "object") return bindIt(Reflect.get(opt.properties, prop, ob), bind);else return bindIt(opt.properties.call(opt, ob, prop, bind), bind);
+            if ((0, _typeof2["default"])(opt.properties) === "object") return bindIt(Reflect.get(opt.properties, prop, ob), bind);else return bindIt(opt.properties.call(opt, ob, prop, bind), bind);
           };
         },
 
         set: function set(ob, prop, val) {
           var opt = priv.get(self);
           if (!Reflect.isExtensible(opt.target)) return true;
-
-          if (Reflect.hasOwnProperty(opt.target, prop)) {
-            var _desc = Object.getOwnPropertyDescriptor(opt.target, prop);
-
-            if (_desc.configurable === false && _desc.writable === false) return true;
-          }
-
+          var trgDesc = Object.getOwnPropertyDescriptor(opt.target, prop);
+          if (trgDesc && trgDesc.configurable === false && trgDesc.writable === false) return true;
           if (opt.virtualTarget) ob = opt.virtualTarget;
-          var desc = Object.getOwnPropertyDescriptor(this.properties, prop);
-          if (desc && desc.set === "function") return this.properties[prop] === val;
-          return opt.handler.set ? !!opt.handler.set(ob, prop, val) : !!(ob[prop] = val);
+          var desc = Object.getOwnPropertyDescriptor(self.properties, prop);
+          if (desc && desc.set === "function") return self.properties[prop] === val;
+          return opt.handler.set ? !!opt.handler.set(ob, prop, val) : !!Object.defineProperty(ob, prop, {
+            value: val,
+            configurable: true,
+            enumerable: true,
+            writable: true
+          });
         },
         has: function has(ob, prop) {
           var opt = priv.get(self);
           var vTarget = opt.virtualTarget;
           if (!Reflect.isExtensible(opt.target)) return Reflect.has(opt.target);
           if (vTarget) ob = vTarget;else return Reflect.has(ob, prop);
-          var desc = Object.getOwnPropertyDescriptor(ob, prop);
+          var desc = Object.getOwnPropertyDescriptor(opt.target, prop);
           if (desc && desc.configurable === false) return true;
-          return Reflect.has(vTarget, prop);
+          return Reflect.ownKeys(vTarget || ob).includes(prop);
         },
         getPrototypeOf: function getPrototypeOf(ob) {
           var opt = priv.get(self);
@@ -277,26 +268,27 @@ var _Proxy = function () {
           if (!vTarget) return keys;
           var vKeys = new Set(keys);
           Object.entries(Object.getOwnPropertyDescriptors(opt.target)).forEach(function (_ref) {
-            var _ref2 = _slicedToArray(_ref, 2),
+            var _ref2 = (0, _slicedToArray2["default"])(_ref, 2),
                 key = _ref2[0],
                 ent = _ref2[1];
 
             if (ent.configurable === false || !Reflect.isExtensible(opt.target)) vKeys.add(key);
           });
-          return _toConsumableArray(vKeys);
+          return (0, _toConsumableArray2["default"])(vKeys);
         },
         getOwnPropertyDescriptor: function getOwnPropertyDescriptor(ob, prop) {
           var getDesc = Object.getOwnPropertyDescriptor;
           var opt = priv.get(self);
           if (!Reflect.isExtensible(opt.target)) return Object.getOwnPropertyDescriptor(opt.target, prop);
           var obDesc = getDesc(ob, prop);
-          if (!opt || !opt.VirtualTarget) return obDesc;
+          if (!opt || !opt.virtualTarget) return obDesc;
           var vTarget = opt.virtualTarget;
           if (!vTarget) return obDesc;
+          var targDesc = getDesc(opt.target, prop);
+          if (targDesc && targDesc.configurable === false && targDesc.writable === false) return targDesc;
           var vDesc = getDesc(vTarget, prop);
-          if (!vDesc && (obDesc && obDesc.configurable === false || obDesc && !Reflect.isExtensible(ob))) return obDesc;
-          vDesc.configurable = obDesc ? obDesc.configurable : true;
-          if (obDesc && obDesc.configurable === false && obDesc.writable === false) return obDesc;
+          if (!vDesc && targDesc && targDesc.configurable === false) return targDesc;
+          vDesc.configurable = obDesc ? obDesc.configurable : vDesc.configurable;
           return vDesc;
         },
         defineProperty: function defineProperty(ob, prop, desc) {
@@ -327,6 +319,12 @@ var _Proxy = function () {
 
           args[0] = ob;
           return Reflect.deleteProperty.apply(Reflect, args);
+        },
+        apply: function apply(ob, thisArg, argumentsList) {
+          var opt = priv.get(self);
+          var vTarget = opt.virtualTarget;
+          if (typeof vTarget === 'function') ob = vTarget;else if (typeof ob !== 'function' && typeof opt.target === 'function') ob = opt.target;
+          return ob.apply(void 0, (0, _toConsumableArray2["default"])(argumentsList));
         }
       };
 
@@ -389,7 +387,7 @@ var _Proxy = function () {
       return newProx;
     }
 
-    _createClass(_Proxy, [{
+    (0, _createClass2["default"])(_Proxy, [{
       key: "{{handler}}",
       get: function get() {
         return this["{{handler}}"] || this;
@@ -465,7 +463,7 @@ var _Proxy = function () {
           get alternate() {
             var _ref3;
 
-            return _ref3 = {}, _defineProperty(_ref3, "{{swap}}", swap), _defineProperty(_ref3, "{{rollback}}", rollback), _defineProperty(_ref3, "{{archive}}", archive), _defineProperty(_ref3, "{{clone}}", klone), _ref3;
+            return _ref3 = {}, (0, _defineProperty2["default"])(_ref3, "{{swap}}", swap), (0, _defineProperty2["default"])(_ref3, "{{rollback}}", rollback), (0, _defineProperty2["default"])(_ref3, "{{archive}}", archive), (0, _defineProperty2["default"])(_ref3, "{{clone}}", klone), _ref3;
           },
 
           get bind() {
@@ -581,7 +579,6 @@ var _Proxy = function () {
         return returnVal;
       }
     }]);
-
     return _Proxy;
   }();
 
@@ -594,7 +591,7 @@ var _Proxy = function () {
             arg[_key6 - 1] = arguments[_key6];
           }
 
-          var pr = priv.get(this);
+          var pr = priv.get(handler);
           var theTarget = typeof oldKey === "function" ? oldKey : Reflect[key];
           if (pr.clone) ob = clone;
           if (pr.virtualTarget) ob = pr.virtualTarget;
@@ -630,8 +627,7 @@ var _Proxy = function () {
     console.log = function (item) {
       if (item && item["{{target}}"]) {
         var _Proxy2 = function _Proxy2(ob) {
-          _classCallCheck(this, _Proxy2);
-
+          (0, _classCallCheck2["default"])(this, _Proxy2);
           Object.defineProperties(this, Object.getOwnPropertyDescriptors(ob));
           Object.setPrototypeOf(this, Object.getPrototypeOf(ob));
           return this;

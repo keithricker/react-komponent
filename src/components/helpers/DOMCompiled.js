@@ -1,227 +1,339 @@
 "use strict";
 
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var _global;
 
-try {
-  _global = global;
-} catch (_unused) {
-  global = window;
-}
-
-var DOM = module.exports = function DOM() {
-  for (var _len = arguments.length, arg = new Array(_len), _key = 0; _key < _len; _key++) {
-    arg[_key] = arguments[_key];
-  }
-
-  // require('jsdom-global')()
-  var jsdom = require("jsdom");
-
-  var JSDOM = jsdom.JSDOM;
-
-  var DOM = /*#__PURE__*/function (_JSDOM) {
-    _inherits(DOM, _JSDOM);
-
-    var _super = _createSuper(DOM);
-
-    function DOM() {
-      var _this;
-
-      for (var _len2 = arguments.length, arg = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        arg[_key2] = arguments[_key2];
-      }
-
-      _classCallCheck(this, DOM);
-
-      if (!arg[1]) arg[1] = {
-        runScripts: "dangerously"
-      };
-      if (!arg[0]) arg[0] = "<!doctype html>\n          <html lang=\"en\">\n          <head>\n            <meta charset=\"utf-8\">\n            <title></title>\n          </head>\n          <body>\n          </body>\n          </html>";
-      _this = _super.call.apply(_super, [this].concat(arg));
-
-      var self = _assertThisInitialized(_this);
-
-      var env = _global.document && _global.document.constructor.name === 'HTMLDocument' ? 'web' : 'node';
-
-      var _window = arguments.length || env === 'node' ? self.window : window;
-
-      var _document = _window.document;
-      var docHandler = {
-        get: function get(ob, prop, prox) {
-          if (prop === '{{target}}') return ob;
-          var match = /^{{(.*)}}$/.exec(prop);
-
-          if (match && match[1]) {
-            prop = match[1];
-            ob = self;
-          }
-
-          if (prop === 'window') return new Proxy(_window, {
-            get: function get(obj, key) {
-              if (key === 'document') return prox;
-              if (key in obj) return obj[key];
-              if (key in self) return prox[key];
-            }
-          });
-          if (ob.hasOwnProperty(prop)) return ob[prop];
-          if (prop in DOM.prototype) return typeof self[prop] === 'function' ? self[prop].bind(self) : self[prop];
-          if (prop in self) return self[prop];
-          var elem = ob.getElementsByTagName(prop);
-          if (elem && elem.length === 1) elem = elem[0];
-          if (typeof elem !== 'undefined') return elem;
-        }
-      };
-      var docProx = new Proxy(_document, docHandler);
-      return _possibleConstructorReturn(_this, docProx);
+function globalType() {
+  try {
+    if (global && global.constructor && global.constructor.name.toLowerCase() === 'window') {
+      _global = global;
+      return 'window';
     }
 
-    _createClass(DOM, [{
-      key: "elements",
-      value: function elements(key, val) {
-        if (key === 'class') return this.getElementsByClassName(key);else if (key === 'tag') return this.getElementsByTagName(key);
+    if (window) {
+      _global = window;
+      return 'window';
+    }
 
-        var query = function query(cb) {
-          return _toConsumableArray(document.querySelectorAll("*")).filter(function (item) {
-            return cb(item);
-          });
-        };
+    _global = global;
+    return 'node';
+  } catch (_unused) {
+    _global = global;
+    return 'node';
+  }
+}
 
-        if (arguments.length === 1 && _typeof(key) === 'object') {
-          return query(function (item) {
-            return Object.keys(item).every(function (key) {
-              return item.getAttribute(key) === val;
-            });
-          });
-        }
+globalType();
+var pv = new WeakMap();
+var canUseJsdom;
 
-        return query(function (item) {
-          return item.getAttribute(key) === val;
+try {
+  canUseJsdom = require('jsdom'); // canUseJsdom = require("jsdom");
+} catch (_unused2) {
+  canUseJsdom = false;
+}
+
+var jsdom = canUseJsdom ? require("jsdom") : {
+  JSDOM: /*#__PURE__*/function (_Object) {
+    (0, _inherits2["default"])(JSDOM, _Object);
+
+    var _super = _createSuper(JSDOM);
+
+    function JSDOM() {
+      (0, _classCallCheck2["default"])(this, JSDOM);
+      return _super.apply(this, arguments);
+    }
+
+    return JSDOM;
+  }( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Object))
+};
+var JSDOM = jsdom.JSDOM;
+
+var DOM = /*#__PURE__*/function (_JSDOM) {
+  (0, _inherits2["default"])(DOM, _JSDOM);
+
+  var _super2 = _createSuper(DOM);
+
+  function DOM() {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, DOM);
+
+    for (var _len = arguments.length, arg = new Array(_len), _key = 0; _key < _len; _key++) {
+      arg[_key] = arguments[_key];
+    }
+
+    var superArgs = [].concat(arg);
+
+    if (!arg[1]) {
+      var url;
+      if (process && process.env && process.env.serverUrl) url = process.env.serverUrl + "/";
+      if (globalType() === "window") url = _global.location.protocol + "//" + _global.location.hostname + "/";
+      superArgs[1] = {
+        url: url,
+        contentType: "text/html",
+        runScripts: "dangerously",
+        resources: "usable"
+      };
+    }
+
+    var _window, _document;
+
+    if (arg.length === 1 && arg[0].document && (arg[0].document.constructor.name === "HTMLDocument" || arg[0].document.constructor.name === "Document" && arg[0].document.defaultView)) _window = arg[0];else if (arg.length === 1 && arg[0].constructor && (arg[0].constructor.name === "HTMLDocument" || arg[0].constructor.name === "Document" && arg[0].defaultView)) _window = arg[0].defaultView;else if (!arg[0]) superArgs[0] = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title></title></head><body></body></html>";
+    _this = _super2.call.apply(_super2, [this].concat((0, _toConsumableArray2["default"])(canUseJsdom ? superArgs : [])));
+    var self = (0, _assertThisInitialized2["default"])(_this);
+    var env = globalType();
+    if (!_window) _window = arg.length || env === "node" ? self.window : {
+      document: _document
+    };
+    if (!_document) _document = _window.document;
+
+    if (!canUseJsdom && !_document) {
+      _document = new Document().implementation.createHTMLDocument();
+      _window.document = _document;
+      var htmlString = typeof arg[0] === "string" ? arg[0] : superArgs[0];
+
+      if (typeof arg[0] !== "string") {
+        var _require = require("./utils"),
+            ReflectBind = _require.ReflectBind,
+            clone = _require.clone;
+
+        Reflect.ownKeys(Document.prototype).forEach(function (key, desc) {
+          desc = ReflectBind.descriptor(Document.prototype, key, _document);
+          if (desc.value) desc.value = document[key];
+          if ((0, _typeof2["default"])(desc.value) === "object") desc.value = clone(desc.value, true);
+          Object.defineProperty(_document, key, desc);
         });
       }
-    }, {
-      key: "create",
-      value: function create(type, attributes, appendTo) {
-        var newEl,
-            text = type;
-        /*
+
+      pv.set((0, _assertThisInitialized2["default"])(_this), {
+        window: {
+          document: _document
+        },
+        document: _document,
+        arguments: superArgs
+      });
+      htmlString = document.documentElement.outerHTML || document.getElementsByTagName("html")[0].outerHTML;
+
+      _this.html(htmlString);
+    } else pv.set((0, _assertThisInitialized2["default"])(_this), {
+      window: _window,
+      document: _document,
+      arguments: superArgs
+    });
+
+    var docHandler = {
+      get: function get(ob, prop, prox) {
+        if (prop === "{{target}}") return self;
+        var match = /^{{(.*)}}$/.exec(prop);
+
+        if (match && match[1]) {
+          prop = match[1];
+          ob = self;
+        }
+
+        if (prop === "window") return new Proxy(_window, {
+          get: function get(obj, key) {
+            if (key === "document") return prox;
+            if (key in obj) return obj[key];
+            if (key in self) return prox[key];
+          }
+        });
+
+        if (prop in ob) {
+          var prp = Reflect.get(ob, prop, ob);
+          return typeof prp === "function" ? prp.bind(ob) : prp;
+        }
+
+        if (prop in DOM.prototype) return typeof self[prop] === "function" ? self[prop].bind(self) : self[prop];
+        if (prop in self) return self[prop];
+        var elem = ob.getElementsByTagName(prop);
+        if (elem && elem.length === 1) elem = elem[0];
+        if (typeof elem !== "undefined") return elem;
+      }
+    };
+    var docProx = new Proxy(_document, docHandler);
+    return (0, _possibleConstructorReturn2["default"])(_this, docProx);
+  }
+
+  (0, _createClass2["default"])(DOM, [{
+    key: "elements",
+    value: function elements(key, val) {
+      var _this2 = this;
+
+      if (key === "class") return pv.get(this).document.getElementsByClassName(key);else if (key === "tag") return pv.get(this).document.getElementsByTagName(key);
+
+      var query = function query(cb) {
+        return (0, _toConsumableArray2["default"])(pv.get(_this2).document.querySelectorAll("*")).filter(function (item) {
+          return cb(item);
+        });
+      };
+
+      if (arguments.length === 1 && (0, _typeof2["default"])(key) === "object") {
+        return query(function (item) {
+          return Object.keys(item).every(function (key) {
+            return item.getAttribute(key) === val;
+          });
+        });
+      }
+
+      return query(function (item) {
+        return item.getAttribute(key) === val;
+      });
+    }
+  }, {
+    key: "create",
+    value: function create(type, attributes, appendTo) {
+      var newEl,
+          text = type;
+      /*
         let match = /^<([^ ]*?) .*?(?:>?)(.*)(?:<\/(?:[^ ].*)>|\/>)/gi.exec(text)
         */
 
-        if (text.trim().split(" ").length > 1 && text.includes('<')) {
-          if (_typeof(attributes) === 'object') {
-            appendTo = attributes;
-            attributes = undefined;
-          }
-
-          try {
-            var tempEl = document.createElement('div');
-            var tempId = 'reactKomponentDOMTemporaryElement';
-            tempEl.setAttribute("id", tempId);
-            tempEl.innerHTML = text;
-            newEl = tempEl.childNodes[0];
-            tempEl.remove();
-          } catch (err) {
-            throw err;
-          }
-        }
-        /*
-        let pattern1 = `^<${type}.*?(?:>|.*?\/>)(.*?)(?:<?)\/(?:${type}?)`
-        let pattern2 = `([^ ]*)=(?:["|'])([^ ]*?)["|']`
-        */
-
-
-        newEl = newEl || this.window.document.createElement(type);
-        if (attributes) Object.keys(attributes).forEach(function (key) {
-          return newEl.setAttribute(key, attributes[key]);
-        });
-        if (appendTo) appendTo.appendChild(newEl);
-        Object.setPrototypeOf(newEl, Object.setPrototypeOf({
-          set: function set() {
-            this.setAttribute.apply(this, arguments);
-            return this;
-          }
-        }, Object.getPrototypeOf(newEl)));
-        return newEl;
-      }
-    }, {
-      key: "tags",
-      value: function tags(name) {
-        return this.getElementsByTagName(name);
-      }
-    }, {
-      key: "tag",
-      value: function tag(name) {
-        return this.tags(name)[0];
-      }
-    }, {
-      key: "html",
-      value: function html(_html) {
-        if (!_html) {
-          var prop = _global.document && this === _global.document ? 'outerHTML' : 'innerHTML';
-          this.getElementsByTagName('html')[prop] = _html;
-          return this.tag('html').outerHTML;
+      if (text.trim().split(" ").length > 1 && text.includes("<")) {
+        if ((0, _typeof2["default"])(attributes) === "object") {
+          appendTo = attributes;
+          attributes = undefined;
         }
 
-        var newJdom = _html instanceof DOM ? _html : new DOM(_html);
-        var newHTML = this.tag('html').innerHTML = newJdom(_html).tag('html').innerHTML;
-        return newHTML;
+        try {
+          var tempEl = document.createElement("div");
+          var tempId = "reactKomponentDOMTemporaryElement";
+          tempEl.setAttribute("id", tempId);
+          tempEl.innerHTML = text;
+          newEl = tempEl.childNodes[0];
+          tempEl.remove();
+        } catch (err) {
+          throw err;
+        }
       }
-    }, {
-      key: "query",
-      value: function query(search) {
-        return this.querySelector(search);
-      }
-    }, {
-      key: "queryAll",
-      value: function queryAll(search) {
-        return this.querySelectorAll(search);
-      }
-    }], [{
-      key: Symbol.hasInstance,
-      value: function value(instance) {
-        return instance['{{constructor}}'].prototype instanceof this;
-      }
-    }]);
+      /*
+      let pattern1 = `^<${type}.*?(?:>|.*?\/>)(.*?)(?:<?)\/(?:${type}?)`
+      let pattern2 = `([^ ]*)=(?:["|'])([^ ]*?)["|']`
+      */
 
-    return DOM;
-  }(JSDOM);
 
-  return _construct(DOM, arg);
-};
+      newEl = newEl || pv.get(this).document.createElement(type);
+      if (attributes) Object.keys(attributes).forEach(function (key) {
+        return newEl.setAttribute(key, attributes[key]);
+      });
+      if (appendTo) appendTo.appendChild(newEl);
+      Object.setPrototypeOf(newEl, Object.setPrototypeOf({
+        set: function set() {
+          this.setAttribute.apply(this, arguments);
+          return this;
+        }
+      }, Object.getPrototypeOf(newEl)));
+      return newEl;
+    }
+  }, {
+    key: "tags",
+    value: function tags(name) {
+      return pv.get(this).document.getElementsByTagName(name);
+    }
+  }, {
+    key: "tag",
+    value: function tag(name) {
+      return this.tags(name)[0];
+    }
+  }, {
+    key: "html",
+    value: function html(_html) {
+      if (!_html) {
+        if (_global.document && pv.get(this).document === _global.document) return pv.get(this).document.documentElement.outerHTML || pv.get(this).document.getElementsByTagName("html")[0].outerHTML;
+        return pv.get(this).document.documentElement.outerHTML;
+      }
 
-DOM["default"] = DOM;
+      if (_html instanceof DOM) _html = _html.outerHtml();
+      /*
+      let args = Array(html,pv.get(this).arguments[1]).filter(Boolean)
+      */
+
+      var newHtml = _html;
+      if (canUseJsdom) newHtml = new DOM(_html).tag("html").innerHTML;else {
+        var match = _html.match(/<html[\s\S]*?>([\s\S]*?)<\/html>/im);
+
+        newHtml = newHtml ? match[1] : newHtml;
+      }
+      this.tag("html").innerHTML = newHtml;
+    }
+  }, {
+    key: "outerHTML",
+    get: function get() {
+      console.log("blablablablabla");
+      var oh;
+      if (this.window && this.window.document === pv.get(this).document && typeof pv.get(this).arguments[0] === "string") oh = this.serialize ? this.serialize() : pv.get(this).document.documentElement.outerHTML;else oh = pv.get(this).document.documentElement.outerHTML;
+      return oh;
+    }
+  }, {
+    key: "query",
+    value: function query(search) {
+      return pv.get(this).document.querySelector(search);
+    }
+  }, {
+    key: "queryAll",
+    value: function queryAll(search) {
+      return pv.get(this).document.querySelectorAll(search);
+    }
+  }], [{
+    key: Symbol.hasInstance,
+    value: function value(instance) {
+      if (this.prototype.isPrototypeOf(instance)) return true;
+      return !!(instance["{{target}}"] && this.prototype.isPrototypeOf(instance["{{target}}"]));
+    }
+  }]);
+  return DOM;
+}(JSDOM);
+
+var DOMClass = DOM;
+var domName = "DOM";
+var theDom = (0, _defineProperty2["default"])({}, domName, function DOM() {
+  for (var _len2 = arguments.length, arg = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    arg[_key2] = arguments[_key2];
+  }
+
+  // require('jsdom-global')()
+  return (0, _construct2["default"])(DOMClass, arg);
+})[domName];
+
+if (canUseJsdom) {
+  Reflect.ownKeys(jsdom).filter(function (key) {
+    return key !== "constructor";
+  }).forEach(function (key) {
+    Object.defineProperty(theDom, key, {
+      get: function get() {
+        return jsdom[key];
+      }
+    });
+  });
+}
+
+theDom["default"] = theDom;
+module.exports = theDom;

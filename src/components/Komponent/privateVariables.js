@@ -1,4 +1,4 @@
-const { randomString } = require("../helpers/utils");
+const { randomString } = require("../helpers/utilsCompiled");
 
 const privs = new WeakMap();
 const handlerMap = new WeakMap();

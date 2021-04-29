@@ -6,8 +6,8 @@ process.env.NODE_ENV = 'development'
 const appRoot = path.resolve("../..")
 const komponentRoot = path.resolve(process.cwd())
 
-const config = require(appRoot+"/node_modules/react-scripts/config/webpack.config.js")('development')
-const webpack = require(appRoot+"/node_modules/webpack");
+const config = path.resolve(__dirname,'../','node_modules/react-scripts/config/webpack.config')('development')
+const webpack = require("webpack")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 
 // outputs to static/js/bundle.js

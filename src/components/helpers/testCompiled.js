@@ -1,6 +1,8 @@
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 /******/
 (function (modules) {
@@ -331,7 +333,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     if (mode & 8) return value;
     /******/
 
-    if (mode & 4 && _typeof(value) === 'object' && value && value.__esModule) return value;
+    if (mode & 4 && (0, _typeof2["default"])(value) === 'object' && value && value.__esModule) return value;
     /******/
 
     var ns = Object.create(null);
